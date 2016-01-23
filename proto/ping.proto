@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+message PingRequest {
+  uint64 time = 1;
+  uint32 count = 2;
+  bytes hostid = 3;
+  string test = 4;
+}
+
+message PingReply {
+  uint64 time = 1;
+  int64 timeDelta = 2;
+  uint32 count = 3;
+  int32 countMiss = 4;
+  bytes hostid = 5;
+}
