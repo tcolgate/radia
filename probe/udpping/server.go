@@ -24,29 +24,49 @@ func (s *server) run() {
 
 	for {
 		b := make([]byte, 128)
-		i, sa, e := so.ReadFrom(b)
+		i, sa, e := so.ReadFromUDP(b)
 		log.Println(i, sa, e)
 
+		tns := uint64(time.Now().UnixNano())
 		macLen := 256 / 8
 		mac := b[:macLen]
 		message := b[macLen:i]
 
 		if len(mac) != macLen {
-			log.Println("Short HMAC")
+			log.Println("Server: Short HMAC")
 			continue
 		}
 		if !checkMAC(message, mac, s.key) {
-			log.Println("Bad HMAC ", macLen)
+			log.Println("Server: Bad HMAC ", macLen)
 			continue
 		}
 
-		log.Println("Good HMAC ", macLen)
-
 		req := pb.PingRequest{}
 		proto.Unmarshal(message, &req)
-		then := time.Unix(0, int64(*req.Time))
-		log.Println(req, *req.Test, then)
+		go s.process(so, sa, &req, tns)
 	}
 
 	so.Close()
+}
+
+func (s *server) process(so *net.UDPConn, sa *net.UDPAddr, r *pb.PingRequest, timeIn uint64) {
+	tns := uint64(time.Now().UnixNano())
+
+	thing := pb.PingReply{}
+	thing.TimeSent = r.Time
+	thing.TimeIn = &timeIn
+	thing.Count = r.Count
+	thing.TimeOut = &tns
+
+	bs, err := proto.Marshal(&thing)
+	if err != nil {
+		panic(err)
+	}
+
+	mac := genMAC(bs, s.key)
+
+	b := append(mac, bs...)
+	so.WriteToUDP(b, sa)
+
+	return
 }

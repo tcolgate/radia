@@ -1,3 +1,4 @@
+// Package udpping is a point to multi-point ping test.
 package udpping
 
 import (
@@ -17,10 +18,14 @@ type probe struct {
 
 func (p *probe) Run(r reporter.Reporter) {
 	log.Println("Got HERE")
-	c := client{}
-	s := server{}
-
 	addr := net.IPv4(127, 0, 0, 1)
-	go c.run(net.UDPAddr{IP: addr})
+	uaddr := net.UDPAddr{IP: addr, Port: 5678}
+
+	s := server{key: []byte("1234"), laddr: uaddr}
 	go s.run()
+
+	// Should be able to create multiple of these
+	c := client{r: r, key: []byte("1234")}
+	go c.run(uaddr)
+
 }

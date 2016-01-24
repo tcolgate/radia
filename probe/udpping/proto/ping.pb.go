@@ -25,7 +25,6 @@ type PingRequest struct {
 	Time             *uint64 `protobuf:"varint,1,opt,name=time" json:"time,omitempty"`
 	Count            *uint32 `protobuf:"varint,2,opt,name=count" json:"count,omitempty"`
 	Hostid           []byte  `protobuf:"bytes,3,opt,name=hostid" json:"hostid,omitempty"`
-	Test             *string `protobuf:"bytes,4,opt,name=test" json:"test,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -54,19 +53,13 @@ func (m *PingRequest) GetHostid() []byte {
 	return nil
 }
 
-func (m *PingRequest) GetTest() string {
-	if m != nil && m.Test != nil {
-		return *m.Test
-	}
-	return ""
-}
-
 type PingReply struct {
-	Time             *uint64 `protobuf:"varint,1,opt,name=time" json:"time,omitempty"`
-	TimeDelta        *int64  `protobuf:"varint,2,opt,name=timeDelta" json:"timeDelta,omitempty"`
-	Count            *uint32 `protobuf:"varint,3,opt,name=count" json:"count,omitempty"`
-	CountMiss        *int32  `protobuf:"varint,4,opt,name=countMiss" json:"countMiss,omitempty"`
-	Hostid           []byte  `protobuf:"bytes,5,opt,name=hostid" json:"hostid,omitempty"`
+	TimeSent         *uint64 `protobuf:"varint,1,opt,name=timeSent" json:"timeSent,omitempty"`
+	TimeIn           *uint64 `protobuf:"varint,2,opt,name=timeIn" json:"timeIn,omitempty"`
+	TimeOut          *uint64 `protobuf:"varint,3,opt,name=timeOut" json:"timeOut,omitempty"`
+	Count            *uint32 `protobuf:"varint,4,opt,name=count" json:"count,omitempty"`
+	CountMiss        *int32  `protobuf:"varint,5,opt,name=countMiss" json:"countMiss,omitempty"`
+	Hostid           []byte  `protobuf:"bytes,6,opt,name=hostid" json:"hostid,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -74,16 +67,23 @@ func (m *PingReply) Reset()         { *m = PingReply{} }
 func (m *PingReply) String() string { return proto1.CompactTextString(m) }
 func (*PingReply) ProtoMessage()    {}
 
-func (m *PingReply) GetTime() uint64 {
-	if m != nil && m.Time != nil {
-		return *m.Time
+func (m *PingReply) GetTimeSent() uint64 {
+	if m != nil && m.TimeSent != nil {
+		return *m.TimeSent
 	}
 	return 0
 }
 
-func (m *PingReply) GetTimeDelta() int64 {
-	if m != nil && m.TimeDelta != nil {
-		return *m.TimeDelta
+func (m *PingReply) GetTimeIn() uint64 {
+	if m != nil && m.TimeIn != nil {
+		return *m.TimeIn
+	}
+	return 0
+}
+
+func (m *PingReply) GetTimeOut() uint64 {
+	if m != nil && m.TimeOut != nil {
+		return *m.TimeOut
 	}
 	return 0
 }
