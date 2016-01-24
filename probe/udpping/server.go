@@ -1,4 +1,4 @@
-package main
+package udpping
 
 import (
 	"log"
@@ -7,34 +7,35 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/tcolgate/vonq"
 
-	pb "github.com/tcolgate/vonq/proto"
+	pb "github.com/tcolgate/vonq/probe/udpping/proto"
 )
 
-func main() {
-	addr := net.UDPAddr{Port: 5678}
-	s, err := net.ListenUDP("udp", &addr)
+type server struct {
+	laddr net.UDPAddr
+	key   []byte
+}
+
+func (s *server) run() {
+	so, err := net.ListenUDP("udp", &s.laddr)
 	if err != nil {
 		os.Exit(1)
 	}
 
 	for {
 		b := make([]byte, 128)
-		i, sa, e := s.ReadFrom(b)
+		i, sa, e := so.ReadFrom(b)
 		log.Println(i, sa, e)
 
 		macLen := 256 / 8
 		mac := b[:macLen]
 		message := b[macLen:i]
 
-		log.Println(mac, string(message), len(message))
-
 		if len(mac) != macLen {
 			log.Println("Short HMAC")
 			continue
 		}
-		if !vonq.CheckMAC(message, mac, []byte("1234")) {
+		if !checkMAC(message, mac, s.key) {
 			log.Println("Bad HMAC ", macLen)
 			continue
 		}
@@ -47,5 +48,5 @@ func main() {
 		log.Println(req, *req.Test, then)
 	}
 
-	s.Close()
+	so.Close()
 }
