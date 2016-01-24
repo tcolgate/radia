@@ -32,11 +32,7 @@ func (s *server) run() {
 		mac := b[:macLen]
 		message := b[macLen:i]
 
-		if len(mac) != macLen {
-			log.Println("Server: Short HMAC")
-			continue
-		}
-		if !checkMAC(message, mac, s.key) {
+		if len(mac) != macLen || !checkMAC(message, mac, s.key) {
 			log.Println("Server: Bad HMAC ", macLen)
 			continue
 		}

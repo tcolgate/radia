@@ -32,8 +32,6 @@ func (cl *client) sendPing(c *net.UDPConn, count uint32) error {
 	b := append(mac, bs...)
 	_, e := c.Write(b)
 
-	log.Println(count)
-
 	return e
 }
 
@@ -57,24 +55,21 @@ func (c *client) run(daddr net.UDPAddr) {
 func (c *client) getReplies(so *net.UDPConn) {
 	for {
 		b := make([]byte, 128)
-		i, sa, e := so.ReadFromUDP(b)
-		log.Println(i, e)
+		i, sa, err := so.ReadFromUDP(b)
+		if err != nil {
+			log.Println("failed to read from socket, ", err.Error())
+			continue
+		}
 
 		tns := uint64(time.Now().UnixNano())
 		macLen := 256 / 8
 		mac := b[:macLen]
 		message := b[macLen:i]
 
-		if len(mac) != macLen {
-			log.Println("Client: Short HMAC")
+		if len(mac) != macLen || !checkMAC(message, mac, c.key) {
+			//Should count bad hmacs
 			continue
 		}
-		if !checkMAC(message, mac, c.key) {
-			log.Println("Client: Bad HMAC ", macLen)
-			continue
-		}
-
-		log.Println("Client: Good HMAC ", macLen)
 
 		rep := pb.PingReply{}
 		proto.Unmarshal(message, &rep)
@@ -93,10 +88,16 @@ func (c *client) processReply(r *pb.PingReply, timeIn uint64, sa *net.UDPAddr) {
 	dback := t4.Sub(t3)
 	rtt := t4.Sub(t1) - dsrv
 
-	log.Println("ADDR: ", sa.IP)
-	log.Println("DOUT: ", dout)
-	log.Println("DSRV: ", dsrv)
-	log.Println("DBACK: ", dback)
-	log.Println("RTT: ", rtt)
+	tags := map[string]string{
+		"local":  c.addr.IP.String(),
+		"remote": sa.IP.String(),
+	}
+
+	c.r.Report([]reporter.Metric{
+		{Name: "udpping.rttns", Tags: tags, Value: float64(rtt.Nanoseconds())},
+		{Name: "udpping.doutns", Tags: tags, Value: float64(dout.Nanoseconds())},
+		{Name: "udpping.dsrvns", Tags: tags, Value: float64(dsrv.Nanoseconds())},
+		{Name: "udpping.dbackns", Tags: tags, Value: float64(dback.Nanoseconds())},
+	})
 	return
 }

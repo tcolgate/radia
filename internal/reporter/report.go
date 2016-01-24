@@ -13,12 +13,13 @@ type Reporter interface {
 }
 
 func New() Reporter {
-	return nil
+	return &influxdb{}
 }
 
 type influxdb struct {
 }
 
 func (i influxdb) Report(m []Metric) {
+	// TODO(tcm): should take these and pass the into a channel
 	log.Println(m)
 }

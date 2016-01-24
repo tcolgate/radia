@@ -2,7 +2,6 @@
 package udpping
 
 import (
-	"log"
 	"net"
 
 	"github.com/tcolgate/vonq/internal/probes"
@@ -17,7 +16,6 @@ type probe struct {
 }
 
 func (p *probe) Run(r reporter.Reporter) {
-	log.Println("Got HERE")
 	addr := net.IPv4(127, 0, 0, 1)
 	uaddr := net.UDPAddr{IP: addr, Port: 5678}
 
