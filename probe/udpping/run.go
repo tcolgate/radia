@@ -26,13 +26,24 @@ import (
 )
 
 func init() {
-	probes.Register(&probe{})
 }
 
-type probe struct {
+type thing struct{
+	probe.Base
+	s string
 }
 
-func (p *probe) Run(r reporter.Reporter) {
+func (t *thing) InitFlags(fs *flags.FlagSet){
+	fs.StringVar(t.s,"thing","thing")
+	return &fs
+}
+
+func (t *thing)  Run(args []string) {
+	t := thing{}
+	fs := flags.NewFlagSet("thing",flags.ContinueOnError)
+	fs := t.InitFlags(fs)
+	fs.Parse(args)
+
 	addr := net.IPv4(127, 0, 0, 1)
 	uaddr := net.UDPAddr{IP: addr, Port: 5678}
 
@@ -40,7 +51,7 @@ func (p *probe) Run(r reporter.Reporter) {
 	go s.run()
 
 	// Should be able to create multiple of these
-	c := client{r: r, key: []byte("1234")}
+	c := client{r: .probe.Reporter(), key: []byte("1234")}
 	go c.run(uaddr)
 
 }
