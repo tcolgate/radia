@@ -25,7 +25,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
-	pb "github.com/tcolgate/vonq/probe/udpping/proto"
+	pb "github.com/tcolgate/vonq/probes/udpping/proto"
 )
 
 type server struct {

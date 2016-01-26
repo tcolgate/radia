@@ -25,7 +25,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 	"github.com/tcolgate/vonq/internal/reporter"
-	pb "github.com/tcolgate/vonq/probe/udpping/proto"
+	pb "github.com/tcolgate/vonq/probes/udpping/proto"
 )
 
 type client struct {
