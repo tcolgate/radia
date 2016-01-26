@@ -30,10 +30,10 @@ import (
 
 type server struct {
 	laddr net.UDPAddr
-	key   []byte
+	*udpPingProbe
 }
 
-func (s *server) run() {
+func (s *server) runServer() {
 	so, err := net.ListenUDP("udp", &s.laddr)
 	if err != nil {
 		os.Exit(1)
@@ -49,20 +49,20 @@ func (s *server) run() {
 		mac := b[:macLen]
 		message := b[macLen:i]
 
-		if len(mac) != macLen || !checkMAC(message, mac, s.key) {
+		if len(mac) != macLen || !checkMAC(message, mac, []byte(s.key)) {
 			log.Println("Server: Bad HMAC ", macLen)
 			continue
 		}
 
 		req := pb.PingRequest{}
 		proto.Unmarshal(message, &req)
-		go s.process(so, sa, &req, tns)
+		go s.processRequest(so, sa, &req, tns)
 	}
 
 	so.Close()
 }
 
-func (s *server) process(so *net.UDPConn, sa *net.UDPAddr, r *pb.PingRequest, timeIn uint64) {
+func (s *server) processRequest(so *net.UDPConn, sa *net.UDPAddr, r *pb.PingRequest, timeIn uint64) {
 	tns := uint64(time.Now().UnixNano())
 
 	thing := pb.PingReply{}
@@ -76,10 +76,10 @@ func (s *server) process(so *net.UDPConn, sa *net.UDPAddr, r *pb.PingRequest, ti
 		panic(err)
 	}
 
-	mac := genMAC(bs, s.key)
+	mac := genMAC(bs, []byte(s.key))
 
 	b := append(mac, bs...)
-	so.WriteToUDP(b, sa)
+	log.Println(so.WriteToUDP(b, sa))
 
 	return
 }

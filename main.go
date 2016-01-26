@@ -24,14 +24,16 @@ package main
 
 import (
 	_ "expvar"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 
-	"github.com/tcolgate/vonq/internal/probes"
-	"github.com/tcolgate/vonq/internal/reporter"
-	_ "github.com/tcolgate/vonq/probe"
+	_ "github.com/tcolgate/vonq/probes"
+	"github.com/tcolgate/vonq/probes/register"
 )
 
 func main() {
-	rr := reporter.New()
-	probes.RunAll(rr)
-	select {}
+	register.RunAll()
+
+	log.Println(http.ListenAndServe("localhost:6060", nil))
 }

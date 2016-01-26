@@ -21,37 +21,35 @@ package udpping
 import (
 	"net"
 
-	"github.com/tcolgate/vonq/probes"
-	"github.com/tcolgate/vonq/reporter"
+	"github.com/tcolgate/vonq/probes/base"
+	"github.com/tcolgate/vonq/probes/register"
 )
 
 func init() {
+	register.Probe(Init)
 }
 
-type thing struct{
-	probe.Base
-	s string
+type udpPingProbe struct {
+	*base.Base
+	key string
 }
 
-func (t *thing) InitFlags(fs *flags.FlagSet){
-	fs.StringVar(t.s,"thing","thing")
-	return &fs
+func Init() base.Probe {
+	p := udpPingProbe{}
+	p.Base, _ = base.New()
+	p.StringVar(&p.key, "key", "secret", "Signing secret")
+	return &p
 }
 
-func (t *thing)  Run(args []string) {
-	t := thing{}
-	fs := flags.NewFlagSet("thing",flags.ContinueOnError)
-	fs := t.InitFlags(fs)
-	fs.Parse(args)
-
+func (p *udpPingProbe) Run(args ...string) {
 	addr := net.IPv4(127, 0, 0, 1)
 	uaddr := net.UDPAddr{IP: addr, Port: 5678}
 
-	s := server{key: []byte("1234"), laddr: uaddr}
-	go s.run()
+	s := server{udpPingProbe: p, laddr: uaddr}
+	go s.runServer()
 
 	// Should be able to create multiple of these
-	c := client{r: .probe.Reporter(), key: []byte("1234")}
-	go c.run(uaddr)
+	c := client{udpPingProbe: p}
+	go c.runClient(uaddr)
 
 }

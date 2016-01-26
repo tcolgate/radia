@@ -15,32 +15,33 @@
 // You should have received a copy of the GNU General Public License
 // along with vonq.  If not, see <http://www.gnu.org/licenses/>.
 
-package probes
+package register
 
-type Probe struct {
-	verbosity int
-}
+import (
+	"errors"
+	"log"
 
-type option func(p *Probe) option
+	"github.com/tcolgate/vonq/probes/base"
+)
 
-// Option sets the options specified.
-// It returns an option to restore the last arg's previous value.
-func (p *Probe) Option(opts ...option) (previous option) {
-	for _, opt := range opts {
-		previous = opt(p)
+var ErrDuplicateProbe = errors.New("Duplicate probe")
+
+var probes = map[string]func() base.Probe{}
+
+func Probe(fp func() base.Probe) error {
+	p := fp()
+	if _, ok := probes[p.Name()]; ok {
+		log.Println("duplicate probe: ", p.Name())
+		return ErrDuplicateProbe
 	}
-	return previous
+	probes[p.Name()] = fp
+	log.Println("registered probe: ", p.Name())
+	return nil
 }
 
-// Verbosity sets the oauth client's log level
-func Verbosity(v int) option {
-	return func(p *Probe) option {
-		previous := p.verbosity
-		p.verbosity = v
-		return Verbosity(previous)
+func RunAll() {
+	for _, fp := range probes {
+		p := fp()
+		go p.Run()
 	}
-}
-
-func (p *Probe) Verbosity() int {
-	return p.verbosity
 }

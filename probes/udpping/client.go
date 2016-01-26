@@ -24,14 +24,13 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/tcolgate/vonq/internal/reporter"
 	pb "github.com/tcolgate/vonq/probes/udpping/proto"
+	"github.com/tcolgate/vonq/reporter"
 )
 
 type client struct {
 	addr net.UDPAddr
-	key  []byte
-	r    reporter.Reporter
+	*udpPingProbe
 }
 
 func (cl *client) sendPing(c *net.UDPConn, count uint32) error {
@@ -44,7 +43,7 @@ func (cl *client) sendPing(c *net.UDPConn, count uint32) error {
 		panic(err)
 	}
 
-	mac := genMAC(bs, cl.key)
+	mac := genMAC(bs, []byte(cl.key))
 
 	b := append(mac, bs...)
 	_, e := c.Write(b)
@@ -52,7 +51,7 @@ func (cl *client) sendPing(c *net.UDPConn, count uint32) error {
 	return e
 }
 
-func (c *client) run(daddr net.UDPAddr) {
+func (c *client) runClient(daddr net.UDPAddr) {
 	var count uint32
 	s, err := net.DialUDP("udp", &c.addr, &daddr)
 	if err != nil {
@@ -71,6 +70,7 @@ func (c *client) run(daddr net.UDPAddr) {
 
 func (c *client) getReplies(so *net.UDPConn) {
 	for {
+		log.Println("here")
 		b := make([]byte, 128)
 		i, sa, err := so.ReadFromUDP(b)
 		if err != nil {
@@ -83,7 +83,7 @@ func (c *client) getReplies(so *net.UDPConn) {
 		mac := b[:macLen]
 		message := b[macLen:i]
 
-		if len(mac) != macLen || !checkMAC(message, mac, c.key) {
+		if len(mac) != macLen || !checkMAC(message, mac, []byte(c.key)) {
 			//Should count bad hmacs
 			continue
 		}
@@ -110,11 +110,11 @@ func (c *client) processReply(r *pb.PingReply, timeIn uint64, sa *net.UDPAddr) {
 		"remote": sa.IP.String(),
 	}
 
-	c.r.Report([]reporter.Metric{
-		{Name: "udpping.rttns", Tags: tags, Value: float64(rtt.Nanoseconds())},
-		{Name: "udpping.doutns", Tags: tags, Value: float64(dout.Nanoseconds())},
-		{Name: "udpping.dsrvns", Tags: tags, Value: float64(dsrv.Nanoseconds())},
-		{Name: "udpping.dbackns", Tags: tags, Value: float64(dback.Nanoseconds())},
+	c.Report([]reporter.Metric{
+		{Name: "rttns", Tags: tags, Value: float64(rtt.Nanoseconds())},
+		{Name: "doutns", Tags: tags, Value: float64(dout.Nanoseconds())},
+		{Name: "dsrvns", Tags: tags, Value: float64(dsrv.Nanoseconds())},
+		{Name: "dbackns", Tags: tags, Value: float64(dback.Nanoseconds())},
 	})
 	return
 }
