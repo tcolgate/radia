@@ -25,13 +25,11 @@ package main
 import (
 	_ "expvar"
 
-	"github.com/tcolgate/vonq/internal/probes"
-	"github.com/tcolgate/vonq/internal/reporter"
-	_ "github.com/tcolgate/vonq/probe"
+	"github.com/tcolgate/vonq/probes/register"
 )
 
 func main() {
-	rr := reporter.New()
-	probes.RunAll(rr)
+	//rr := reporter.New()
+	register.RunAll()
 	select {}
 }

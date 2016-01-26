@@ -21,29 +21,27 @@ package udpping
 import (
 	"net"
 
-	"github.com/tcolgate/vonq/probes"
-	"github.com/tcolgate/vonq/reporter"
+	"github.com/tcolgate/vonq/probes/base"
+	"github.com/tcolgate/vonq/probes/register"
 )
 
 func init() {
+	register.Probe(Init)
 }
 
-type thing struct{
-	probe.Base
+type thing struct {
+	*base.Base
 	s string
 }
 
-func (t *thing) InitFlags(fs *flags.FlagSet){
-	fs.StringVar(t.s,"thing","thing")
-	return &fs
+func Init() base.Probe {
+	t := thing{}
+	t.Base, _ = base.New()
+	t.StringVar(&t.s, "thing", "thing", "does tings")
+	return &t
 }
 
-func (t *thing)  Run(args []string) {
-	t := thing{}
-	fs := flags.NewFlagSet("thing",flags.ContinueOnError)
-	fs := t.InitFlags(fs)
-	fs.Parse(args)
-
+func (t *thing) Run(args ...string) {
 	addr := net.IPv4(127, 0, 0, 1)
 	uaddr := net.UDPAddr{IP: addr, Port: 5678}
 
@@ -51,7 +49,7 @@ func (t *thing)  Run(args []string) {
 	go s.run()
 
 	// Should be able to create multiple of these
-	c := client{r: .probe.Reporter(), key: []byte("1234")}
+	c := client{key: []byte("1234")}
 	go c.run(uaddr)
 
 }
