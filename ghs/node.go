@@ -6,5 +6,4 @@ type Node struct {
 	Fragment FragmentID
 }
 
-type RemoteNode struct {
-}
+type RemoteNode chan Message

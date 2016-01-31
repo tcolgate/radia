@@ -3,9 +3,10 @@ package ghs
 type EdgeState int
 
 const (
-	Unknown EdgeState = iota
-	Basic
-	Rejected
+	EdgeUnknown EdgeState = iota
+	EdgeBasic
+	EdgeBranch
+	EdgeRejected
 )
 
 type EdgeSet []Edge

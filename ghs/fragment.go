@@ -2,11 +2,16 @@ package ghs
 
 type FragmentID int
 
-type BroadcastMsg struct {
+type Broadcast struct {
 	FragID FragmentID
 	Level  int
 }
 
-type ConvergecastMsg struct {
+type Convergecast struct {
 	MinWeight Weight
+}
+
+type Message struct {
+	*Broadcast
+	*Convergecast
 }

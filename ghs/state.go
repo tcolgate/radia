@@ -6,8 +6,11 @@ type State func(*Node) State
 
 func Dormant(n *Node) State {
 	e := n.Edges.MinEdge()
-	log.Println(e)
+	e.State = EdgeBranch
+	e.Peer <- Message{}
+	msg := <-e.Peer
 
+	log.Println(msg)
 	return nil
 }
 
