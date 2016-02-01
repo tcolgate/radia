@@ -11,7 +11,14 @@ type Convergecast struct {
 	MinWeight Weight
 }
 
+type MessageType int
+
+const (
+	MessageHello MessageType = iota
+	MessageBroadcast
+	MessageConvergeCast
+)
+
 type Message struct {
-	*Broadcast
-	*Convergecast
+	Type MessageType
 }

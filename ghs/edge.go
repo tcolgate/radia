@@ -3,8 +3,7 @@ package ghs
 type EdgeState int
 
 const (
-	EdgeUnknown EdgeState = iota
-	EdgeBasic
+	EdgeBasic EdgeState = iota
 	EdgeBranch
 	EdgeRejected
 )
