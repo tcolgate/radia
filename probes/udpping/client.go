@@ -29,7 +29,7 @@ import (
 )
 
 type client struct {
-	addr net.UDPAddr
+	addr net.Addr
 	*udpPingProbe
 }
 

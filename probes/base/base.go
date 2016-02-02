@@ -72,7 +72,7 @@ func New(opts ...option) (p *Base, err error) {
 		}
 	}
 	p.FlagSet = flag.NewFlagSet(p.name, flag.ContinueOnError)
-	p.reporter = reporter.New()
+	p.reporter = reporter.New() //use a default from the reporter package
 
 	return p, nil
 }

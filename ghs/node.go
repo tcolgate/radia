@@ -4,11 +4,13 @@ type NodeID int
 
 type Node struct {
 	ID       NodeID
-	Edges    EdgeSet
+	Edges    Edges
 	Level    int
 	Fragment FragmentID
 }
 
-type RemoteNode struct {
-	n1, n2 chan Message
+func Join(n1 *Node, n2 *Node, f SenderRecieverMaker) {
+	e1, e2 := NewEdge(f)
+	n1.Edges = append(n1.Edges, e1)
+	n2.Edges = append(n2.Edges, e2)
 }
