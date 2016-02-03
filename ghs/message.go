@@ -27,6 +27,7 @@ type Convergecast struct {
 	MinWeight Weight
 }
 
+//go:generate stringer -type=MessageType
 type MessageType int
 
 const (
@@ -39,9 +40,16 @@ type Message struct {
 	Type MessageType
 }
 
+type SenderRecieverMaker func() (SenderReciever, SenderReciever)
+
 type chanPair struct {
 	send chan<- Message
 	recv <-chan Message
+}
+
+func MakeChanPair() (SenderReciever, SenderReciever) {
+	c1, c2 := make(chan Message), make(chan Message)
+	return chanPair{c1, c2}, chanPair{c2, c1}
 }
 
 func (p chanPair) Send(m Message) {
@@ -55,5 +63,3 @@ func (p chanPair) Recieve() Message {
 func (p chanPair) Close() {
 	close(p.send)
 }
-
-type SenderRecieverMaker func() (SenderReciever, SenderReciever)
