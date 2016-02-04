@@ -31,9 +31,13 @@ type Convergecast struct {
 type MessageType int
 
 const (
-	MessageHello MessageType = iota
-	MessageBroadcast
-	MessageConvergeCast
+	MessageConnect MessageType = iota
+	MessageInitiate
+	MessageTest
+	MessageAccept
+	MessageReject
+	MessageReport
+	MessageChangeRoot
 )
 
 type Message struct {

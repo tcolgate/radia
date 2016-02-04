@@ -1,17 +1,17 @@
 package ghs
 
+//go:generate stringer -type=EdgeState
 type EdgeState int
 
 const (
-	EdgeBasic EdgeState = iota
-	EdgeBranch
-	EdgeRejected
+	EdgeStateBasic EdgeState = iota
+	EdgeStateBranch
+	EdgeStateRejected
 )
 
 type Edge struct {
 	Weight Weight
 	State  EdgeState
-	Core   bool
 
 	SenderReciever
 }

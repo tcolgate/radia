@@ -2,11 +2,26 @@ package ghs
 
 type NodeID int
 
+//go:generate stringer -type=NodeState
+type NodeState int
+
+const (
+	NodeStateSleeping NodeState = iota
+	NodeStateFind
+	NodeStateFound
+)
+
 type Node struct {
 	ID       NodeID
 	Edges    Edges
 	Level    int
 	Fragment FragmentID
+
+	bestEdge  int
+	bestWt    int
+	testEdge  int
+	inBranch  int
+	findCount int
 }
 
 func Join(n1 *Node, n2 *Node, f SenderRecieverMaker) {
