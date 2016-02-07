@@ -1,10 +1,14 @@
 package ghs
 
+import "math"
+
 type Weight struct {
 	float64
 	Lsn NodeID // Least Signigicant NodeID
 	Msn NodeID // Most Signigicant NodeID
 }
+
+var WeightInf = Weight{float64: math.Inf(1)}
 
 type Weights []*Weight
 
