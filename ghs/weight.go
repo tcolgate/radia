@@ -10,21 +10,42 @@ type Weight struct {
 
 var WeightInf = Weight{float64: math.Inf(1)}
 
-type Weights []*Weight
-
-func (w Weights) Len() int { return len(w) }
-
-func (w Weights) Swap(i, j int) { w[i], w[j] = w[j], w[i] }
-
-// Less - compare two edge weights. If we can make all the edges in the graph
-// have unqiue weights, we should be guaranteed one unique topology
-func (w Weights) Less(i, j int) bool {
+// Less - compare two edge weights.
+func (w1 Weight) Less(w2 Weight) bool {
 	switch {
-	case w[i].float64 < w[j].float64,
-		w[i].float64 == w[j].float64 && int(w[i].Lsn) < int(w[j].Lsn),
-		w[i].float64 == w[j].float64 && int(w[i].Lsn) == int(w[j].Lsn) && int(w[i].Msn) < int(w[j].Msn):
+	case w1.float64 < w2.float64,
+		w1.float64 == w2.float64 && int(w1.Lsn) < int(w2.Lsn),
+		w1.float64 == w2.float64 && int(w1.Lsn) == int(w2.Lsn) && int(w1.Msn) < int(w2.Msn):
 		return true
 	default:
 		return false
 	}
+}
+
+// Less - compare two edge weights.
+func (w1 Weight) Greater(w2 Weight) bool {
+	switch {
+	case w1.float64 > w2.float64,
+		w1.float64 == w2.float64 && int(w1.Lsn) > int(w2.Lsn),
+		w1.float64 == w2.float64 && int(w1.Lsn) == int(w2.Lsn) && int(w1.Msn) > int(w2.Msn):
+		return true
+	default:
+		return false
+	}
+}
+
+// Less - compare two edge weights.
+func (w1 Weight) Equal(w2 Weight) bool {
+	return w1.float64 == w2.float64 && int(w1.Lsn) == int(w2.Lsn) && int(w1.Msn) == int(w2.Msn)
+}
+
+// FragmentID converts a Weight to a FragmentID. The details of the best
+//  edge in a fragment are effectively act as a fragment id.
+// In 2) Response to receipt of Connect(... we have
+// ...
+//    else send Initiate(LN + 1, w(j), Find) on edge j
+// ...
+// Which clearly uses the edge weight in a Initiate (L, F, S)  message
+func (w Weight) FragmentID() FragmentID {
+	return FragmentID(w)
 }

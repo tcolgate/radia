@@ -18,15 +18,6 @@ type SenderReciever interface {
 	Closer
 }
 
-type Broadcast struct {
-	FragID FragmentID
-	Level  int
-}
-
-type Convergecast struct {
-	MinWeight Weight
-}
-
 //go:generate stringer -type=MessageType
 type MessageType int
 
@@ -41,7 +32,11 @@ const (
 )
 
 type Message struct {
+	Edge *Edge
 	Type MessageType
+	Weight
+	FragmentID
+	Level int
 }
 
 type SenderRecieverMaker func() (SenderReciever, SenderReciever)

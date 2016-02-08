@@ -1,3 +1,3 @@
 package ghs
 
-type FragmentID int
+type FragmentID Weight
