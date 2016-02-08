@@ -109,7 +109,7 @@ type GHSMessage struct {
 	Connect          *GHSMessage_Connect    `protobuf:"bytes,2,opt,name=connect" json:"connect,omitempty"`
 	Initiate         *GHSMessage_Initiate   `protobuf:"bytes,3,opt,name=initiate" json:"initiate,omitempty"`
 	Test             *GHSMessage_Test       `protobuf:"bytes,4,opt,name=test" json:"test,omitempty"`
-	Accpet           *GHSMessage_Accept     `protobuf:"bytes,5,opt,name=accpet" json:"accpet,omitempty"`
+	Accept           *GHSMessage_Accept     `protobuf:"bytes,5,opt,name=accept" json:"accept,omitempty"`
 	Reject           *GHSMessage_Reject     `protobuf:"bytes,6,opt,name=reject" json:"reject,omitempty"`
 	Report           *GHSMessage_Report     `protobuf:"bytes,7,opt,name=report" json:"report,omitempty"`
 	Changeroot       *GHSMessage_ChangeRoot `protobuf:"bytes,8,opt,name=changeroot" json:"changeroot,omitempty"`
@@ -148,9 +148,9 @@ func (m *GHSMessage) GetTest() *GHSMessage_Test {
 	return nil
 }
 
-func (m *GHSMessage) GetAccpet() *GHSMessage_Accept {
+func (m *GHSMessage) GetAccept() *GHSMessage_Accept {
 	if m != nil {
-		return m.Accpet
+		return m.Accept
 	}
 	return nil
 }

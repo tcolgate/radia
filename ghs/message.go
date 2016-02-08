@@ -1,7 +1,11 @@
 package ghs
 
-import "log"
-import pb "github.com/tcolgate/vonq/ghs/proto"
+import (
+	"log"
+
+	"github.com/golang/protobuf/proto"
+	pb "github.com/tcolgate/vonq/ghs/proto"
+)
 
 type Sender interface {
 	Send(Message)
@@ -21,21 +25,64 @@ type SenderReciever interface {
 	Closer
 }
 
+type SenderRecieverMaker func() (SenderReciever, SenderReciever)
+
 type Message struct {
 	pb.GHSMessage
 	Edge *Edge
 }
 
-type SenderRecieverMaker func() (SenderReciever, SenderReciever)
-
-func pbWeightToWeight(*pb.GHSMessage_Weight) Weight {
-	return Weight{}
+func pbWeightToWeight(w *pb.GHSMessage_Weight) Weight {
+	return Weight{
+		float64: w.GetWeight(),
+		Lsn:     NodeID(w.GetLsnID()),
+		Msn:     NodeID(w.GetMsnID()),
+	}
 }
 
-func pbNodeStateToNodeState(pb.GHSMessage_Initiate_NodeState) NodeState {
-	return NodeStateFind
+func pbNodeStateToNodeState(n pb.GHSMessage_Initiate_NodeState) NodeState {
+	switch n.String() {
+	case "sleeping":
+		return NodeStateSleeping
+	case "find":
+		return NodeStateFind
+	case "found":
+		return NodeStateFound
+	}
+	return NodeStateSleeping
 }
 
+func protoWeight(w Weight) *pb.GHSMessage_Weight {
+	return &pb.GHSMessage_Weight{
+		Weight: proto.Float64(w.float64),
+		LsnID:  proto.String(string(w.Lsn)),
+		MsnID:  proto.String(string(w.Msn)),
+	}
+}
+
+func protoFragmentID(f FragmentID) *pb.GHSMessage_Weight {
+	return &pb.GHSMessage_Weight{
+		Weight: proto.Float64(f.float64),
+		LsnID:  proto.String(string(f.Lsn)),
+		MsnID:  proto.String(string(f.Msn)),
+	}
+}
+
+func protoNodeState(n NodeState) *pb.GHSMessage_Initiate_NodeState {
+	switch n {
+	case NodeStateSleeping:
+		return pb.GHSMessage_Initiate_sleeping.Enum()
+	case NodeStateFind:
+		return pb.GHSMessage_Initiate_find.Enum()
+	case NodeStateFound:
+		return pb.GHSMessage_Initiate_found.Enum()
+	}
+	return nil
+}
+
+// This can probably be shift around again
+// Not sure if GHS messages need to know so much
+// about the protocol. Maybe it's OK
 func (m Message) dispatch(n *Node) {
 	switch m.GetType() {
 	case pb.GHSMessage_CONNECT:
@@ -67,65 +114,75 @@ func (m Message) dispatch(n *Node) {
 }
 
 func ConnectMessage(level uint32) Message {
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type: pb.GHSMessage_CONNECT.Enum(),
+			Connect: &pb.GHSMessage_Connect{
+				Level: proto.Uint32(level),
+			},
+		},
+	}
 }
 
 func InitiateMessage(level uint32, fragment FragmentID, state NodeState) Message {
-	/*
-		e.send(Message{
-			Type:       MessageInitiate,
-			Level:      level,
-			FragmentID: fragment,
-			NodeState:  state,
-		})
-	*/
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type: pb.GHSMessage_INITIATE.Enum(),
+			Initiate: &pb.GHSMessage_Initiate{
+				Level:     proto.Uint32(level),
+				Fragment:  protoFragmentID(fragment),
+				NodeState: protoNodeState(state),
+			},
+		},
+	}
 }
 
 func TestMessage(level uint32, fragment FragmentID) Message {
-	/*
-		e.send(Message{
-			Type:       MessageTest,
-			Level:      level,
-			FragmentID: fragment,
-		})
-	*/
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type: pb.GHSMessage_TEST.Enum(),
+			Test: &pb.GHSMessage_Test{
+				Level:    proto.Uint32(level),
+				Fragment: protoFragmentID(fragment),
+			},
+		},
+	}
 }
 
 func AcceptMessage() Message {
-	/*
-		e.send(Message{
-			Type: MessageAccept,
-		})
-	*/
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type:   pb.GHSMessage_ACCEPT.Enum(),
+			Accept: &pb.GHSMessage_Accept{},
+		},
+	}
 }
 
 func RejectMessage() Message {
-	/*
-		e.send(Message{
-			Type: MessageReject,
-		})
-	*/
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type:   pb.GHSMessage_REJECT.Enum(),
+			Reject: &pb.GHSMessage_Reject{},
+		},
+	}
 }
 
 func ReportMessage(best Weight) Message {
-	/*
-		e.send(Message{
-			Type:   MessageReport,
-			Weight: best,
-		})
-	*/
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type: pb.GHSMessage_REPORT.Enum(),
+			Report: &pb.GHSMessage_Report{
+				Weight: protoWeight(best),
+			},
+		},
+	}
 }
 
 func ChangeRootMessage() Message {
-	/*
-		e.send(Message{
-			Type: MessageChangeRoot,
-		})
-	*/
-	return Message{}
+	return Message{
+		GHSMessage: pb.GHSMessage{
+			Type:       pb.GHSMessage_CHANGEROOT.Enum(),
+			Changeroot: &pb.GHSMessage_ChangeRoot{},
+		},
+	}
 }

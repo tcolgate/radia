@@ -73,7 +73,7 @@ message GHSMessage {
     Connect connect = 2;
     Initiate initiate = 3;
     Test test = 4;
-    Accept accpet = 5;
+    Accept accept = 5;
     Reject reject = 6;
     Report report = 7;
     ChangeRoot changeroot = 8;

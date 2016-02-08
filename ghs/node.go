@@ -1,6 +1,8 @@
 package ghs
 
-type NodeID int
+import "log"
+
+type NodeID string
 
 //go:generate stringer -type=NodeState
 type NodeState int
@@ -18,6 +20,7 @@ type Node struct {
 	Level    uint32
 	Fragment FragmentID
 	Done     bool
+	OnDone   func()
 
 	msgQueue []Message
 
@@ -51,6 +54,7 @@ func (n *Node) Run() {
 
 	for _, e := range n.Edges {
 		go func(e *Edge) {
+			log.Printf("node(%v).Edge(%b): Listening", n.ID, *e)
 			for {
 				ms <- e.Recieve()
 			}
@@ -60,11 +64,16 @@ func (n *Node) Run() {
 	for nm := range ms {
 		delayed := n.msgQueue
 		n.msgQueue = []Message{}
+		log.Printf("node(%v) Dispathing: %v\n", n.ID, nm)
 		nm.dispatch(n)
 
 		for _, om := range delayed {
+			log.Printf("node(%v) Replaying: %v\n", n.ID, om)
 			om.dispatch(n)
 			if n.Done {
+				if n.OnDone != nil {
+					n.OnDone()
+				}
 				return
 			}
 		}

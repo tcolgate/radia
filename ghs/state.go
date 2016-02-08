@@ -4,12 +4,19 @@ import "log"
 
 // This file is a translation of the algorithm as described in the
 // paper. It's as literal as possible as
+
+// WakeUp -
+func (n *Node) WakeUp() {
+	n.procWakeUp()
+}
+
 // procWakeUp - (2) wakeup node procedure
 func (n *Node) procWakeUp() {
 	e := n.Edges.MinEdge()
+	e.State = EdgeStateBranch
+	n.Level = 0
 	n.State = NodeStateFound
 	n.findCount = 0
-	n.Level = 0
 	e.Send(ConnectMessage(n.Level))
 }
 
