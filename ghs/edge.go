@@ -56,3 +56,56 @@ func (e *Edge) Recieve() Message {
 	m.Edge = e
 	return m
 }
+
+func (e *Edge) send(m Message) {
+	e.SenderReciever.Send(m)
+}
+
+func (e Edge) SendConnect(level int) {
+	e.send(Message{
+		Func:  (*Node).Connect,
+		Level: level,
+	})
+}
+
+func (e Edge) SendInitiate(level int, fragment FragmentID, state NodeState) {
+	e.send(Message{
+		Func:       (*Node).Initiate,
+		Level:      level,
+		FragmentID: fragment,
+		NodeState:  state,
+	})
+}
+
+func (e Edge) SendTest(level int, fragment FragmentID) {
+	e.send(Message{
+		Func:       (*Node).Test,
+		Level:      level,
+		FragmentID: fragment,
+	})
+}
+
+func (e Edge) SendAccept() {
+	e.send(Message{
+		Func: (*Node).Accept,
+	})
+}
+
+func (e Edge) SendReject() {
+	e.send(Message{
+		Func: (*Node).Reject,
+	})
+}
+
+func (e Edge) SendReport(best Weight) {
+	e.send(Message{
+		Func:   (*Node).Report,
+		Weight: best,
+	})
+}
+
+func (e Edge) SendChangeRoot() {
+	e.send(Message{
+		Func: (*Node).ChangeRoot,
+	})
+}
