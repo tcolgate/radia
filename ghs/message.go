@@ -1,5 +1,8 @@
 package ghs
 
+import "log"
+import pb "github.com/tcolgate/vonq/ghs/proto"
+
 type Sender interface {
 	Send(Message)
 }
@@ -18,50 +21,111 @@ type SenderReciever interface {
 	Closer
 }
 
-//go:generate stringer -type=MessageType
-type MessageType int
-
-const (
-	MessageConnect MessageType = iota
-	MessageInitiate
-	MessageTest
-	MessageAccept
-	MessageReject
-	MessageReport
-	MessageChangeRoot
-)
-
-type MessageFunc func(*Node, Message)
-
 type Message struct {
-	Type MessageType
+	pb.GHSMessage
 	Edge *Edge
-	Weight
-	FragmentID
-	NodeState
-	Level int
 }
 
 type SenderRecieverMaker func() (SenderReciever, SenderReciever)
 
-type chanPair struct {
-	send chan<- Message
-	recv <-chan Message
+func pbWeightToWeight(*pb.GHSMessage_Weight) Weight {
+	return Weight{}
 }
 
-func MakeChanPair() (SenderReciever, SenderReciever) {
-	c1, c2 := make(chan Message), make(chan Message)
-	return chanPair{c1, c2}, chanPair{c2, c1}
+func pbNodeStateToNodeState(pb.GHSMessage_Initiate_NodeState) NodeState {
+	return NodeStateFind
 }
 
-func (p chanPair) Send(m Message) {
-	p.send <- m
+func (m Message) dispatch(n *Node) {
+	switch m.GetType() {
+	case pb.GHSMessage_CONNECT:
+		n.Connect(m.Edge, m.GetConnect().GetLevel())
+	case pb.GHSMessage_INITIATE:
+		im := m.GetInitiate()
+		l := im.GetLevel()
+		wf := pbWeightToWeight(im.GetFragment())
+		s := pbNodeStateToNodeState(im.GetNodeState())
+		n.Initiate(m.Edge, l, wf.FragmentID(), s)
+	case pb.GHSMessage_TEST:
+		im := m.GetTest()
+		l := im.GetLevel()
+		wf := pbWeightToWeight(im.GetFragment())
+		n.Test(m.Edge, l, wf.FragmentID())
+	case pb.GHSMessage_ACCEPT:
+		n.Accept(m.Edge)
+	case pb.GHSMessage_REJECT:
+		n.Reject(m.Edge)
+	case pb.GHSMessage_REPORT:
+		rm := m.GetReport()
+		w := pbWeightToWeight(rm.GetWeight())
+		n.Report(m.Edge, w)
+	case pb.GHSMessage_CHANGEROOT:
+		n.ChangeRoot()
+	default:
+		log.Println("unknown message type m.Type")
+	}
 }
 
-func (p chanPair) Recieve() Message {
-	return <-p.recv
+func ConnectMessage(level uint32) Message {
+	return Message{}
 }
 
-func (p chanPair) Close() {
-	close(p.send)
+func InitiateMessage(level uint32, fragment FragmentID, state NodeState) Message {
+	/*
+		e.send(Message{
+			Type:       MessageInitiate,
+			Level:      level,
+			FragmentID: fragment,
+			NodeState:  state,
+		})
+	*/
+	return Message{}
+}
+
+func TestMessage(level uint32, fragment FragmentID) Message {
+	/*
+		e.send(Message{
+			Type:       MessageTest,
+			Level:      level,
+			FragmentID: fragment,
+		})
+	*/
+	return Message{}
+}
+
+func AcceptMessage() Message {
+	/*
+		e.send(Message{
+			Type: MessageAccept,
+		})
+	*/
+	return Message{}
+}
+
+func RejectMessage() Message {
+	/*
+		e.send(Message{
+			Type: MessageReject,
+		})
+	*/
+	return Message{}
+}
+
+func ReportMessage(best Weight) Message {
+	/*
+		e.send(Message{
+			Type:   MessageReport,
+			Weight: best,
+		})
+	*/
+	return Message{}
+}
+
+func ChangeRootMessage() Message {
+	/*
+		e.send(Message{
+			Type: MessageChangeRoot,
+		})
+	*/
+	return Message{}
 }

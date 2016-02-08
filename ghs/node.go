@@ -1,7 +1,5 @@
 package ghs
 
-import "log"
-
 type NodeID int
 
 //go:generate stringer -type=NodeState
@@ -17,7 +15,7 @@ type Node struct {
 	ID       NodeID
 	State    NodeState
 	Edges    Edges
-	Level    int
+	Level    uint32
 	Fragment FragmentID
 	Done     bool
 
@@ -62,34 +60,13 @@ func (n *Node) Run() {
 	for nm := range ms {
 		delayed := n.msgQueue
 		n.msgQueue = []Message{}
-		n.dispatch(nm)
+		nm.dispatch(n)
 
 		for _, om := range delayed {
-			n.dispatch(om)
+			om.dispatch(n)
 			if n.Done {
 				return
 			}
 		}
-	}
-}
-
-func (n *Node) dispatch(m Message) {
-	switch m.Type {
-	case MessageConnect:
-		n.Connect(m)
-	case MessageInitiate:
-		n.Initiate(m)
-	case MessageTest:
-		n.Test(m)
-	case MessageAccept:
-		n.Accept(m)
-	case MessageReject:
-		n.Reject(m)
-	case MessageReport:
-		n.Report(m)
-	case MessageChangeRoot:
-		n.ChangeRoot(m)
-	default:
-		log.Println("unknown message type m.Type")
 	}
 }

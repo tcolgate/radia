@@ -26,7 +26,7 @@ const (
 	GHSMessage_CONNECT    GHSMessage_Type = 0
 	GHSMessage_INITIATE   GHSMessage_Type = 1
 	GHSMessage_TEST       GHSMessage_Type = 2
-	GHSMessage_ACCPET     GHSMessage_Type = 3
+	GHSMessage_ACCEPT     GHSMessage_Type = 3
 	GHSMessage_REJECT     GHSMessage_Type = 4
 	GHSMessage_REPORT     GHSMessage_Type = 5
 	GHSMessage_CHANGEROOT GHSMessage_Type = 6
@@ -36,7 +36,7 @@ var GHSMessage_Type_name = map[int32]string{
 	0: "CONNECT",
 	1: "INITIATE",
 	2: "TEST",
-	3: "ACCPET",
+	3: "ACCEPT",
 	4: "REJECT",
 	5: "REPORT",
 	6: "CHANGEROOT",
@@ -45,7 +45,7 @@ var GHSMessage_Type_value = map[string]int32{
 	"CONNECT":    0,
 	"INITIATE":   1,
 	"TEST":       2,
-	"ACCPET":     3,
+	"ACCEPT":     3,
 	"REJECT":     4,
 	"REPORT":     5,
 	"CHANGEROOT": 6,
@@ -177,7 +177,7 @@ func (m *GHSMessage) GetChangeroot() *GHSMessage_ChangeRoot {
 }
 
 type GHSMessage_Weight struct {
-	Weight           *float32 `protobuf:"fixed32,1,opt,name=weight" json:"weight,omitempty"`
+	Weight           *float64 `protobuf:"fixed64,1,opt,name=weight" json:"weight,omitempty"`
 	LsnID            *string  `protobuf:"bytes,2,opt,name=lsnID" json:"lsnID,omitempty"`
 	MsnID            *string  `protobuf:"bytes,3,opt,name=msnID" json:"msnID,omitempty"`
 	XXX_unrecognized []byte   `json:"-"`
@@ -187,7 +187,7 @@ func (m *GHSMessage_Weight) Reset()         { *m = GHSMessage_Weight{} }
 func (m *GHSMessage_Weight) String() string { return proto1.CompactTextString(m) }
 func (*GHSMessage_Weight) ProtoMessage()    {}
 
-func (m *GHSMessage_Weight) GetWeight() float32 {
+func (m *GHSMessage_Weight) GetWeight() float64 {
 	if m != nil && m.Weight != nil {
 		return *m.Weight
 	}
@@ -227,7 +227,7 @@ func (m *GHSMessage_Connect) GetLevel() uint32 {
 type GHSMessage_Initiate struct {
 	Level            *uint32                        `protobuf:"varint,1,opt,name=level" json:"level,omitempty"`
 	Fragment         *GHSMessage_Weight             `protobuf:"bytes,2,opt,name=fragment" json:"fragment,omitempty"`
-	Nodestate        *GHSMessage_Initiate_NodeState `protobuf:"varint,3,opt,name=nodestate,enum=proto.GHSMessage_Initiate_NodeState" json:"nodestate,omitempty"`
+	NodeState        *GHSMessage_Initiate_NodeState `protobuf:"varint,3,opt,name=nodeState,enum=proto.GHSMessage_Initiate_NodeState" json:"nodeState,omitempty"`
 	XXX_unrecognized []byte                         `json:"-"`
 }
 
@@ -249,9 +249,9 @@ func (m *GHSMessage_Initiate) GetFragment() *GHSMessage_Weight {
 	return nil
 }
 
-func (m *GHSMessage_Initiate) GetNodestate() GHSMessage_Initiate_NodeState {
-	if m != nil && m.Nodestate != nil {
-		return *m.Nodestate
+func (m *GHSMessage_Initiate) GetNodeState() GHSMessage_Initiate_NodeState {
+	if m != nil && m.NodeState != nil {
+		return *m.NodeState
 	}
 	return GHSMessage_Initiate_sleeping
 }

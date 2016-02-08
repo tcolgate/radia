@@ -57,55 +57,29 @@ func (e *Edge) Recieve() Message {
 	return m
 }
 
-func (e *Edge) send(m Message) {
+func (e *Edge) Send(m Message) {
 	e.SenderReciever.Send(m)
 }
 
-func (e Edge) SendConnect(level int) {
-	e.send(Message{
-		Type:  MessageConnect,
-		Level: level,
-	})
+// chanPair is a sender reciever using channels
+type chanPair struct {
+	send chan<- Message
+	recv <-chan Message
 }
 
-func (e Edge) SendInitiate(level int, fragment FragmentID, state NodeState) {
-	e.send(Message{
-		Type:       MessageInitiate,
-		Level:      level,
-		FragmentID: fragment,
-		NodeState:  state,
-	})
+func MakeChanPair() (SenderReciever, SenderReciever) {
+	c1, c2 := make(chan Message), make(chan Message)
+	return chanPair{c1, c2}, chanPair{c2, c1}
 }
 
-func (e Edge) SendTest(level int, fragment FragmentID) {
-	e.send(Message{
-		Type:       MessageTest,
-		Level:      level,
-		FragmentID: fragment,
-	})
+func (p chanPair) Send(m Message) {
+	p.send <- m
 }
 
-func (e Edge) SendAccept() {
-	e.send(Message{
-		Type: MessageAccept,
-	})
+func (p chanPair) Recieve() Message {
+	return <-p.recv
 }
 
-func (e Edge) SendReject() {
-	e.send(Message{
-		Type: MessageReject,
-	})
-}
-
-func (e Edge) SendReport(best Weight) {
-	e.send(Message{
-		Type:   MessageReport,
-		Weight: best,
-	})
-}
-
-func (e Edge) SendChangeRoot() {
-	e.send(Message{
-		Type: MessageChangeRoot,
-	})
+func (p chanPair) Close() {
+	close(p.send)
 }

@@ -10,37 +10,31 @@ func (n *Node) procWakeUp() {
 	n.State = NodeStateFound
 	n.findCount = 0
 	n.Level = 0
-	e.SendConnect(n.Level)
+	e.Send(ConnectMessage(n.Level))
 }
 
 // Connect - (3) Response to receipt of Connect(L) on edge e
-func (n *Node) Connect(msg Message) {
-	e := msg.Edge
-	level := msg.Level
-
+func (n *Node) Connect(e *Edge, level uint32) {
 	if n.State == NodeStateSleeping {
 		n.procWakeUp()
 	}
 	if level < n.Level {
 		e.State = EdgeStateBranch
-		e.SendInitiate(n.Level, n.Fragment, n.State)
+		e.Send(InitiateMessage(n.Level, n.Fragment, n.State))
 		if n.State == NodeStateFind {
 			n.findCount++
 		}
 	} else if e.State == EdgeStateBasic {
-		n.Queue(msg)
+		nm := ConnectMessage(level)
+		nm.Edge = e
+		n.Queue(nm)
 	} else {
-		e.SendInitiate(n.Level+1, e.Weight.FragmentID(), NodeStateFind)
+		e.Send(InitiateMessage(n.Level+1, e.Weight.FragmentID(), NodeStateFind))
 	}
 }
 
 // Initiate - (4) Response to receipt of Initiate(L,F,S) on edge e
-func (n *Node) Initiate(msg Message) {
-	e := msg.Edge
-	level := msg.Level
-	fragment := msg.FragmentID
-	state := msg.NodeState
-
+func (n *Node) Initiate(e *Edge, level uint32, fragment FragmentID, state NodeState) {
 	n.Level = level
 	n.Fragment = fragment
 	n.State = state
@@ -49,7 +43,7 @@ func (n *Node) Initiate(msg Message) {
 	n.bestWt = WeightInf
 	for _, se := range n.Edges {
 		if se != e && e.State == EdgeStateBranch {
-			se.SendInitiate(n.Level, n.Fragment, state)
+			se.Send(InitiateMessage(n.Level, n.Fragment, state))
 			if n.State == NodeStateFind {
 				n.findCount++
 			}
@@ -67,7 +61,7 @@ func (n *Node) procTest() {
 		if e.State == EdgeStateBasic {
 			found = true
 			n.testEdge = e
-			e.SendTest(n.Level, n.Fragment)
+			e.Send(TestMessage(n.Level, n.Fragment))
 			break
 		}
 	}
@@ -78,25 +72,23 @@ func (n *Node) procTest() {
 }
 
 // Test - (5) Response to receipt of Test(L,F) on edge e
-func (n *Node) Test(msg Message) {
-	e := msg.Edge
-	level := msg.Level
-	fragment := msg.FragmentID
-
+func (n *Node) Test(e *Edge, level uint32, fragment FragmentID) {
 	if n.State == NodeStateSleeping {
 		n.procWakeUp()
 	}
 	if level > n.Level {
-		n.Queue(msg)
+		nm := TestMessage(level, fragment)
+		nm.Edge = e
+		n.Queue(nm)
 	} else {
 		if fragment != n.Fragment {
-			e.SendAccept()
+			e.Send(AcceptMessage())
 		} else {
 			if e.State == EdgeStateBasic {
 				e.State = EdgeStateRejected
 			}
 			if n.testEdge != e {
-				e.SendReject()
+				e.Send(RejectMessage())
 			} else {
 				n.procTest()
 			}
@@ -105,9 +97,7 @@ func (n *Node) Test(msg Message) {
 }
 
 // Accept - (7) Response to receipt of Accept on edge e
-func (n *Node) Accept(msg Message) {
-	e := msg.Edge
-
+func (n *Node) Accept(e *Edge) {
 	n.testEdge = nil
 	if e.Weight.Less(n.bestWt) {
 		n.bestEdge = e
@@ -117,9 +107,7 @@ func (n *Node) Accept(msg Message) {
 }
 
 // Reject - (8) Response to receipt of Reject on edge e
-func (n *Node) Reject(msg Message) {
-	e := msg.Edge
-
+func (n *Node) Reject(e *Edge) {
 	if e.State == EdgeStateBasic {
 		e.State = EdgeStateRejected
 	}
@@ -130,15 +118,12 @@ func (n *Node) Reject(msg Message) {
 func (n *Node) procReport() {
 	if n.findCount == 0 && n.testEdge == nil {
 		n.State = NodeStateFound
-		n.inBranch.SendReport(n.bestWt)
+		n.inBranch.Send(ReportMessage(n.bestWt))
 	}
 }
 
 // Report - (10) Response to receipt of Report on edge e
-func (n *Node) Report(msg Message) {
-	e := msg.Edge
-	w := msg.Weight
-
+func (n *Node) Report(e *Edge, w Weight) {
 	if e != n.inBranch {
 		n.findCount--
 		if e.Weight.Less(n.bestWt) {
@@ -147,7 +132,9 @@ func (n *Node) Report(msg Message) {
 		}
 		n.procReport()
 	} else if n.State == NodeStateFind {
-		n.Queue(msg)
+		nm := ReportMessage(n.bestWt)
+		nm.Edge = e
+		n.Queue(nm)
 	} else if w.Greater(n.bestWt) {
 		n.procChangeRoot()
 	} else if w.Equal(n.bestWt) {
@@ -159,11 +146,11 @@ func (n *Node) Report(msg Message) {
 // procChangeRoot - (11) procedure change-root
 func (n *Node) procChangeRoot() {
 	if n.bestEdge.State == EdgeStateBranch {
-		n.bestEdge.SendChangeRoot()
+		n.bestEdge.Send(ChangeRootMessage())
 	}
 }
 
 // ChangeRoot - (12) Response to receipt of Change-root
-func (n *Node) ChangeRoot(msg Message) {
+func (n *Node) ChangeRoot() {
 	n.procChangeRoot()
 }

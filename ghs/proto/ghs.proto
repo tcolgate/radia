@@ -19,7 +19,7 @@ package proto;
 
 message GHSMessage {
   message Weight {
-    float weight = 1;
+    double weight = 1;
     string lsnID = 2;
     string msnID = 3;
   }
@@ -36,7 +36,7 @@ message GHSMessage {
    }
    uint32    level     = 1;
    Weight    fragment  = 2;
-   NodeState nodestate = 3;
+   NodeState nodeState = 3;
   }
 
   message Test {
@@ -61,7 +61,7 @@ message GHSMessage {
     CONNECT    = 0;
     INITIATE   = 1;
     TEST       = 2;
-    ACCPET     = 3;
+    ACCEPT     = 3;
     REJECT     = 4;
     REPORT     = 5;
     CHANGEROOT = 6;
@@ -69,11 +69,13 @@ message GHSMessage {
 
   Type type = 1;
 
-  Connect connect = 2;
-  Initiate initiate = 3;
-  Test test = 4;
-  Accept accpet = 5;
-  Reject reject = 6;
-  Report report = 7;
-  ChangeRoot changeroot = 8;
+  oneof msg_type {
+    Connect connect = 2;
+    Initiate initiate = 3;
+    Test test = 4;
+    Accept accpet = 5;
+    Reject reject = 6;
+    Report report = 7;
+    ChangeRoot changeroot = 8;
+  };
 }
