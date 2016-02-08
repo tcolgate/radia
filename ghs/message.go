@@ -34,7 +34,7 @@ const (
 type MessageFunc func(*Node, Message)
 
 type Message struct {
-	Func MessageFunc
+	Type MessageType
 	Edge *Edge
 	Weight
 	FragmentID

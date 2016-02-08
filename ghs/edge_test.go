@@ -1,9 +1,6 @@
 package ghs
 
-import (
-	"log"
-	"testing"
-)
+import "testing"
 
 func TestEdgeTestMessage1(t *testing.T) {
 	n1 := Node{}
@@ -21,10 +18,9 @@ func TestEdgeTestMessage1(t *testing.T) {
 	go func() { n1.Edges[0].Send(sentm) }()
 	gotm := n2.Edges[0].Recieve()
 
-	log.Printf("%+v, %+v", sentm, gotm)
-
+	gotm.Edge = nil
 	if sentm != gotm {
-		t.Fatalf("expected %+v, got %+v", 1, len(n2.Edges))
+		t.Fatalf("expected %+v, got %+v", sentm, gotm)
 	}
 }
 
@@ -57,8 +53,9 @@ func TestEdgeTestMessage2(t *testing.T) {
 	default:
 	}
 
+	gotm.Edge = nil
 	if sentm != gotm {
-		t.Fatalf("expected %+v, got %+v", 1, len(n2.Edges))
+		t.Fatalf("expected %+v, got %+v", sentm, gotm)
 	}
 }
 

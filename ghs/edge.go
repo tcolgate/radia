@@ -63,14 +63,14 @@ func (e *Edge) send(m Message) {
 
 func (e Edge) SendConnect(level int) {
 	e.send(Message{
-		Func:  (*Node).Connect,
+		Type:  MessageConnect,
 		Level: level,
 	})
 }
 
 func (e Edge) SendInitiate(level int, fragment FragmentID, state NodeState) {
 	e.send(Message{
-		Func:       (*Node).Initiate,
+		Type:       MessageInitiate,
 		Level:      level,
 		FragmentID: fragment,
 		NodeState:  state,
@@ -79,7 +79,7 @@ func (e Edge) SendInitiate(level int, fragment FragmentID, state NodeState) {
 
 func (e Edge) SendTest(level int, fragment FragmentID) {
 	e.send(Message{
-		Func:       (*Node).Test,
+		Type:       MessageTest,
 		Level:      level,
 		FragmentID: fragment,
 	})
@@ -87,25 +87,25 @@ func (e Edge) SendTest(level int, fragment FragmentID) {
 
 func (e Edge) SendAccept() {
 	e.send(Message{
-		Func: (*Node).Accept,
+		Type: MessageAccept,
 	})
 }
 
 func (e Edge) SendReject() {
 	e.send(Message{
-		Func: (*Node).Reject,
+		Type: MessageReject,
 	})
 }
 
 func (e Edge) SendReport(best Weight) {
 	e.send(Message{
-		Func:   (*Node).Report,
+		Type:   MessageReport,
 		Weight: best,
 	})
 }
 
 func (e Edge) SendChangeRoot() {
 	e.send(Message{
-		Func: (*Node).ChangeRoot,
+		Type: MessageChangeRoot,
 	})
 }

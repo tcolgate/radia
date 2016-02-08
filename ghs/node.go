@@ -1,5 +1,7 @@
 package ghs
 
+import "log"
+
 type NodeID int
 
 //go:generate stringer -type=NodeState
@@ -72,5 +74,22 @@ func (n *Node) Run() {
 }
 
 func (n *Node) dispatch(m Message) {
-	m.Func(n, m)
+	switch m.Type {
+	case MessageConnect:
+		n.Connect(m)
+	case MessageInitiate:
+		n.Initiate(m)
+	case MessageTest:
+		n.Test(m)
+	case MessageAccept:
+		n.Accept(m)
+	case MessageReject:
+		n.Reject(m)
+	case MessageReport:
+		n.Report(m)
+	case MessageChangeRoot:
+		n.ChangeRoot(m)
+	default:
+		log.Println("unknown message type m.Type")
+	}
 }
