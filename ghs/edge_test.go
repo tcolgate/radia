@@ -8,7 +8,7 @@ import (
 func TestEdgeTestMessage1(t *testing.T) {
 	n1 := Node{}
 	n2 := Node{}
-	Join(&n1, &n2, MakeChanPair)
+	Join(&n1, &n2, 1.0, MakeChanPair)
 
 	if len(n1.Edges) != 1 {
 		t.Fatalf("expected %v edges, got %v", 1, len(n1.Edges))
@@ -31,8 +31,8 @@ func TestEdgeTestMessage2(t *testing.T) {
 	n1 := Node{}
 	n2 := Node{}
 	n3 := Node{}
-	Join(&n1, &n2, MakeChanPair)
-	Join(&n3, &n2, MakeChanPair)
+	Join(&n1, &n2, 1.0, MakeChanPair)
+	Join(&n3, &n2, 1.0, MakeChanPair)
 
 	if len(n1.Edges) != 1 {
 		t.Fatalf("expected %v edges, got %v", 1, len(n1.Edges))

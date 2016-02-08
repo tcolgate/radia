@@ -1,6 +1,9 @@
 package ghs
 
-import "log"
+import (
+	"log"
+	"math"
+)
 
 // This file is a translation of the algorithm as described in the
 // paper. It's as literal as possible as
@@ -12,6 +15,8 @@ func (n *Node) WakeUp() {
 
 // procWakeUp - (2) wakeup node procedure
 func (n *Node) procWakeUp() {
+	n.Fragment = FragmentID{float64: math.Inf(1), Msn: n.ID}
+
 	e := n.Edges.MinEdge()
 	e.State = EdgeStateBranch
 	n.Level = 0
