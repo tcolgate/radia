@@ -17,6 +17,7 @@ type Node struct {
 	Edges    Edges
 	Level    int
 	Fragment FragmentID
+	Done     bool
 
 	msgQueue []Message
 
@@ -42,4 +43,34 @@ func (n1 *Node) Join(n2 *Node, f SenderRecieverMaker) {
 // Queue - add a GHS message to the internal queue
 func (n *Node) Queue(msg Message) {
 	n.msgQueue = append(n.msgQueue, msg)
+}
+
+func (n *Node) Run() {
+	ms := make(chan Message)
+	n.Edges.SortByMinEdge()
+
+	for _, e := range n.Edges {
+		go func(e *Edge) {
+			for {
+				ms <- e.Recieve()
+			}
+		}(e)
+	}
+
+	for nm := range ms {
+		delayed := n.msgQueue
+		n.msgQueue = []Message{}
+		n.dispatch(nm)
+
+		for _, om := range delayed {
+			n.dispatch(om)
+			if n.Done {
+				return
+			}
+		}
+	}
+}
+
+func (n *Node) dispatch(m Message) {
+	m.Func(n, m)
 }

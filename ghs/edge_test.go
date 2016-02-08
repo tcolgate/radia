@@ -17,7 +17,7 @@ func TestEdgeTestMessage1(t *testing.T) {
 		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
 	}
 
-	sentm := Message{MessageBroadcast}
+	sentm := Message{Type: MessageConnect}
 	go func() { n1.Edges[0].Send(sentm) }()
 	gotm := n2.Edges[0].Recieve()
 
@@ -46,7 +46,7 @@ func TestEdgeTestMessage2(t *testing.T) {
 		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
 	}
 
-	sentm := Message{MessageBroadcast}
+	sentm := Message{Type: MessageConnect}
 	c := make(chan Message)
 	go func() { c <- n1.Edges[0].Recieve() }()
 	go func() { n3.Edges[0].Send(sentm) }()

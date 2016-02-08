@@ -31,11 +31,14 @@ const (
 	MessageChangeRoot
 )
 
+type MessageFunc func(*Node, Message)
+
 type Message struct {
+	Func MessageFunc
 	Edge *Edge
-	Type MessageType
 	Weight
 	FragmentID
+	NodeState
 	Level int
 }
 

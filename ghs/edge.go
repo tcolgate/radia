@@ -51,23 +51,8 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 	return &Edge{SenderReciever: c1}, &Edge{SenderReciever: c2}
 }
 
-func (e Edge) SendConnect(level int) {
-}
-
-func (e Edge) SendInitiate(level int, fragment FragmentID, state NodeState) {
-}
-
-func (e Edge) SendTest(level int, fragment FragmentID) {
-}
-
-func (e Edge) SendAccept() {
-}
-
-func (e Edge) SendReject() {
-}
-
-func (e Edge) SendReport(best Weight) {
-}
-
-func (e Edge) SendChangeRoot() {
+func (e *Edge) Recieve() Message {
+	m := e.SenderReciever.Recieve()
+	m.Edge = e
+	return m
 }
