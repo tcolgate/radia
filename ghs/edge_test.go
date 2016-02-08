@@ -1,6 +1,9 @@
 package ghs
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestEdgeTestMessage1(t *testing.T) {
 	n1 := Node{}
@@ -14,12 +17,12 @@ func TestEdgeTestMessage1(t *testing.T) {
 		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
 	}
 
-	sentm := Message{Type: MessageConnect}
+	sentm := ConnectMessage(0)
 	go func() { n1.Edges[0].Send(sentm) }()
 	gotm := n2.Edges[0].Recieve()
 
 	gotm.Edge = nil
-	if sentm != gotm {
+	if !reflect.DeepEqual(sentm, gotm) {
 		t.Fatalf("expected %+v, got %+v", sentm, gotm)
 	}
 }
@@ -42,7 +45,7 @@ func TestEdgeTestMessage2(t *testing.T) {
 		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
 	}
 
-	sentm := Message{Type: MessageConnect}
+	sentm := ConnectMessage(1)
 	c := make(chan Message)
 	go func() { c <- n1.Edges[0].Recieve() }()
 	go func() { n3.Edges[0].Send(sentm) }()
@@ -54,7 +57,7 @@ func TestEdgeTestMessage2(t *testing.T) {
 	}
 
 	gotm.Edge = nil
-	if sentm != gotm {
+	if !reflect.DeepEqual(sentm, gotm) {
 		t.Fatalf("expected %+v, got %+v", sentm, gotm)
 	}
 }
