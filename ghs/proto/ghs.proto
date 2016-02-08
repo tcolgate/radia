@@ -1,0 +1,79 @@
+// This file is part of vonq.
+// 
+// vonq is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// vonq is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with vonq.  If not, see <http://www.gnu.org/licenses/>.
+
+syntax = "proto3";
+
+package proto;
+
+message GHSMessage {
+  message Weight {
+    float weight = 1;
+    string lsnID = 2;
+    string msnID = 3;
+  }
+
+  message Connect {
+   uint32 Level = 1;
+  }
+
+  message Initiate {
+   enum NodeState {
+     sleeping = 0;
+     find     = 1;
+     found    = 2;
+   }
+   uint32    level     = 1;
+   Weight    fragment  = 2;
+   NodeState nodestate = 3;
+  }
+
+  message Test {
+   uint32 level    = 1;
+   Weight fragment = 2;
+  }
+
+  message Accept {
+  }
+
+  message Reject {
+  }
+
+  message Report {
+    Weight weight = 1;
+  }
+
+  message ChangeRoot {
+  }
+
+  enum Type {
+    CONNECT    = 0;
+    INITIATE   = 1;
+    TEST       = 2;
+    ACCPET     = 3;
+    REJECT     = 4;
+    REPORT     = 5;
+    CHANGEROOT = 6;
+  };
+
+  Type type = 1;
+
+  Connect connect = 2;
+  Initiate initiate = 3;
+  Test test = 4;
+  Accept accpet = 5;
+  Reject reject = 6;
+  Report report = 7;
+  ChangeRoot changeroot = 8;
+}
