@@ -1,6 +1,9 @@
 package ghs
 
-import "sort"
+import (
+	"fmt"
+	"sort"
+)
 
 //go:generate stringer -type=EdgeState
 type EdgeState int
@@ -15,10 +18,26 @@ type Edge struct {
 	Weight Weight
 	State  EdgeState
 
+	local  *Node
+	remote *Node
+
 	SenderReciever
 }
 
 type Edges []*Edge
+
+func (es Edges) String() string {
+	str := "(Edges "
+	for i, e := range es {
+		str = str + fmt.Sprintf("(%v: %v)", i, e)
+	}
+	str += ")"
+	return str
+}
+
+func (e Edge) String() string {
+	return fmt.Sprintf("(E(%v):%v:%v)", e.State, e.remote.ID, e.Weight)
+}
 
 func (e Edges) MinEdge() *Edge {
 	if len(e) == 0 {
@@ -54,10 +73,12 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 func (e *Edge) Recieve() Message {
 	m := e.SenderReciever.Recieve()
 	m.Edge = e
+	e.local.Printf("(Recieve (%v) %v)", e, m)
 	return m
 }
 
 func (e *Edge) Send(m Message) {
+	e.local.Printf("(Send (%v) %v)", e, m)
 	e.SenderReciever.Send(m)
 }
 

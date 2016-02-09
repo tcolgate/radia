@@ -1,6 +1,7 @@
 package ghs
 
 import (
+	"fmt"
 	"log"
 	"sort"
 )
@@ -15,6 +16,12 @@ const (
 	NodeStateFind
 	NodeStateFound
 )
+
+func (n *Node) String() string {
+	return fmt.Sprintf("node(%v)(SN: %v, LN: %v, F: %v, ES: %v, BE: %v, BW: %v, TE: %v, IB: %v, FC: %v)",
+		n.ID, n.State, n.Level, n.Fragment, n.Edges, n.bestEdge, n.bestWt, n.testEdge, n.inBranch, n.findCount)
+
+}
 
 type Node struct {
 	ID       NodeID
@@ -32,6 +39,8 @@ type Node struct {
 	testEdge  *Edge
 	inBranch  *Edge
 	findCount int
+
+	*log.Logger
 }
 
 func Join(n1 *Node, n2 *Node, w float64, f SenderRecieverMaker) {
@@ -46,6 +55,7 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 	sort.Strings(ids)
 
 	e1, e2 := NewEdge(f)
+
 	e1.Weight.float64 = w
 	e2.Weight.float64 = w
 	e1.Weight.Lsn = NodeID(ids[0])
@@ -53,22 +63,31 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 	e1.Weight.Msn = NodeID(ids[1])
 	e2.Weight.Msn = NodeID(ids[1])
 
+	e1.local, e1.remote = n1, n2
+	e2.local, e2.remote = n2, n1
+
 	n1.Edges = append(n1.Edges, e1)
 	n2.Edges = append(n2.Edges, e2)
 }
 
 // Queue - add a GHS message to the internal queue
 func (n *Node) Queue(msg Message) {
+	n.Printf("Queueing  %v\n", msg)
 	n.msgQueue = append(n.msgQueue, msg)
 }
 
 func (n *Node) Run() {
 	ms := make(chan Message)
 	n.Edges.SortByMinEdge()
+	defer func() {
+		if n.OnDone != nil {
+			n.OnDone()
+		}
+	}()
 
 	for _, e := range n.Edges {
 		go func(e *Edge) {
-			log.Printf("node(%v).Edge(%b): Listening", n.ID, *e)
+			n.Printf(".Edge(%b): Listening", *e)
 			for {
 				ms <- e.Recieve()
 			}
@@ -78,18 +97,25 @@ func (n *Node) Run() {
 	for nm := range ms {
 		delayed := n.msgQueue
 		n.msgQueue = []Message{}
-		log.Printf("node(%v) Dispathing: %v\n", n.ID, nm)
+		n.Printf("before %+v\n", n)
+		n.Printf("Do %+v\n", nm)
 		nm.dispatch(n)
+		n.Printf("after %+v\n", n)
 
 		for _, om := range delayed {
-			log.Printf("node(%v) Replaying: %v\n", n.ID, om)
+			n.Printf("Redo %+v\n", om)
 			om.dispatch(n)
 			if n.Done {
-				if n.OnDone != nil {
-					n.OnDone()
-				}
-				return
+				break
 			}
+			n.Printf("%+v\n", n)
+		}
+		if n.Done {
+			if n.OnDone != nil {
+				n.OnDone()
+			}
+			return
 		}
 	}
+
 }

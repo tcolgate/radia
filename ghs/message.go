@@ -1,6 +1,7 @@
 package ghs
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -49,7 +50,7 @@ func pbNodeStateToNodeState(n pb.GHSMessage_Initiate_NodeState) NodeState {
 	case "found":
 		return NodeStateFound
 	}
-	return NodeStateSleeping
+	panic("eah?")
 }
 
 func protoWeight(w Weight) *pb.GHSMessage_Weight {
@@ -78,6 +79,27 @@ func protoNodeState(n NodeState) *pb.GHSMessage_Initiate_NodeState {
 		return pb.GHSMessage_Initiate_found.Enum()
 	}
 	return nil
+}
+
+func (m Message) String() string {
+	switch m.GetType() {
+	case pb.GHSMessage_CONNECT:
+		return fmt.Sprintf("(CONNECT %s)", m.Connect)
+	case pb.GHSMessage_INITIATE:
+		return fmt.Sprintf("(INITIATE %s)", m.Initiate)
+	case pb.GHSMessage_TEST:
+		return fmt.Sprintf("(TEST %s)", m.Test)
+	case pb.GHSMessage_ACCEPT:
+		return fmt.Sprintf("(ACCEPT %s)", m.Accept)
+	case pb.GHSMessage_REJECT:
+		return fmt.Sprintf("(REJECT %s)", m.Reject)
+	case pb.GHSMessage_REPORT:
+		return fmt.Sprintf("(REPORT %s)", m.Report)
+	case pb.GHSMessage_CHANGEROOT:
+		return fmt.Sprintf("(CHANGEROOT %s)", m.Changeroot)
+	default:
+		return fmt.Sprintf("(unknown message)")
+	}
 }
 
 // This can probably be shift around again

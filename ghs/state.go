@@ -1,10 +1,5 @@
 package ghs
 
-import (
-	"log"
-	"math"
-)
-
 // This file is a translation of the algorithm as described in the
 // paper. It's as literal as possible as
 
@@ -15,7 +10,7 @@ func (n *Node) WakeUp() {
 
 // procWakeUp - (2) wakeup node procedure
 func (n *Node) procWakeUp() {
-	n.Fragment = FragmentID{float64: math.Inf(1), Msn: n.ID}
+	n.Println("Waking")
 
 	e := n.Edges.MinEdge()
 	e.State = EdgeStateBranch
@@ -36,12 +31,14 @@ func (n *Node) Connect(e *Edge, level uint32) {
 		if n.State == NodeStateFind {
 			n.findCount++
 		}
-	} else if e.State == EdgeStateBasic {
-		nm := ConnectMessage(level)
-		nm.Edge = e
-		n.Queue(nm)
 	} else {
-		e.Send(InitiateMessage(n.Level+1, e.Weight.FragmentID(), NodeStateFind))
+		if e.State == EdgeStateBasic {
+			nm := ConnectMessage(level)
+			nm.Edge = e
+			n.Queue(nm)
+		} else {
+			e.Send(InitiateMessage(n.Level+1, e.Weight.FragmentID(), NodeStateFind))
+		}
 	}
 }
 
@@ -55,14 +52,14 @@ func (n *Node) Initiate(e *Edge, level uint32, fragment FragmentID, state NodeSt
 	n.bestWt = WeightInf
 	for _, se := range n.Edges {
 		if se != e && e.State == EdgeStateBranch {
-			se.Send(InitiateMessage(n.Level, n.Fragment, state))
+			se.Send(InitiateMessage(level, fragment, state))
 			if n.State == NodeStateFind {
 				n.findCount++
 			}
 		}
-		if state == NodeStateFind {
-			n.procTest()
-		}
+	}
+	if state == NodeStateFind {
+		n.procTest()
 	}
 }
 
@@ -83,7 +80,7 @@ func (n *Node) procTest() {
 	}
 }
 
-// Test - (5) Response to receipt of Test(L,F) on edge e
+// Test - (6) Response to receipt of Test(L,F) on edge e
 func (n *Node) Test(e *Edge, level uint32, fragment FragmentID) {
 	if n.State == NodeStateSleeping {
 		n.procWakeUp()
@@ -138,20 +135,26 @@ func (n *Node) procReport() {
 func (n *Node) Report(e *Edge, w Weight) {
 	if e != n.inBranch {
 		n.findCount--
-		if e.Weight.Less(n.bestWt) {
+		if w.Less(n.bestWt) {
 			n.bestWt = w
 			n.bestEdge = e
 		}
 		n.procReport()
-	} else if n.State == NodeStateFind {
-		nm := ReportMessage(n.bestWt)
-		nm.Edge = e
-		n.Queue(nm)
-	} else if w.Greater(n.bestWt) {
-		n.procChangeRoot()
-	} else if w.Equal(n.bestWt) {
-		// Halt
-		log.Println("Halt")
+	} else {
+		if n.State == NodeStateFind {
+			nm := ReportMessage(w)
+			nm.Edge = e
+			n.Queue(nm)
+		} else {
+			if w.Greater(n.bestWt) {
+				n.procChangeRoot()
+			} else {
+				if w.Equal(n.bestWt) {
+					n.Done = true
+					n.Println("Halt")
+				}
+			}
+		}
 	}
 }
 
@@ -159,6 +162,9 @@ func (n *Node) Report(e *Edge, w Weight) {
 func (n *Node) procChangeRoot() {
 	if n.bestEdge.State == EdgeStateBranch {
 		n.bestEdge.Send(ChangeRootMessage())
+	} else {
+		n.bestEdge.Send(ConnectMessage(n.Level))
+		n.bestEdge.State = EdgeStateBranch
 	}
 }
 

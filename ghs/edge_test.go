@@ -1,13 +1,21 @@
 package ghs
 
 import (
+	"log"
+	"os"
 	"reflect"
 	"testing"
 )
 
 func TestEdgeTestMessage1(t *testing.T) {
-	n1 := Node{}
-	n2 := Node{}
+	n1 := Node{
+		ID:     NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1) ", 0),
+	}
+	n2 := Node{
+		ID:     NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2) ", 0),
+	}
 	Join(&n1, &n2, 1.0, MakeChanPair)
 
 	if len(n1.Edges) != 1 {
@@ -28,9 +36,18 @@ func TestEdgeTestMessage1(t *testing.T) {
 }
 
 func TestEdgeTestMessage2(t *testing.T) {
-	n1 := Node{}
-	n2 := Node{}
-	n3 := Node{}
+	n1 := Node{
+		ID:     NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1) ", 0),
+	}
+	n2 := Node{
+		ID:     NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2) ", 0),
+	}
+	n3 := Node{
+		ID:     NodeID("n3"),
+		Logger: log.New(os.Stdout, "node(n3) ", 0),
+	}
 	Join(&n1, &n2, 1.0, MakeChanPair)
 	Join(&n3, &n2, 1.0, MakeChanPair)
 

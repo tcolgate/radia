@@ -19,11 +19,11 @@ func (w1 Weight) Less(w2 Weight) bool {
 	case w1.float64 < w2.float64:
 		return true
 	case w1.float64 == w2.float64 &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) < 0:
+		strings.Compare(string(w1.Msn), string(w2.Msn)) < 0:
 		return true
 	case w1.float64 == w2.float64 &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) == 0 &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) < 0:
+		strings.Compare(string(w1.Msn), string(w2.Msn)) == 0 &&
+		strings.Compare(string(w1.Lsn), string(w2.Lsn)) < 0:
 		return true
 	default:
 		return false
@@ -36,11 +36,11 @@ func (w1 Weight) Greater(w2 Weight) bool {
 	case w1.float64 > w2.float64:
 		return true
 	case w1.float64 == w2.float64 &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) > 0:
+		strings.Compare(string(w1.Msn), string(w2.Msn)) > 0:
 		return true
 	case w1.float64 == w2.float64 &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) == 0 &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) > 0:
+		strings.Compare(string(w1.Msn), string(w2.Msn)) == 0 &&
+		strings.Compare(string(w1.Lsn), string(w2.Lsn)) > 0:
 		return true
 	default:
 		return false
