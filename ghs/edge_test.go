@@ -1,12 +1,6 @@
 package ghs
 
-import (
-	"log"
-	"os"
-	"reflect"
-	"testing"
-)
-
+/*
 func TestEdgeTestMessage1(t *testing.T) {
 	n1 := Node{
 		ID:     NodeID("n1"),
@@ -82,3 +76,4 @@ func TestEdgeTestMessage2(t *testing.T) {
 func TestEdgesNextEmpty(t *testing.T) {
 
 }
+*/

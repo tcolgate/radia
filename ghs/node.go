@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
+
+	"golang.org/x/net/context"
 )
 
 type NodeID string
@@ -20,13 +22,14 @@ const (
 func (n *Node) String() string {
 	return fmt.Sprintf("node(%v)(SN: %v, LN: %v, F: %v, ES: %v, BE: %v, BW: %v, TE: %v, IB: %v, FC: %v)",
 		n.ID, n.State, n.Level, n.Fragment, n.Edges, n.bestEdge, n.bestWt, n.testEdge, n.inBranch, n.findCount)
-
 }
 
 type Node struct {
-	ID       NodeID
+	ID    NodeID
+	Edges Edges
+	*log.Logger
+
 	State    NodeState
-	Edges    Edges
 	Level    uint32
 	Fragment FragmentID
 	Done     bool
@@ -39,8 +42,6 @@ type Node struct {
 	testEdge  *Edge
 	inBranch  *Edge
 	findCount int
-
-	*log.Logger
 }
 
 func Join(n1 *Node, n2 *Node, w float64, f SenderRecieverMaker) {
@@ -76,10 +77,12 @@ func (n *Node) Queue(msg Message) {
 	n.msgQueue = append(n.msgQueue, msg)
 }
 
-func (n *Node) Run() {
+func (n *Node) Run(ctx context.Context) {
 	ms := make(chan Message)
 	n.Edges.SortByMinEdge()
+
 	defer func() {
+		close(ms)
 		if n.OnDone != nil {
 			n.OnDone()
 		}
@@ -87,9 +90,12 @@ func (n *Node) Run() {
 
 	for _, e := range n.Edges {
 		go func(e *Edge) {
-			n.Printf(".Edge(%b): Listening", *e)
 			for {
-				ms <- e.Recieve()
+				select {
+				case ms <- e.Recieve(ctx):
+				case <-ctx.Done():
+					return
+				}
 			}
 		}(e)
 	}
@@ -97,25 +103,50 @@ func (n *Node) Run() {
 	for nm := range ms {
 		delayed := n.msgQueue
 		n.msgQueue = []Message{}
+
 		n.Printf("before %+v\n", n)
 		n.Printf("Do %+v\n", nm)
-		nm.dispatch(n)
+		nm.Dispatch(ctx, n)
 		n.Printf("after %+v\n", n)
 
 		for _, om := range delayed {
 			n.Printf("Redo %+v\n", om)
-			om.dispatch(n)
-			if n.Done {
-				break
-			}
+			om.Dispatch(ctx, n)
 			n.Printf("%+v\n", n)
 		}
+
 		if n.Done {
-			if n.OnDone != nil {
-				n.OnDone()
-			}
 			return
 		}
 	}
+}
 
+func (n *Node) Dispatch(ctx context.Context, m Message) {
+	switch m.GetType() {
+	case pb.GHSMessage_CONNECT:
+		n.Connect(ctx, m.Edge, m.GetConnect().GetLevel())
+	case pb.GHSMessage_INITIATE:
+		im := m.GetInitiate()
+		l := im.GetLevel()
+		wf := pbWeightToWeight(im.GetFragment())
+		s := pbNodeStateToNodeState(im.GetNodeState())
+		n.Initiate(ctx, m.Edge, l, wf.FragmentID(), s)
+	case pb.GHSMessage_TEST:
+		im := m.GetTest()
+		l := im.GetLevel()
+		wf := pbWeightToWeight(im.GetFragment())
+		n.Test(ctx, m.Edge, l, wf.FragmentID())
+	case pb.GHSMessage_ACCEPT:
+		n.Accept(ctx, m.Edge)
+	case pb.GHSMessage_REJECT:
+		n.Reject(ctx, m.Edge)
+	case pb.GHSMessage_REPORT:
+		rm := m.GetReport()
+		w := pbWeightToWeight(rm.GetWeight())
+		n.Report(ctx, m.Edge, w)
+	case pb.GHSMessage_CHANGEROOT:
+		n.ChangeRoot(ctx)
+	default:
+		log.Println("unknown message type m.Type")
+	}
 }

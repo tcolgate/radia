@@ -3,6 +3,8 @@ package ghs
 import (
 	"fmt"
 	"sort"
+
+	"golang.org/x/net/context"
 )
 
 //go:generate stringer -type=EdgeState
@@ -15,13 +17,10 @@ const (
 )
 
 type Edge struct {
+	SenderReciever
+
 	Weight Weight
 	State  EdgeState
-
-	local  *Node
-	remote *Node
-
-	SenderReciever
 }
 
 type Edges []*Edge
@@ -70,16 +69,14 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 	return &Edge{SenderReciever: c1}, &Edge{SenderReciever: c2}
 }
 
-func (e *Edge) Recieve() Message {
-	m := e.SenderReciever.Recieve()
+func (e *Edge) Recieve(ctx context.Context) Message {
+	m := e.SenderReciever.Recieve(ctx)
 	m.Edge = e
-	e.local.Printf("(Recieve (%v) %v)", e, m)
 	return m
 }
 
-func (e *Edge) Send(m Message) {
-	e.local.Printf("(Send (%v) %v)", e, m)
-	e.SenderReciever.Send(m)
+func (e *Edge) Send(ctx context.Context, m Message) {
+	e.SenderReciever.Send(ctx, m)
 }
 
 // chanPair is a sender reciever using channels
@@ -88,11 +85,11 @@ type chanPair struct {
 	recv <-chan Message
 }
 
-func (p chanPair) Send(m Message) {
+func (p chanPair) Send(ctx context.Context, m Message) {
 	p.send <- m
 }
 
-func (p chanPair) Recieve() Message {
+func (p chanPair) Recieve(ctx context.Context) Message {
 	return <-p.recv
 }
 

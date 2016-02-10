@@ -6,14 +6,19 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	pb "github.com/tcolgate/vonq/ghs/proto"
+	"golang.org/x/net/context"
 )
 
 type Sender interface {
-	Send(Message)
+	Send(context.Context, Message)
 }
 
 type Reciever interface {
-	Recieve() Message
+	Recieve(ctx context.Context) Message
+}
+
+type Dispatcher interface {
+	Dispatcher(context.Context, Message)
 }
 
 type Closer interface {
@@ -105,31 +110,31 @@ func (m Message) String() string {
 // This can probably be shift around again
 // Not sure if GHS messages need to know so much
 // about the protocol. Maybe it's OK
-func (m Message) dispatch(n *Node) {
+func (m Message) Dispatch(ctx context.Context, n *Node) {
 	switch m.GetType() {
 	case pb.GHSMessage_CONNECT:
-		n.Connect(m.Edge, m.GetConnect().GetLevel())
+		n.Connect(ctx, m.Edge, m.GetConnect().GetLevel())
 	case pb.GHSMessage_INITIATE:
 		im := m.GetInitiate()
 		l := im.GetLevel()
 		wf := pbWeightToWeight(im.GetFragment())
 		s := pbNodeStateToNodeState(im.GetNodeState())
-		n.Initiate(m.Edge, l, wf.FragmentID(), s)
+		n.Initiate(ctx, m.Edge, l, wf.FragmentID(), s)
 	case pb.GHSMessage_TEST:
 		im := m.GetTest()
 		l := im.GetLevel()
 		wf := pbWeightToWeight(im.GetFragment())
-		n.Test(m.Edge, l, wf.FragmentID())
+		n.Test(ctx, m.Edge, l, wf.FragmentID())
 	case pb.GHSMessage_ACCEPT:
-		n.Accept(m.Edge)
+		n.Accept(ctx, m.Edge)
 	case pb.GHSMessage_REJECT:
-		n.Reject(m.Edge)
+		n.Reject(ctx, m.Edge)
 	case pb.GHSMessage_REPORT:
 		rm := m.GetReport()
 		w := pbWeightToWeight(rm.GetWeight())
-		n.Report(m.Edge, w)
+		n.Report(ctx, m.Edge, w)
 	case pb.GHSMessage_CHANGEROOT:
-		n.ChangeRoot()
+		n.ChangeRoot(ctx)
 	default:
 		log.Println("unknown message type m.Type")
 	}
