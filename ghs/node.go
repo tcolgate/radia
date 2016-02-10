@@ -20,7 +20,6 @@ const (
 func (n *Node) String() string {
 	return fmt.Sprintf("node(%v)(SN: %v, LN: %v, F: %v, ES: %v, BE: %v, BW: %v, TE: %v, IB: %v, FC: %v)",
 		n.ID, n.State, n.Level, n.Fragment, n.Edges, n.bestEdge, n.bestWt, n.testEdge, n.inBranch, n.findCount)
-
 }
 
 type Node struct {
@@ -58,12 +57,13 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 
 	e1.Weight.float64 = w
 	e2.Weight.float64 = w
+
 	e1.Weight.Lsn = NodeID(ids[0])
 	e2.Weight.Lsn = NodeID(ids[0])
 	e1.Weight.Msn = NodeID(ids[1])
 	e2.Weight.Msn = NodeID(ids[1])
 
-	e1.local, e1.remote = n1, n2
+	e1.local, e1.remote = n1, n2 // mostly for debugging
 	e2.local, e2.remote = n2, n1
 
 	n1.Edges = append(n1.Edges, e1)
@@ -78,6 +78,8 @@ func (n *Node) Queue(msg Message) {
 
 func (n *Node) Run() {
 	ms := make(chan Message)
+	defer close(ms)
+
 	n.Edges.SortByMinEdge()
 	defer func() {
 		if n.OnDone != nil {
@@ -101,6 +103,12 @@ func (n *Node) Run() {
 		n.Printf("Do %+v\n", nm)
 		nm.dispatch(n)
 		n.Printf("after %+v\n", n)
+		if n.Done {
+			if n.OnDone != nil {
+				n.OnDone()
+			}
+			return
+		}
 
 		for _, om := range delayed {
 			n.Printf("Redo %+v\n", om)
@@ -110,12 +118,5 @@ func (n *Node) Run() {
 			}
 			n.Printf("%+v\n", n)
 		}
-		if n.Done {
-			if n.OnDone != nil {
-				n.OnDone()
-			}
-			return
-		}
 	}
-
 }
