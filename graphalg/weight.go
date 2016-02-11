@@ -1,4 +1,4 @@
-package ghs
+package graphalg
 
 import (
 	"math"
@@ -52,15 +52,4 @@ func (w1 Weight) Equal(w2 Weight) bool {
 	return w1.float64 == w2.float64 &&
 		strings.Compare(string(w1.Lsn), string(w2.Lsn)) == 0 &&
 		strings.Compare(string(w1.Msn), string(w2.Msn)) == 0
-}
-
-// FragmentID converts a Weight to a FragmentID. The details of the best
-//  edge in a fragment are effectively act as a fragment id.
-// In 2) Response to receipt of Connect(... we have
-// ...
-//    else send Initiate(LN + 1, w(j), Find) on edge j
-// ...
-// Which clearly uses the edge weight in a Initiate (L, F, S)  message
-func (w Weight) FragmentID() FragmentID {
-	return FragmentID(w)
 }

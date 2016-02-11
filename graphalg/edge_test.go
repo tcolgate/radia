@@ -1,4 +1,4 @@
-package ghs
+package graphalg
 
 import (
 	"log"

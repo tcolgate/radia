@@ -1,22 +1,12 @@
-package ghs
+package graphalg
 
 import (
 	"fmt"
 	"sort"
 )
 
-//go:generate stringer -type=EdgeState
-type EdgeState int
-
-const (
-	EdgeStateBasic EdgeState = iota
-	EdgeStateBranch
-	EdgeStateRejected
-)
-
 type Edge struct {
 	Weight Weight
-	State  EdgeState
 
 	local  *Node
 	remote *Node
@@ -36,7 +26,7 @@ func (es Edges) String() string {
 }
 
 func (e Edge) String() string {
-	return fmt.Sprintf("(E(%v):%v:%v)", e.State, e.remote.ID, e.Weight)
+	return fmt.Sprintf("E(->%v:%v)", e.remote.ID, e.Weight)
 }
 
 func (e Edges) MinEdge() *Edge {

@@ -6,31 +6,12 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	pb "github.com/tcolgate/vonq/ghs/proto"
+	"github.com/tcolgate/vonq/graphalg"
 )
 
-type Sender interface {
-	Send(Message)
-}
-
-type Reciever interface {
-	Recieve() Message
-}
-
-type Closer interface {
-	Close()
-}
-
-type SenderReciever interface {
-	Sender
-	Reciever
-	Closer
-}
-
-type SenderRecieverMaker func() (SenderReciever, SenderReciever)
-
 type Message struct {
+	*graphalg.Edge
 	pb.GHSMessage
-	Edge *Edge
 }
 
 func pbWeightToWeight(w *pb.GHSMessage_Weight) Weight {
@@ -99,39 +80,6 @@ func (m Message) String() string {
 		return fmt.Sprintf("(CHANGEROOT %s)", m.Changeroot)
 	default:
 		return fmt.Sprintf("(unknown message)")
-	}
-}
-
-// This can probably be shift around again
-// Not sure if GHS messages need to know so much
-// about the protocol. Maybe it's OK
-func (m Message) dispatch(n *Node) {
-	switch m.GetType() {
-	case pb.GHSMessage_CONNECT:
-		n.Connect(m.Edge, m.GetConnect().GetLevel())
-	case pb.GHSMessage_INITIATE:
-		im := m.GetInitiate()
-		l := im.GetLevel()
-		wf := pbWeightToWeight(im.GetFragment())
-		s := pbNodeStateToNodeState(im.GetNodeState())
-		n.Initiate(m.Edge, l, wf.FragmentID(), s)
-	case pb.GHSMessage_TEST:
-		im := m.GetTest()
-		l := im.GetLevel()
-		wf := pbWeightToWeight(im.GetFragment())
-		n.Test(m.Edge, l, wf.FragmentID())
-	case pb.GHSMessage_ACCEPT:
-		n.Accept(m.Edge)
-	case pb.GHSMessage_REJECT:
-		n.Reject(m.Edge)
-	case pb.GHSMessage_REPORT:
-		rm := m.GetReport()
-		w := pbWeightToWeight(rm.GetWeight())
-		n.Report(m.Edge, w)
-	case pb.GHSMessage_CHANGEROOT:
-		n.ChangeRoot()
-	default:
-		log.Println("unknown message type m.Type")
 	}
 }
 
@@ -206,5 +154,35 @@ func ChangeRootMessage() Message {
 			Type:       pb.GHSMessage_CHANGEROOT.Enum(),
 			Changeroot: &pb.GHSMessage_ChangeRoot{},
 		},
+	}
+}
+
+func (s *State) Dispatch(m Message) {
+	switch m.GetType() {
+	case pb.GHSMessage_CONNECT:
+		s.Connect(m.Edge, m.GetConnect().GetLevel())
+	case pb.GHSMessage_INITIATE:
+		im := m.GetInitiate()
+		l := im.GetLevel()
+		wf := pbWeightToWeight(im.GetFragment())
+		ns := pbNodeStateToNodeState(im.GetNodeState())
+		s.Initiate(m.Edge, l, wf.FragmentID(), ns)
+	case pb.GHSMessage_TEST:
+		im := m.GetTest()
+		l := im.GetLevel()
+		wf := pbWeightToWeight(im.GetFragment())
+		s.Test(m.Edge, l, wf.FragmentID())
+	case pb.GHSMessage_ACCEPT:
+		s.Accept(m.Edge)
+	case pb.GHSMessage_REJECT:
+		s.Reject(m.Edge)
+	case pb.GHSMessage_REPORT:
+		rm := m.GetReport()
+		w := pbWeightToWeight(rm.GetWeight())
+		s.Report(m.Edge, w)
+	case pb.GHSMessage_CHANGEROOT:
+		s.ChangeRoot()
+	default:
+		log.Println("unknown message type m.Type")
 	}
 }
