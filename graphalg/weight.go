@@ -22,12 +22,16 @@ import (
 	"strings"
 )
 
+// Weight represents the weight of an edge. The edge includes
+// two NodeIDs to break ties in cases where all edges must have
+// unqiue weights (e.g. MSTs)
 type Weight struct {
 	float64
 	Lsn NodeID // Least Signigicant NodeID
 	Msn NodeID // Most Signigicant NodeID
 }
 
+// WeightInf is an edge with infinite weight
 var WeightInf = Weight{float64: math.Inf(1)}
 
 // Less - compare two edge weights.
