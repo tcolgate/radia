@@ -88,26 +88,3 @@ func (e *Edge) Send(m Message) {
 	e.local.Printf("(Send (%v) %v)", e, m)
 	e.SenderReciever.Send(m)
 }
-
-// chanPair is a sender reciever using channels
-type chanPair struct {
-	send chan<- Message
-	recv <-chan Message
-}
-
-func (p chanPair) Send(m Message) {
-	p.send <- m
-}
-
-func (p chanPair) Recieve() Message {
-	return <-p.recv
-}
-
-func (p chanPair) Close() {
-	close(p.send)
-}
-
-func MakeChanPair() (SenderReciever, SenderReciever) {
-	c1, c2 := make(chan Message), make(chan Message)
-	return chanPair{c1, c2}, chanPair{c2, c1}
-}
