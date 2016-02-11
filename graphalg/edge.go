@@ -79,7 +79,6 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 
 func (e *Edge) Recieve() Message {
 	m := e.SenderReciever.Recieve()
-	m.Edge = e
 	e.local.Printf("(Recieve (%v) %v)", e, m)
 	return m
 }

@@ -29,12 +29,14 @@ func Run(a Algorithm) {
 		}
 	}()
 
-	for _, e := range a.Edges() {
-		go func(e *Edge) {
+	for ei, e := range a.Edges() {
+		go func(e *Edge, ei int) {
 			for {
-				ms <- e.Recieve()
+				msg := e.Recieve()
+				msg.Edge = ei
+				ms <- msg
 			}
-		}(e)
+		}(e, ei)
 	}
 
 	for nm := range ms {
