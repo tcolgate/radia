@@ -27,11 +27,11 @@ import (
 )
 
 type Message struct {
-	*graphalg.Edge
+	*graphalg.Message
 	pb.GHSMessage
 }
 
-func pbWeightToWeight(w *pb.GHSMessage_Weight) Weight {
+func pbWeightToWeight(w *pb.GHSMessage_Weight) graphalg.Weight {
 	return Weight{
 		float64: w.GetWeight(),
 		Lsn:     NodeID(w.GetLsnID()),
@@ -51,7 +51,7 @@ func pbNodeStateToNodeState(n pb.GHSMessage_Initiate_NodeState) NodeState {
 	panic("eah?")
 }
 
-func protoWeight(w Weight) *pb.GHSMessage_Weight {
+func protoWeight(w graphalg.Weight) *pb.GHSMessage_Weight {
 	return &pb.GHSMessage_Weight{
 		Weight: proto.Float64(w.float64),
 		LsnID:  proto.String(string(w.Lsn)),
@@ -59,7 +59,7 @@ func protoWeight(w Weight) *pb.GHSMessage_Weight {
 	}
 }
 
-func protoFragmentID(f FragmentID) *pb.GHSMessage_Weight {
+func protoFragmentID(f FragID) *pb.GHSMessage_Weight {
 	return &pb.GHSMessage_Weight{
 		Weight: proto.Float64(f.float64),
 		LsnID:  proto.String(string(f.Lsn)),
@@ -111,7 +111,7 @@ func ConnectMessage(level uint32) Message {
 	}
 }
 
-func InitiateMessage(level uint32, fragment FragmentID, state NodeState) Message {
+func InitiateMessage(level uint32, fragment FragID, state NodeState) Message {
 	return Message{
 		GHSMessage: pb.GHSMessage{
 			Type: pb.GHSMessage_INITIATE.Enum(),
@@ -124,7 +124,7 @@ func InitiateMessage(level uint32, fragment FragmentID, state NodeState) Message
 	}
 }
 
-func TestMessage(level uint32, fragment FragmentID) Message {
+func TestMessage(level uint32, fragment FragID) Message {
 	return Message{
 		GHSMessage: pb.GHSMessage{
 			Type: pb.GHSMessage_TEST.Enum(),
@@ -154,7 +154,7 @@ func RejectMessage() Message {
 	}
 }
 
-func ReportMessage(best Weight) Message {
+func ReportMessage(best graphalg.Weight) Message {
 	return Message{
 		GHSMessage: pb.GHSMessage{
 			Type: pb.GHSMessage_REPORT.Enum(),

@@ -31,7 +31,7 @@ const NIL = -1
 type State struct {
 	graphalg.Node
 	NodeState
-	Fragment FragmentID
+	Fragment FragID
 	Level    uint32
 
 	EdgeStates []EdgeState
@@ -39,7 +39,7 @@ type State struct {
 	testEdge   int
 	inBranch   int
 
-	bestWt Weight
+	bestWt graphalg.Weight
 
 	findCount int
 }
@@ -62,6 +62,8 @@ const (
 	EdgeStateRejected
 )
 
+type FragID graphalg.Weight
+
 // FragmentID converts a Weight to a FragmentID. The details of the best
 //  edge in a fragment are effectively act as a fragment id.
 // In 2) Response to receipt of Connect(... we have
@@ -69,8 +71,8 @@ const (
 //    else send Initiate(LN + 1, w(j), Find) on edge j
 // ...
 // Which clearly uses the edge weight in a Initiate (L, F, S)  message
-func FragmentID(w graphalg.Weight) FragmentID {
-	return FragmentID(w)
+func FragmentID(w graphalg.Weight) FragID {
+	return FragID(w)
 }
 
 // WakeUp -
@@ -87,7 +89,7 @@ func (s *State) procWakeUp() {
 	s.Level = 0
 	s.NodeState = NodeStateFound
 	s.findCount = 0
-	s.Edges(j).Send(ConnectMessage(s.Level))
+	s.Edge(j).Send(ConnectMessage(s.Level))
 }
 
 // Connect - (3) Response to receipt of Connect(L) on edge j
@@ -96,8 +98,8 @@ func (s *State) Connect(j int, level uint32) {
 		s.procWakeUp()
 	}
 	if level < s.Level {
-		s.EdgesStates[j] = EdgeStateBranch
-		s.Edges(j).Send(InitiateMessage(s.Level, s.Fragment, s.NodeState))
+		s.EdgeStates[j] = EdgeStateBranch
+		s.Edge(j).Send(InitiateMessage(s.Level, s.Fragment, s.NodeState))
 		if s.NodeState == NodeStateFind {
 			s.findCount++
 		}
@@ -107,22 +109,22 @@ func (s *State) Connect(j int, level uint32) {
 			nm.Edge = j
 			s.Queue(nm)
 		} else {
-			s.Edges(j).Send(InitiateMessage(s.Level+1, s.Edges(j).Weight.FragmentID(), NodeStateFind))
+			s.Edge(j).Send(InitiateMessage(s.Level+1, s.Edge(j).Weight.FragmentID(), NodeStateFind))
 		}
 	}
 }
 
 // Initiate - (4) Response to receipt of Initiate(L,F,S) on edge j
-func (s *State) Initiate(j int, level uint32, fragment FragmentID, state NodeState) {
+func (s *State) Initiate(j int, level uint32, fragment FragID, state NodeState) {
 	s.Level = level
 	s.Fragment = fragment
 	s.NodeState = state
 	s.inBranch = j
 	s.bestEdge = NIL
-	s.bestWt = WeightInf
+	s.bestWt = graphalg.WeightInf
 	for i := range s.EdgeStates {
 		if j != i && s.EdgeStates[i] == EdgeStateBranch {
-			s.Edges(j).Send(InitiateMessage(level, fragment, state))
+			s.Edge(j).Send(InitiateMessage(level, fragment, state))
 			if s.NodeState == NodeStateFind {
 				s.findCount++
 			}
@@ -140,7 +142,7 @@ func (s *State) procTest() {
 		if s.EdgeStates[i] == EdgeStateBasic {
 			found = true
 			s.testEdge = i
-			s.Edges(i).Send(TestMessage(s.Level, s.Fragment))
+			s.Edge(i).Send(TestMessage(s.Level, s.Fragment))
 			break
 		}
 	}
@@ -151,7 +153,7 @@ func (s *State) procTest() {
 }
 
 // Test - (6) Response to receipt of Test(L,F) on edge j
-func (s *State) Test(j int, level uint32, fragment FragmentID) {
+func (s *State) Test(j int, level uint32, fragment FragID) {
 	if s.NodeState == NodeStateSleeping {
 		s.procWakeUp()
 	}
@@ -161,13 +163,13 @@ func (s *State) Test(j int, level uint32, fragment FragmentID) {
 		s.Queue(nm)
 	} else {
 		if fragment != s.Fragment {
-			s.Edges(j).Send(AcceptMessage())
+			s.Edge(j).Send(AcceptMessage())
 		} else {
 			if s.EdgeStates[j] == EdgeStateBasic {
 				s.EdgeStates[j] = EdgeStateRejected
 			}
 			if s.testEdge != j {
-				s.Edges(j).Send(RejectMessage())
+				s.Edge(j).Send(RejectMessage())
 			} else {
 				s.procTest()
 			}
@@ -178,9 +180,9 @@ func (s *State) Test(j int, level uint32, fragment FragmentID) {
 // Accept - (7) Response to receipt of Accept on edge j
 func (s *State) Accept(j int) {
 	s.testEdge = NIL
-	if s.Edges(j).Weight.Less(s.bestWt) {
+	if s.Edge(j).Weight.Less(s.bestWt) {
 		s.bestEdge = j
-		s.bestWt = s.Edges(j).Weight
+		s.bestWt = s.Edge(j).Weight
 	}
 	s.procReport()
 }
@@ -197,12 +199,12 @@ func (s *State) Reject(j int) {
 func (s *State) procReport() {
 	if s.findCount == 0 && s.testEdge == NIL {
 		s.NodeState = NodeStateFound
-		s.Edges(s.inBranch).Send(ReportMessage(s.bestWt))
+		s.Edge(s.inBranch).Send(ReportMessage(s.bestWt))
 	}
 }
 
 // Report - (10) Response to receipt of Report on edge j
-func (s *State) Report(j int, w Weight) {
+func (s *State) Report(j int, w graphalg.Weight) {
 	if j != s.inBranch {
 		s.findCount--
 		if w.Less(s.bestWt) {
@@ -230,9 +232,9 @@ func (s *State) Report(j int, w Weight) {
 // procChangeRoot - (11) procedure change-root
 func (s *State) procChangeRoot() {
 	if s.EdgeStates[s.bestEdge] == EdgeStateBranch {
-		s.Edges(j).Send(ChangeRootMessage())
+		s.Edge(j).Send(ChangeRootMessage())
 	} else {
-		s.Edges(j).Send(ConnectMessage(s.Level))
+		s.Edge(j).Send(ConnectMessage(s.Level))
 		s.EdgeStates[s.bestEdge] = EdgeStateBranch
 	}
 }

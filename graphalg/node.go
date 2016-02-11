@@ -36,6 +36,14 @@ type Node struct {
 	*log.Logger
 }
 
+func (n *Node) MinEdge() int {
+	return n.Edges.MinEdge()
+}
+
+func (n *Node) Edge(j int) *Edge {
+	return n.Edges[j]
+}
+
 func Join(n1 *Node, n2 *Node, w float64, f SenderRecieverMaker) {
 	n1.Join(n2, w, f)
 }

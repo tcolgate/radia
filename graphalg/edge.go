@@ -46,12 +46,12 @@ func (e Edge) String() string {
 	return fmt.Sprintf("E(->%v:%v)", e.remote.ID, e.Weight)
 }
 
-func (e Edges) MinEdge() *Edge {
+func (e Edges) MinEdge() int {
 	if len(e) == 0 {
-		return nil
+		return -1
 	}
 	e.SortByMinEdge()
-	return e[0]
+	return 0
 }
 
 func (e Edges) SortByMinEdge() {
