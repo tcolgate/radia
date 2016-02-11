@@ -103,20 +103,13 @@ func (n *Node) Run() {
 		n.Printf("Do %+v\n", nm)
 		nm.dispatch(n)
 		n.Printf("after %+v\n", n)
-		if n.Done {
-			if n.OnDone != nil {
-				n.OnDone()
-			}
-			return
-		}
-
 		for _, om := range delayed {
 			n.Printf("Redo %+v\n", om)
 			om.dispatch(n)
-			if n.Done {
-				break
-			}
 			n.Printf("%+v\n", n)
+		}
+		if n.Done {
+			return
 		}
 	}
 }

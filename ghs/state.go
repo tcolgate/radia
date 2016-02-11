@@ -51,7 +51,7 @@ func (n *Node) Initiate(e *Edge, level uint32, fragment FragmentID, state NodeSt
 	n.bestEdge = nil
 	n.bestWt = WeightInf
 	for _, se := range n.Edges {
-		if se != e && e.State == EdgeStateBranch {
+		if se != e && se.State == EdgeStateBranch {
 			se.Send(InitiateMessage(level, fragment, state))
 			if n.State == NodeStateFind {
 				n.findCount++
