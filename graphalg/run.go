@@ -17,19 +17,17 @@
 
 package graphalg
 
-func Run(a Algorithm) {
+func (n *Node) Run(a NodeAlgorithm) {
 	msgQueue := []Message{}
 	ms := make(chan Message)
 	defer close(ms)
 
-	a.Edges().SortByMinEdge()
+	n.Edges().SortByMinEdge()
 	defer func() {
-		if a.OnDone() != nil {
-			a.OnDone()
-		}
+		a.WhenDone()
 	}()
 
-	for ei, e := range a.Edges() {
+	for ei, e := range n.Edges() {
 		go func(e *Edge, ei int) {
 			for {
 				pb := e.Recieve()
