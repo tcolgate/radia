@@ -25,11 +25,11 @@ import (
 // Weight represents the weight of an edge. The edge includes
 // two NodeIDs to break ties in cases where all edges must have
 // unqiue weights (e.g. MSTs)
-type Weight struct {
-	Cost float64
-	Lsn  NodeID // Least Signigicant NodeID
-	Msn  NodeID // Most Signigicant NodeID
-}
+//type Weight struct {
+//	Cost float64
+//	Lsn  NodeID // Least Signigicant NodeID
+//	Msn  NodeID // Most Signigicant NodeID
+//}
 
 // WeightInf is an edge with infinite weight
 var WeightInf = Weight{Cost: math.Inf(1)}
@@ -40,11 +40,11 @@ func (w1 Weight) Less(w2 Weight) bool {
 	case w1.Cost < w2.Cost:
 		return true
 	case w1.Cost == w2.Cost &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) < 0:
+		strings.Compare(string(w1.MsnID), string(w2.MsnID)) < 0:
 		return true
 	case w1.Cost == w2.Cost &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) == 0 &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) < 0:
+		strings.Compare(string(w1.MsnID), string(w2.MsnID)) == 0 &&
+		strings.Compare(string(w1.LsnID), string(w2.LsnID)) < 0:
 		return true
 	default:
 		return false
@@ -57,11 +57,11 @@ func (w1 Weight) Greater(w2 Weight) bool {
 	case w1.Cost > w2.Cost:
 		return true
 	case w1.Cost == w2.Cost &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) > 0:
+		strings.Compare(string(w1.MsnID), string(w2.MsnID)) > 0:
 		return true
 	case w1.Cost == w2.Cost &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) == 0 &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) > 0:
+		strings.Compare(string(w1.MsnID), string(w2.MsnID)) == 0 &&
+		strings.Compare(string(w1.LsnID), string(w2.LsnID)) > 0:
 		return true
 	default:
 		return false
@@ -71,6 +71,6 @@ func (w1 Weight) Greater(w2 Weight) bool {
 // Less - compare two edge weights.
 func (w1 Weight) Equal(w2 Weight) bool {
 	return w1.Cost == w2.Cost &&
-		strings.Compare(string(w1.Lsn), string(w2.Lsn)) == 0 &&
-		strings.Compare(string(w1.Msn), string(w2.Msn)) == 0
+		strings.Compare(string(w1.LsnID), string(w2.LsnID)) == 0 &&
+		strings.Compare(string(w1.MsnID), string(w2.MsnID)) == 0
 }

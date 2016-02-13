@@ -60,10 +60,10 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 	e1.Weight.Cost = w
 	e2.Weight.Cost = w
 
-	e1.Weight.Lsn = NodeID(ids[0])
-	e2.Weight.Lsn = NodeID(ids[0])
-	e1.Weight.Msn = NodeID(ids[1])
-	e2.Weight.Msn = NodeID(ids[1])
+	e1.Weight.LsnID = ids[0]
+	e2.Weight.LsnID = ids[0]
+	e1.Weight.MsnID = ids[1]
+	e2.Weight.MsnID = ids[1]
 
 	e1.local, e1.remote = n1, n2 // mostly for debugging
 	e2.local, e2.remote = n2, n1

@@ -41,9 +41,9 @@ func Run(a Algorithm) {
 	for nm := range ms {
 		delayed := msgQueue
 		msgQueue = []Message{}
-		a.Dispatch(nm)
+		a.Dispatch(nm.Edge, nm.Data)
 		for _, om := range delayed {
-			a.Dispatch(om)
+			a.Dispatch(om.Edge, om.Data)
 		}
 		if a.Done() {
 			return
