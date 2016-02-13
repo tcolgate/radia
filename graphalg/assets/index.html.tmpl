@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Sample of websocket with golang</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js"></script>
+		<script>
+      $(function() {
+        var ws = new WebSocket("ws://localhost:12345/updates");
+        var $ul = $('#msg-list');
+        ws.onmessage = function(e) {
+          console.log("Got: " + event.data);
+          $('<li>').text(event.data).appendTo($ul);
+        };
+
+        $('#runBtn').click(function(){
+          $.get( "/run", function( data ) {
+            console.log("Requested run");
+          });
+        });
+      });
+		</script>
+	</head>
+	<body>
+      <ul id="msg-list"></ul>
+			<input type="button" id="runBtn" value="Run"></input>
+	</body>
+</html>
