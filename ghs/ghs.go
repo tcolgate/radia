@@ -17,15 +17,12 @@
 
 package ghs
 
-import (
-	"fmt"
-
-	"github.com/tcolgate/vonq/graphalg"
-)
+import "github.com/tcolgate/vonq/graphalg"
 
 // This file is a translation of the algorithm as described in the
 // paper. It's as literal as possible as
 
+// NIL is used for identifying unset edge indexes
 const NIL = -1
 
 type State struct {
@@ -89,7 +86,7 @@ func (s *State) procWakeUp() {
 	s.Level = 0
 	s.NodeState = NodeStateFound
 	s.findCount = 0
-	s.Edge(j).Send(ConnectMessage(s.Level))
+	s.Send(j, ConnectMessage(s.Level))
 }
 
 // Connect - (3) Response to receipt of Connect(L) on edge j
@@ -99,17 +96,15 @@ func (s *State) Connect(j int, level uint32) {
 	}
 	if level < s.Level {
 		s.EdgeStates[j] = EdgeStateBranch
-		s.Edge(j).Send(InitiateMessage(s.Level, s.Fragment, s.NodeState))
+		s.Send(j, InitiateMessage(s.Level, s.Fragment, s.NodeState))
 		if s.NodeState == NodeStateFind {
 			s.findCount++
 		}
 	} else {
 		if s.EdgeStates[j] == EdgeStateBasic {
-			nm := ConnectMessage(level)
-			nm.Edge = j
-			s.Queue(nm)
+			s.Queue(j, ConnectMessage(level))
 		} else {
-			s.Edge(j).Send(InitiateMessage(s.Level+1, s.Edge(j).Weight.FragmentID(), NodeStateFind))
+			s.Send(j, InitiateMessage(s.Level+1, FragmentID(s.Edge(j).Weight), NodeStateFind))
 		}
 	}
 }
@@ -124,7 +119,7 @@ func (s *State) Initiate(j int, level uint32, fragment FragID, state NodeState) 
 	s.bestWt = graphalg.WeightInf
 	for i := range s.EdgeStates {
 		if j != i && s.EdgeStates[i] == EdgeStateBranch {
-			s.Edge(j).Send(InitiateMessage(level, fragment, state))
+			s.Send(i, InitiateMessage(level, fragment, state))
 			if s.NodeState == NodeStateFind {
 				s.findCount++
 			}
@@ -142,7 +137,7 @@ func (s *State) procTest() {
 		if s.EdgeStates[i] == EdgeStateBasic {
 			found = true
 			s.testEdge = i
-			s.Edge(i).Send(TestMessage(s.Level, s.Fragment))
+			s.Send(i, TestMessage(s.Level, s.Fragment))
 			break
 		}
 	}
@@ -158,18 +153,16 @@ func (s *State) Test(j int, level uint32, fragment FragID) {
 		s.procWakeUp()
 	}
 	if level > s.Level {
-		nm := TestMessage(level, fragment)
-		nm.Edge = j
-		s.Queue(nm)
+		s.Queue(j, TestMessage(level, fragment))
 	} else {
 		if fragment != s.Fragment {
-			s.Edge(j).Send(AcceptMessage())
+			s.Send(j, AcceptMessage())
 		} else {
 			if s.EdgeStates[j] == EdgeStateBasic {
 				s.EdgeStates[j] = EdgeStateRejected
 			}
 			if s.testEdge != j {
-				s.Edge(j).Send(RejectMessage())
+				s.Send(j, RejectMessage())
 			} else {
 				s.procTest()
 			}
@@ -199,7 +192,7 @@ func (s *State) Reject(j int) {
 func (s *State) procReport() {
 	if s.findCount == 0 && s.testEdge == NIL {
 		s.NodeState = NodeStateFound
-		s.Edge(s.inBranch).Send(ReportMessage(s.bestWt))
+		s.Send(s.inBranch, ReportMessage(s.bestWt))
 	}
 }
 
@@ -214,9 +207,7 @@ func (s *State) Report(j int, w graphalg.Weight) {
 		s.procReport()
 	} else {
 		if s.NodeState == NodeStateFind {
-			nm := ReportMessage(w)
-			nm.Edge = j
-			s.Queue(nm)
+			s.Queue(j, ReportMessage(w))
 		} else {
 			if w.Greater(s.bestWt) {
 				s.procChangeRoot()
@@ -232,9 +223,9 @@ func (s *State) Report(j int, w graphalg.Weight) {
 // procChangeRoot - (11) procedure change-root
 func (s *State) procChangeRoot() {
 	if s.EdgeStates[s.bestEdge] == EdgeStateBranch {
-		s.Edge(j).Send(ChangeRootMessage())
+		s.Send(s.bestEdge, ChangeRootMessage())
 	} else {
-		s.Edge(j).Send(ConnectMessage(s.Level))
+		s.Send(s.bestEdge, ConnectMessage(s.Level))
 		s.EdgeStates[s.bestEdge] = EdgeStateBranch
 	}
 }
@@ -244,7 +235,7 @@ func (s *State) ChangeRoot() {
 	s.procChangeRoot()
 }
 
-func (s *State) String() string {
-	return fmt.Sprintf("node(%v)(SN: %v, LN: %v, F: %v, ES: %v, BE: %v, BW: %v, TE: %v, IB: %v, FC: %v)",
-		n.ID, n.State, n.Level, n.Fragment, n.Edges, n.bestEdge, n.bestWt, n.testEdge, n.inBranch, n.findCount)
-}
+//func (s *State) String() string {
+//	return fmt.Sprintf("node(%v)(SN: %v, LN: %v, F: %v, ES: %v, BE: %v, BW: %v, TE: %v, IB: %v, FC: %v)",
+//		n.ID, n.State, n.Level, n.Fragment, n.Edges, n.bestEdge, n.bestWt, n.testEdge, n.inBranch, n.findCount)
+//}

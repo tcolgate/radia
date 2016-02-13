@@ -28,14 +28,14 @@ import (
 
 type Message struct {
 	*graphalg.Message
-	pb.GHSMessage
+	*pb.GHSMessage
 }
 
 func pbWeightToWeight(w *pb.GHSMessage_Weight) graphalg.Weight {
-	return Weight{
-		float64: w.GetWeight(),
-		Lsn:     NodeID(w.GetLsnID()),
-		Msn:     NodeID(w.GetMsnID()),
+	return graphalg.Weight{
+		Cost: w.GetWeight(),
+		Lsn:  graphalg.NodeID(w.GetLsnID()),
+		Msn:  graphalg.NodeID(w.GetMsnID()),
 	}
 }
 
@@ -53,17 +53,17 @@ func pbNodeStateToNodeState(n pb.GHSMessage_Initiate_NodeState) NodeState {
 
 func protoWeight(w graphalg.Weight) *pb.GHSMessage_Weight {
 	return &pb.GHSMessage_Weight{
-		Weight: proto.Float64(w.float64),
-		LsnID:  proto.String(string(w.Lsn)),
-		MsnID:  proto.String(string(w.Msn)),
+		Cost:  proto.Float64(w.float64),
+		LsnID: proto.String(string(w.Lsn)),
+		MsnID: proto.String(string(w.Msn)),
 	}
 }
 
 func protoFragmentID(f FragID) *pb.GHSMessage_Weight {
 	return &pb.GHSMessage_Weight{
-		Weight: proto.Float64(f.float64),
-		LsnID:  proto.String(string(f.Lsn)),
-		MsnID:  proto.String(string(f.Msn)),
+		Cost:  proto.Float64(f.float64),
+		LsnID: proto.String(string(f.Lsn)),
+		MsnID: proto.String(string(f.Msn)),
 	}
 }
 
@@ -102,7 +102,7 @@ func (m Message) String() string {
 
 func ConnectMessage(level uint32) Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type: pb.GHSMessage_CONNECT.Enum(),
 			Connect: &pb.GHSMessage_Connect{
 				Level: proto.Uint32(level),
@@ -113,7 +113,7 @@ func ConnectMessage(level uint32) Message {
 
 func InitiateMessage(level uint32, fragment FragID, state NodeState) Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type: pb.GHSMessage_INITIATE.Enum(),
 			Initiate: &pb.GHSMessage_Initiate{
 				Level:     proto.Uint32(level),
@@ -126,7 +126,7 @@ func InitiateMessage(level uint32, fragment FragID, state NodeState) Message {
 
 func TestMessage(level uint32, fragment FragID) Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type: pb.GHSMessage_TEST.Enum(),
 			Test: &pb.GHSMessage_Test{
 				Level:    proto.Uint32(level),
@@ -138,7 +138,7 @@ func TestMessage(level uint32, fragment FragID) Message {
 
 func AcceptMessage() Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type:   pb.GHSMessage_ACCEPT.Enum(),
 			Accept: &pb.GHSMessage_Accept{},
 		},
@@ -147,7 +147,7 @@ func AcceptMessage() Message {
 
 func RejectMessage() Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type:   pb.GHSMessage_REJECT.Enum(),
 			Reject: &pb.GHSMessage_Reject{},
 		},
@@ -156,7 +156,7 @@ func RejectMessage() Message {
 
 func ReportMessage(best graphalg.Weight) Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type: pb.GHSMessage_REPORT.Enum(),
 			Report: &pb.GHSMessage_Report{
 				Weight: protoWeight(best),
@@ -167,28 +167,31 @@ func ReportMessage(best graphalg.Weight) Message {
 
 func ChangeRootMessage() Message {
 	return Message{
-		GHSMessage: pb.GHSMessage{
+		GHSMessage: &pb.GHSMessage{
 			Type:       pb.GHSMessage_CHANGEROOT.Enum(),
 			Changeroot: &pb.GHSMessage_ChangeRoot{},
 		},
 	}
 }
 
-func (s *State) Dispatch(m Message) {
+func (s *State) Dispatch(m graphalg.Message) {
+	j := m.Edge
+	// Need to unsmarshal our message
+
 	switch m.GetType() {
 	case pb.GHSMessage_CONNECT:
-		s.Connect(m.Edge, m.GetConnect().GetLevel())
+		s.Connect(j, m.GetConnect().GetLevel())
 	case pb.GHSMessage_INITIATE:
 		im := m.GetInitiate()
 		l := im.GetLevel()
 		wf := pbWeightToWeight(im.GetFragment())
 		ns := pbNodeStateToNodeState(im.GetNodeState())
-		s.Initiate(m.Edge, l, wf.FragmentID(), ns)
+		s.Initiate(j, l, wf.FragmentID(), ns)
 	case pb.GHSMessage_TEST:
 		im := m.GetTest()
 		l := im.GetLevel()
 		wf := pbWeightToWeight(im.GetFragment())
-		s.Test(m.Edge, l, wf.FragmentID())
+		s.Test(j, l, wf.FragmentID())
 	case pb.GHSMessage_ACCEPT:
 		s.Accept(m.Edge)
 	case pb.GHSMessage_REJECT:
@@ -196,7 +199,7 @@ func (s *State) Dispatch(m Message) {
 	case pb.GHSMessage_REPORT:
 		rm := m.GetReport()
 		w := pbWeightToWeight(rm.GetWeight())
-		s.Report(m.Edge, w)
+		s.Report(j, w)
 	case pb.GHSMessage_CHANGEROOT:
 		s.ChangeRoot()
 	default:

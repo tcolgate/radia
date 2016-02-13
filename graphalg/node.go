@@ -57,8 +57,8 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 
 	e1, e2 := NewEdge(f)
 
-	e1.Weight.float64 = w
-	e2.Weight.float64 = w
+	e1.Weight.Cost = w
+	e2.Weight.Cost = w
 
 	e1.Weight.Lsn = NodeID(ids[0])
 	e2.Weight.Lsn = NodeID(ids[0])
@@ -72,8 +72,12 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 	n2.Edges = append(n2.Edges, e2)
 }
 
-// Queue - add a GHS message to the internal queue
-func (n *Node) Queue(msg Message) {
-	n.Printf("Queueing  %v\n", msg)
-	n.msgQueue = append(n.msgQueue, msg)
+// Send - send a message to the specified
+func (n *Node) Send(e int, d []byte) {
+	n.Edges[e].Send(d)
+}
+
+// Queue - re-queue a message to the internal queue
+func (n *Node) Queue(e int, d []byte) {
+	n.msgQueue = append(n.msgQueue, Message{e, d})
 }

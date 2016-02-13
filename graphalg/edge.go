@@ -77,13 +77,11 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 	return &Edge{SenderReciever: c1}, &Edge{SenderReciever: c2}
 }
 
-func (e *Edge) Recieve() Message {
+func (e *Edge) Recieve() []byte {
 	m := e.SenderReciever.Recieve()
-	e.local.Printf("(Recieve (%v) %v)", e, m)
 	return m
 }
 
-func (e *Edge) Send(m Message) {
-	e.local.Printf("(Send (%v) %v)", e, m)
+func (e *Edge) Send(m []byte) {
 	e.SenderReciever.Send(m)
 }

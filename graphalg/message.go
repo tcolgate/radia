@@ -18,16 +18,16 @@
 package graphalg
 
 type Message struct {
-	Edge  int
-	Bytes []byte
+	Edge int
+	Data []byte
 }
 
 type Sender interface {
-	Send(Message)
+	Send([]byte)
 }
 
 type Reciever interface {
-	Recieve() Message
+	Recieve() []byte
 }
 
 type Closer interface {

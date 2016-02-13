@@ -21,16 +21,16 @@ import "time"
 
 // chanPair is a sender reciever using channels
 type chanPair struct {
-	send  chan<- Message
-	recv  <-chan Message
+	send  chan<- []byte
+	recv  <-chan []byte
 	delay *time.Duration
 }
 
-func (p chanPair) Send(m Message) {
+func (p chanPair) Send(m []byte) {
 	p.send <- m
 }
 
-func (p chanPair) Recieve() Message {
+func (p chanPair) Recieve() []byte {
 	m := <-p.recv
 	if p.delay != nil {
 		time.Sleep(*p.delay)
@@ -46,11 +46,11 @@ func (p chanPair) Close() {
 // MakeChanPair is an edge sender/reciever built using a
 // channel
 func MakeChanPair() (SenderReciever, SenderReciever) {
-	c1, c2 := make(chan Message), make(chan Message)
+	c1, c2 := make(chan []byte), make(chan []byte)
 	return chanPair{c1, c2, nil}, chanPair{c2, c1, nil}
 }
 
 func MakeDelayChanPair(d time.Duration) (SenderReciever, SenderReciever) {
-	c1, c2 := make(chan Message), make(chan Message)
+	c1, c2 := make(chan []byte), make(chan []byte)
 	return chanPair{c1, c2, &d}, chanPair{c2, c1, &d}
 }

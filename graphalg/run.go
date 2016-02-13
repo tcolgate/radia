@@ -32,9 +32,8 @@ func Run(a Algorithm) {
 	for ei, e := range a.Edges() {
 		go func(e *Edge, ei int) {
 			for {
-				msg := e.Recieve()
-				msg.Edge = ei
-				ms <- msg
+				pb := e.Recieve()
+				ms <- Message{ei, pb}
 			}
 		}(e, ei)
 	}
