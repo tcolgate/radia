@@ -15,15 +15,11 @@
 
 syntax = "proto3";
 
-package proto;
+import 'github.com/tcolgate/vonq/graphalg/graphalg.proto'; // We'll be passing weights around
+
+package ghs;
 
 message GHSMessage {
-  message Weight {
-    double weight = 1;
-    string lsnID = 2;
-    string msnID = 3;
-  }
-
   message Connect {
    uint32 Level = 1;
   }
@@ -35,13 +31,13 @@ message GHSMessage {
      found    = 2;
    }
    uint32    level     = 1;
-   Weight    fragment  = 2;
+   graphalg.Weight    fragment  = 2;
    NodeState nodeState = 3;
   }
 
   message Test {
    uint32 level    = 1;
-   Weight fragment = 2;
+   graphalg.Weight fragment = 2;
   }
 
   message Accept {
@@ -51,7 +47,7 @@ message GHSMessage {
   }
 
   message Report {
-    Weight weight = 1;
+    graphalg.Weight weight = 1;
   }
 
   message ChangeRoot {

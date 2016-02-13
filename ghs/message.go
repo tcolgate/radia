@@ -18,119 +18,56 @@
 package ghs
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/proto"
-	pb "github.com/tcolgate/vonq/ghs/proto"
 	"github.com/tcolgate/vonq/graphalg"
 )
 
+func init() {
+	NodeStateSleeping = NodeState(GHSMessage_Initiate_NodeState_value["sleeping"])
+	NodeStateFind = NodeState(GHSMessage_Initiate_NodeState_value["find"])
+	NodeStateFound = NodeState(GHSMessage_Initiate_NodeState_value["found"])
+}
+
+//go:generate protoc -I $GOPATH/src:. --go_out=.  ghs.proto
 type Message struct {
-	*graphalg.Message
-	*pb.GHSMessage
-}
-
-func pbWeightToWeight(w *pb.GHSMessage_Weight) graphalg.Weight {
-	return graphalg.Weight{
-		Cost: w.GetWeight(),
-		Lsn:  graphalg.NodeID(w.GetLsnID()),
-		Msn:  graphalg.NodeID(w.GetMsnID()),
-	}
-}
-
-func pbNodeStateToNodeState(n pb.GHSMessage_Initiate_NodeState) NodeState {
-	switch n.String() {
-	case "sleeping":
-		return NodeStateSleeping
-	case "find":
-		return NodeStateFind
-	case "found":
-		return NodeStateFound
-	}
-	panic("eah?")
-}
-
-func protoWeight(w graphalg.Weight) *pb.GHSMessage_Weight {
-	return &pb.GHSMessage_Weight{
-		Cost:  proto.Float64(w.float64),
-		LsnID: proto.String(string(w.Lsn)),
-		MsnID: proto.String(string(w.Msn)),
-	}
-}
-
-func protoFragmentID(f FragID) *pb.GHSMessage_Weight {
-	return &pb.GHSMessage_Weight{
-		Cost:  proto.Float64(f.float64),
-		LsnID: proto.String(string(f.Lsn)),
-		MsnID: proto.String(string(f.Msn)),
-	}
-}
-
-func protoNodeState(n NodeState) *pb.GHSMessage_Initiate_NodeState {
-	switch n {
-	case NodeStateSleeping:
-		return pb.GHSMessage_Initiate_sleeping.Enum()
-	case NodeStateFind:
-		return pb.GHSMessage_Initiate_find.Enum()
-	case NodeStateFound:
-		return pb.GHSMessage_Initiate_found.Enum()
-	}
-	return nil
-}
-
-func (m Message) String() string {
-	switch m.GetType() {
-	case pb.GHSMessage_CONNECT:
-		return fmt.Sprintf("(CONNECT %s)", m.Connect)
-	case pb.GHSMessage_INITIATE:
-		return fmt.Sprintf("(INITIATE %s)", m.Initiate)
-	case pb.GHSMessage_TEST:
-		return fmt.Sprintf("(TEST %s)", m.Test)
-	case pb.GHSMessage_ACCEPT:
-		return fmt.Sprintf("(ACCEPT %s)", m.Accept)
-	case pb.GHSMessage_REJECT:
-		return fmt.Sprintf("(REJECT %s)", m.Reject)
-	case pb.GHSMessage_REPORT:
-		return fmt.Sprintf("(REPORT %s)", m.Report)
-	case pb.GHSMessage_CHANGEROOT:
-		return fmt.Sprintf("(CHANGEROOT %s)", m.Changeroot)
-	default:
-		return fmt.Sprintf("(unknown message)")
-	}
+	*GHSMessage
 }
 
 func ConnectMessage(level uint32) Message {
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type: pb.GHSMessage_CONNECT.Enum(),
-			Connect: &pb.GHSMessage_Connect{
-				Level: proto.Uint32(level),
+		&GHSMessage{
+			Type: GHSMessage_CONNECT,
+			Connect: &GHSMessage_Connect{
+				Level: level,
 			},
 		},
 	}
 }
 
 func InitiateMessage(level uint32, fragment FragID, state NodeState) Message {
+	wg := graphalg.Weight(fragment)
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type: pb.GHSMessage_INITIATE.Enum(),
-			Initiate: &pb.GHSMessage_Initiate{
-				Level:     proto.Uint32(level),
-				Fragment:  protoFragmentID(fragment),
-				NodeState: protoNodeState(state),
+		&GHSMessage{
+			Type: GHSMessage_INITIATE,
+			Initiate: &GHSMessage_Initiate{
+				Level:     level,
+				Fragment:  &wg,
+				NodeState: GHSMessage_Initiate_NodeState(state),
 			},
 		},
 	}
 }
 
 func TestMessage(level uint32, fragment FragID) Message {
+	wg := graphalg.Weight(fragment)
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type: pb.GHSMessage_TEST.Enum(),
-			Test: &pb.GHSMessage_Test{
-				Level:    proto.Uint32(level),
-				Fragment: protoFragmentID(fragment),
+		&GHSMessage{
+			Type: GHSMessage_TEST,
+			Test: &GHSMessage_Test{
+				Level:    level,
+				Fragment: &wg,
 			},
 		},
 	}
@@ -138,28 +75,28 @@ func TestMessage(level uint32, fragment FragID) Message {
 
 func AcceptMessage() Message {
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type:   pb.GHSMessage_ACCEPT.Enum(),
-			Accept: &pb.GHSMessage_Accept{},
+		GHSMessage: &GHSMessage{
+			Type:   GHSMessage_ACCEPT,
+			Accept: &GHSMessage_Accept{},
 		},
 	}
 }
 
 func RejectMessage() Message {
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type:   pb.GHSMessage_REJECT.Enum(),
-			Reject: &pb.GHSMessage_Reject{},
+		GHSMessage: &GHSMessage{
+			Type:   GHSMessage_REJECT,
+			Reject: &GHSMessage_Reject{},
 		},
 	}
 }
 
 func ReportMessage(best graphalg.Weight) Message {
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type: pb.GHSMessage_REPORT.Enum(),
-			Report: &pb.GHSMessage_Report{
-				Weight: protoWeight(best),
+		GHSMessage: &GHSMessage{
+			Type: GHSMessage_REPORT,
+			Report: &GHSMessage_Report{
+				Weight: &best,
 			},
 		},
 	}
@@ -167,40 +104,57 @@ func ReportMessage(best graphalg.Weight) Message {
 
 func ChangeRootMessage() Message {
 	return Message{
-		GHSMessage: &pb.GHSMessage{
-			Type:       pb.GHSMessage_CHANGEROOT.Enum(),
-			Changeroot: &pb.GHSMessage_ChangeRoot{},
+		GHSMessage: &GHSMessage{
+			Type:       GHSMessage_CHANGEROOT,
+			Changeroot: &GHSMessage_ChangeRoot{},
 		},
 	}
 }
 
-func (s *State) Dispatch(m graphalg.Message) {
-	j := m.Edge
-	// Need to unsmarshal our message
+func (s *State) QueueGHS(j int, m Message) {
+	b, err := proto.Marshal(m.GHSMessage)
+	if err != nil {
+		log.Println(err)
+	}
+	s.Node.Queue(j, b)
+}
 
-	switch m.GetType() {
-	case pb.GHSMessage_CONNECT:
-		s.Connect(j, m.GetConnect().GetLevel())
-	case pb.GHSMessage_INITIATE:
+func (s *State) SendGHS(j int, m Message) {
+	b, err := proto.Marshal(m.GHSMessage)
+	if err != nil {
+		log.Println(err)
+	}
+
+	s.Node.Send(j, b)
+}
+
+func (s *State) Dispatch(j int, b []byte) {
+	m := GHSMessage{}
+	proto.Unmarshal(b, &m)
+
+	switch m.Type {
+	case GHSMessage_CONNECT:
+		s.Connect(j, m.GetConnect().Level)
+	case GHSMessage_INITIATE:
 		im := m.GetInitiate()
-		l := im.GetLevel()
-		wf := pbWeightToWeight(im.GetFragment())
-		ns := pbNodeStateToNodeState(im.GetNodeState())
-		s.Initiate(j, l, wf.FragmentID(), ns)
-	case pb.GHSMessage_TEST:
+		l := im.Level
+		wf := im.Fragment
+		ns := NodeState(im.NodeState)
+		s.Initiate(j, l, FragmentID(*wf), ns)
+	case GHSMessage_TEST:
 		im := m.GetTest()
-		l := im.GetLevel()
-		wf := pbWeightToWeight(im.GetFragment())
-		s.Test(j, l, wf.FragmentID())
-	case pb.GHSMessage_ACCEPT:
-		s.Accept(m.Edge)
-	case pb.GHSMessage_REJECT:
-		s.Reject(m.Edge)
-	case pb.GHSMessage_REPORT:
+		l := im.Level
+		wf := im.Fragment
+		s.Test(j, l, FragmentID(*wf))
+	case GHSMessage_ACCEPT:
+		s.Accept(j)
+	case GHSMessage_REJECT:
+		s.Reject(j)
+	case GHSMessage_REPORT:
 		rm := m.GetReport()
-		w := pbWeightToWeight(rm.GetWeight())
-		s.Report(j, w)
-	case pb.GHSMessage_CHANGEROOT:
+		w := rm.GetWeight()
+		s.Report(j, *w)
+	case GHSMessage_CHANGEROOT:
 		s.ChangeRoot()
 	default:
 		log.Println("unknown message type m.Type")

@@ -17,18 +17,13 @@
 
 package graphalg
 
-type Algorithm interface {
-	Run()
-
-	Edges() Edges
+type NodeAlgorithm interface {
 	Dispatcher
-	Queuer
 	Doner
 }
 
 type Queuer interface {
-	Queue(Message)
-	ClearQueue()
+	Queue(edge int, m Message)
 }
 
 type Dispatcher interface {
@@ -37,7 +32,17 @@ type Dispatcher interface {
 
 type Doner interface {
 	Done() bool
-	SetDone()
-	OnDone() func()
-	SetOnDone(func())
+}
+
+type Base struct {
+	IsDone bool
+	OnDone func()
+}
+
+func (b *Base) Done() bool {
+	return b.IsDone
+}
+
+func (b *Base) SetDone(done bool) {
+	b.IsDone = done
 }

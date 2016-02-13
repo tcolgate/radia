@@ -25,23 +25,26 @@ import (
 type NodeID string
 
 type Node struct {
-	ID    NodeID
-	Edges Edges
+	Base
+	ID NodeID
+
+	edges Edges
 
 	msgQueue []Message
-
-	Done   bool
-	OnDone func()
 
 	*log.Logger
 }
 
+func (n *Node) Edges() Edges {
+	return n.edges
+}
+
 func (n *Node) MinEdge() int {
-	return n.Edges.MinEdge()
+	return n.edges.MinEdge()
 }
 
 func (n *Node) Edge(j int) *Edge {
-	return n.Edges[j]
+	return n.edges[j]
 }
 
 func Join(n1 *Node, n2 *Node, w float64, f SenderRecieverMaker) {
@@ -68,13 +71,13 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 	e1.local, e1.remote = n1, n2 // mostly for debugging
 	e2.local, e2.remote = n2, n1
 
-	n1.Edges = append(n1.Edges, e1)
-	n2.Edges = append(n2.Edges, e2)
+	n1.edges = append(n1.edges, e1)
+	n2.edges = append(n2.edges, e2)
 }
 
 // Send - send a message to the specified
 func (n *Node) Send(e int, d []byte) {
-	n.Edges[e].Send(d)
+	n.edges[e].Send(d)
 }
 
 // Queue - re-queue a message to the internal queue

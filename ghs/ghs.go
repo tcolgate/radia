@@ -26,7 +26,8 @@ import "github.com/tcolgate/vonq/graphalg"
 const NIL = -1
 
 type State struct {
-	graphalg.Node
+	*graphalg.Node
+
 	NodeState
 	Fragment FragID
 	Level    uint32
@@ -41,13 +42,16 @@ type State struct {
 	findCount int
 }
 
-//go:generate stringer -type=NodeState
-type NodeState int
+// NodeState is the state of the node.
+type NodeState GHSMessage_Initiate_NodeState
 
-const (
-	NodeStateSleeping NodeState = iota
-	NodeStateFind
-	NodeStateFound
+// This is perfect, but these values will be set based
+// on what the protoc compiler assigned these values
+// but we want nice names for them here
+var (
+	NodeStateSleeping NodeState
+	NodeStateFind     NodeState
+	NodeStateFound    NodeState
 )
 
 //go:generate stringer -type=EdgeState
@@ -79,14 +83,15 @@ func (s *State) WakeUp() {
 
 // procWakeUp - (2) wakeup node procedure
 func (s *State) procWakeUp() {
-	s.Println("Waking")
+	s.EdgeStates = make([]EdgeState, len(s.Edges()))
+	s.Fragment = FragID{MsnID: string(s.ID)}
 
-	j := s.Edges.MinEdge()
+	j := s.Edges().MinEdge()
 	s.EdgeStates[j] = EdgeStateBranch
 	s.Level = 0
 	s.NodeState = NodeStateFound
 	s.findCount = 0
-	s.Send(j, ConnectMessage(s.Level))
+	s.SendGHS(j, ConnectMessage(s.Level))
 }
 
 // Connect - (3) Response to receipt of Connect(L) on edge j
@@ -96,15 +101,15 @@ func (s *State) Connect(j int, level uint32) {
 	}
 	if level < s.Level {
 		s.EdgeStates[j] = EdgeStateBranch
-		s.Send(j, InitiateMessage(s.Level, s.Fragment, s.NodeState))
+		s.SendGHS(j, InitiateMessage(s.Level, s.Fragment, s.NodeState))
 		if s.NodeState == NodeStateFind {
 			s.findCount++
 		}
 	} else {
 		if s.EdgeStates[j] == EdgeStateBasic {
-			s.Queue(j, ConnectMessage(level))
+			s.QueueGHS(j, ConnectMessage(level))
 		} else {
-			s.Send(j, InitiateMessage(s.Level+1, FragmentID(s.Edge(j).Weight), NodeStateFind))
+			s.SendGHS(j, InitiateMessage(s.Level+1, FragmentID(s.Edge(j).Weight), NodeStateFind))
 		}
 	}
 }
@@ -119,7 +124,7 @@ func (s *State) Initiate(j int, level uint32, fragment FragID, state NodeState) 
 	s.bestWt = graphalg.WeightInf
 	for i := range s.EdgeStates {
 		if j != i && s.EdgeStates[i] == EdgeStateBranch {
-			s.Send(i, InitiateMessage(level, fragment, state))
+			s.SendGHS(i, InitiateMessage(level, fragment, state))
 			if s.NodeState == NodeStateFind {
 				s.findCount++
 			}
@@ -137,7 +142,7 @@ func (s *State) procTest() {
 		if s.EdgeStates[i] == EdgeStateBasic {
 			found = true
 			s.testEdge = i
-			s.Send(i, TestMessage(s.Level, s.Fragment))
+			s.SendGHS(i, TestMessage(s.Level, s.Fragment))
 			break
 		}
 	}
@@ -153,16 +158,16 @@ func (s *State) Test(j int, level uint32, fragment FragID) {
 		s.procWakeUp()
 	}
 	if level > s.Level {
-		s.Queue(j, TestMessage(level, fragment))
+		s.QueueGHS(j, TestMessage(level, fragment))
 	} else {
 		if fragment != s.Fragment {
-			s.Send(j, AcceptMessage())
+			s.SendGHS(j, AcceptMessage())
 		} else {
 			if s.EdgeStates[j] == EdgeStateBasic {
 				s.EdgeStates[j] = EdgeStateRejected
 			}
 			if s.testEdge != j {
-				s.Send(j, RejectMessage())
+				s.SendGHS(j, RejectMessage())
 			} else {
 				s.procTest()
 			}
@@ -192,7 +197,7 @@ func (s *State) Reject(j int) {
 func (s *State) procReport() {
 	if s.findCount == 0 && s.testEdge == NIL {
 		s.NodeState = NodeStateFound
-		s.Send(s.inBranch, ReportMessage(s.bestWt))
+		s.SendGHS(s.inBranch, ReportMessage(s.bestWt))
 	}
 }
 
@@ -207,13 +212,13 @@ func (s *State) Report(j int, w graphalg.Weight) {
 		s.procReport()
 	} else {
 		if s.NodeState == NodeStateFind {
-			s.Queue(j, ReportMessage(w))
+			s.QueueGHS(j, ReportMessage(w))
 		} else {
 			if w.Greater(s.bestWt) {
 				s.procChangeRoot()
 			} else {
 				if w.Equal(s.bestWt) {
-					s.Done = true
+					s.SetDone(true)
 				}
 			}
 		}
@@ -223,9 +228,9 @@ func (s *State) Report(j int, w graphalg.Weight) {
 // procChangeRoot - (11) procedure change-root
 func (s *State) procChangeRoot() {
 	if s.EdgeStates[s.bestEdge] == EdgeStateBranch {
-		s.Send(s.bestEdge, ChangeRootMessage())
+		s.SendGHS(s.bestEdge, ChangeRootMessage())
 	} else {
-		s.Send(s.bestEdge, ConnectMessage(s.Level))
+		s.SendGHS(s.bestEdge, ConnectMessage(s.Level))
 		s.EdgeStates[s.bestEdge] = EdgeStateBranch
 	}
 }

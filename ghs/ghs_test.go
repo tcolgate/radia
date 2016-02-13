@@ -22,150 +22,184 @@ import (
 	"os"
 	"sync"
 	"testing"
+
+	"github.com/tcolgate/vonq/graphalg"
 )
 
 func TestGHS1(t *testing.T) {
 	wg := sync.WaitGroup{}
+
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
 	wg.Add(2)
-	n1 := Node{
-		ID:       NodeID("n1"),
-		Logger:   log.New(os.Stdout, "node(n1)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{float64: 1, Lsn: "blah", Msn: "n1"},
+	n1 := graphalg.Node{
+		ID:     graphalg.NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1)", 0),
 	}
-	n2 := Node{
-		ID:       NodeID("n2"),
-		Logger:   log.New(os.Stdout, "node(n2)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{float64: 2, Lsn: "blab", Msn: "n4"},
+	n2 := graphalg.Node{
+		ID:     graphalg.NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2)", 0),
 	}
 
-	n1.Join(&n2, 1.0, MakeChanPair)
+	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
 
-	go n1.Run()
-	go n2.Run()
+	ghs1 := State{Node: &n1}
+	ghs2 := State{Node: &n2}
 
-	n1.WakeUp()
+	go n1.Run(&ghs1, wg.Done)
+	go n2.Run(&ghs2, wg.Done)
+
+	ghs1.WakeUp()
 
 	wg.Wait()
 }
 
 func TestGHS2(t *testing.T) {
 	wg := sync.WaitGroup{}
+
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
 	wg.Add(2)
-	n1 := Node{
-		ID:       NodeID("n1"),
-		Logger:   log.New(os.Stdout, "node(n1)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n1"},
+	n1 := graphalg.Node{
+		ID:     graphalg.NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1)", 0),
 	}
-	n2 := Node{
-		ID:       NodeID("n2"),
-		Logger:   log.New(os.Stdout, "node(n2)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n2"},
+	n2 := graphalg.Node{
+		ID:     graphalg.NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2)", 0),
 	}
-	n3 := Node{
-		ID:       NodeID("n3"),
-		Logger:   log.New(os.Stdout, "node(n3)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n3"},
+	n3 := graphalg.Node{
+		ID:     graphalg.NodeID("n3"),
+		Logger: log.New(os.Stdout, "node(n3)", 0),
 	}
 
-	n1.Join(&n2, 1.0, MakeChanPair)
-	n2.Join(&n3, 2.0, MakeChanPair)
+	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
+	n1.Join(&n3, 2.0, graphalg.MakeChanPair)
 
-	go n1.Run()
-	go n2.Run()
-	go n3.Run()
+	ghs1 := State{Node: &n1}
+	ghs2 := State{Node: &n2}
+	ghs3 := State{Node: &n3}
 
-	n1.WakeUp()
+	go n1.Run(&ghs1, wg.Done)
+	go n2.Run(&ghs2, wg.Done)
+	go n3.Run(&ghs3, wg.Done)
+
+	ghs1.WakeUp()
 
 	wg.Wait()
 }
 
 func TestGHS3(t *testing.T) {
 	wg := sync.WaitGroup{}
+
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
 	wg.Add(2)
-	n1 := Node{
-		ID:       NodeID("n1"),
-		Logger:   log.New(os.Stdout, "node(n1)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n1"},
+	n1 := graphalg.Node{
+		ID:     graphalg.NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1)", 0),
 	}
-	n2 := Node{
-		ID:       NodeID("n2"),
-		Logger:   log.New(os.Stdout, "node(n2)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n2"},
+	n2 := graphalg.Node{
+		ID:     graphalg.NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2)", 0),
 	}
-	n3 := Node{
-		ID:       NodeID("n3"),
-		Logger:   log.New(os.Stdout, "node(n3)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n3"},
+	n3 := graphalg.Node{
+		ID:     graphalg.NodeID("n3"),
+		Logger: log.New(os.Stdout, "node(n3)", 0),
 	}
 
-	n1.Join(&n2, 1.0, MakeChanPair)
-	n2.Join(&n3, 2.0, MakeChanPair)
-	n3.Join(&n1, 3.0, MakeChanPair)
+	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
+	n2.Join(&n3, 2.0, graphalg.MakeChanPair)
+	n3.Join(&n1, 3.0, graphalg.MakeChanPair)
 
-	go n1.Run()
-	go n2.Run()
-	go n3.Run()
+	ghs1 := State{Node: &n1}
+	ghs2 := State{Node: &n2}
+	ghs3 := State{Node: &n3}
 
-	n1.WakeUp()
+	go n1.Run(&ghs1, wg.Done)
+	go n2.Run(&ghs2, wg.Done)
+	go n3.Run(&ghs3, wg.Done)
+
+	ghs1.WakeUp()
 
 	wg.Wait()
 }
 
 func TestGHS4(t *testing.T) {
 	wg := sync.WaitGroup{}
+
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
 	wg.Add(2)
-	n1 := Node{
-		ID:       NodeID("n1"),
-		Logger:   log.New(os.Stdout, "node(n1)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n1"},
+	n1 := graphalg.Node{
+		ID:     graphalg.NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1)", 0),
 	}
-	n2 := Node{
-		ID:       NodeID("n2"),
-		Logger:   log.New(os.Stdout, "node(n2)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n2"},
+	n2 := graphalg.Node{
+		ID:     graphalg.NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2)", 0),
 	}
-	n3 := Node{
-		ID:       NodeID("n3"),
-		Logger:   log.New(os.Stdout, "node(n3)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n3"},
-	}
-	n4 := Node{
-		ID:       NodeID("n4"),
-		Logger:   log.New(os.Stdout, "node(n4)", 0),
-		OnDone:   wg.Done,
-		Fragment: FragmentID{Msn: "n4"},
+	n3 := graphalg.Node{
+		ID:     graphalg.NodeID("n3"),
+		Logger: log.New(os.Stdout, "node(n3)", 0),
 	}
 
-	n1.Join(&n2, 1.0, MakeChanPair)
-	n2.Join(&n3, 2.0, MakeChanPair)
-	n3.Join(&n1, 3.0, MakeChanPair)
-	n1.Join(&n4, 0.5, MakeChanPair)
+	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
+	n2.Join(&n3, 1.0, graphalg.MakeChanPair)
+	n3.Join(&n1, 1.0, graphalg.MakeChanPair)
 
-	go n1.Run()
-	go n2.Run()
-	go n3.Run()
-	go n4.Run()
+	ghs1 := State{Node: &n1}
+	ghs2 := State{Node: &n2}
+	ghs3 := State{Node: &n3}
 
-	n1.WakeUp()
+	go n1.Run(&ghs1, wg.Done)
+	go n2.Run(&ghs2, wg.Done)
+	go n3.Run(&ghs3, wg.Done)
+
+	ghs1.WakeUp()
+
+	wg.Wait()
+}
+
+func TestGHS5(t *testing.T) {
+	wg := sync.WaitGroup{}
+
+	// We'll only ever get halt messages from the core edge, so only
+	// two nodes halt
+	wg.Add(2)
+	n1 := graphalg.Node{
+		ID:     graphalg.NodeID("n1"),
+		Logger: log.New(os.Stdout, "node(n1)", 0),
+	}
+	n2 := graphalg.Node{
+		ID:     graphalg.NodeID("n2"),
+		Logger: log.New(os.Stdout, "node(n2)", 0),
+	}
+	n3 := graphalg.Node{
+		ID:     graphalg.NodeID("n3"),
+		Logger: log.New(os.Stdout, "node(n3)", 0),
+	}
+	n4 := graphalg.Node{
+		ID:     graphalg.NodeID("n4"),
+		Logger: log.New(os.Stdout, "node(n4)", 0),
+	}
+
+	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
+	n2.Join(&n3, 1.0, graphalg.MakeChanPair)
+	n3.Join(&n1, 1.0, graphalg.MakeChanPair)
+	n1.Join(&n4, 1.0, graphalg.MakeChanPair)
+
+	ghs1 := State{Node: &n1}
+	ghs2 := State{Node: &n2}
+	ghs3 := State{Node: &n3}
+	ghs4 := State{Node: &n4}
+
+	go n1.Run(&ghs1, wg.Done)
+	go n2.Run(&ghs2, wg.Done)
+	go n3.Run(&ghs3, wg.Done)
+	go n4.Run(&ghs4, wg.Done)
+
+	ghs1.WakeUp()
 
 	wg.Wait()
 }
