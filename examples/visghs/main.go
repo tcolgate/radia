@@ -51,9 +51,9 @@ func setupGHS() graphalg.Visualize {
 	}
 
 	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
-	n2.Join(&n3, 1.0, graphalg.MakeChanPair)
-	n3.Join(&n1, 1.0, graphalg.MakeChanPair)
-	n1.Join(&n4, 1.0, graphalg.MakeChanPair)
+	n2.Join(&n3, 2.0, graphalg.MakeChanPair)
+	n3.Join(&n1, 3.0, graphalg.MakeChanPair)
+	n1.Join(&n4, 4.0, graphalg.MakeChanPair)
 
 	/*
 		ghs1 := ghs.State{Node: &n1}

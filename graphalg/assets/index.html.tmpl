@@ -1,29 +1,111 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8" />
-		<title>Sample of websocket with golang</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-beta1/jquery.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js"></script>
-		<script>
-      $(function() {
-        var ws = new WebSocket("ws://localhost:12345/updates");
-        var $ul = $('#msg-list');
-        ws.onmessage = function(e) {
-          console.log("Got: " + event.data);
-          $('<li>').text(event.data).appendTo($ul);
-        };
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js"></script>
 
-        $('#runBtn').click(function(){
-          $.get( "/run", function( data ) {
-            console.log("Requested run");
-          });
+<style type="text/css">
+  .chart rect {
+    fill: steelblue;
+    stroke: white;
+  }
+
+  .link {
+    stroke: #000;
+    stroke-width: 1.5px;
+  }
+
+  .node {
+    fill: #000;
+    stroke: #fff;
+    stroke-width: 1.5px;
+  }
+
+  .node.a { fill: #1f77b4; }
+  .node.b { fill: #ff7f0e; }
+  .node.c { fill: #2ca02c; }
+</style>
+
+<body>
+  <script>
+      var ws = new WebSocket("ws://localhost:12345/updates");
+
+      var width = 960,
+          height = 500;
+
+      var color = d3.scale.category10();
+
+      var nodes = [],
+          links = [];
+
+      var force = d3.layout.force()
+          .nodes(nodes)
+          .links(links)
+          .charge(-400)
+          .linkDistance(linkDist)
+          .size([width, height])
+          .on("tick",tick);
+
+      var svg = d3.select("body").append("svg")
+          .attr("width", width)
+          .attr("height", height);
+
+      var node = svg.selectAll(".node"),
+          link = svg.selectAll(".link");
+
+      function linkDist(l,li){
+        return l.cost
+      }
+
+      function update(data) {
+        // Add any nodes
+        data.nodes.forEach(function(n){
+          nodes.push(n);
         });
-      });
-		</script>
-	</head>
-	<body>
-      <ul id="msg-list"></ul>
-			<input type="button" id="runBtn" value="Run"></input>
-	</body>
-</html>
+
+        links = []
+        data.links.forEach(function(l){
+          links.push({source: nodes[l.source],target: nodes[l.target], cost: l.cost});
+        });
+        force.links(links)
+
+        start();
+      };
+
+      function start() {
+        link = link.data(force.links(), function(d) { return d.source.id + "-" + d.target.id; });
+        link.enter().insert("line", ".node").attr("class", "link");
+        link.exit().remove();
+
+        node = node.data(force.nodes(), function(d) { return d.id;});
+        node.enter().append("circle").attr("class", function(d) { return "node " + d.id; }).attr("r", 8);
+        node.exit().remove();
+
+        force.start();
+      }
+
+      ws.onmessage = function(e) {
+        console.log("Got: " + event.data);
+        var data = JSON.parse(event.data);
+        update(data);
+      };
+
+      function tick() {
+        console.log("tick")
+        node.attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; })
+
+        link.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+      };
+
+      function run(){
+        d3.xhr("/run").get(function( data ) {
+          console.log("Requested run");
+        });
+      };
+  </script>
+  <div id="graph-area"></div>
+  <input type="button" id="runBtn" value="Run" onclick="run()"></input>
+</body>
+
+

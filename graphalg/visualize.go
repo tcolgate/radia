@@ -1,6 +1,7 @@
 package graphalg
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"text/template"
@@ -38,8 +39,58 @@ func (v Visualize) handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v Visualize) updateSocket(ws *websocket.Conn) {
-	for i := 0; i < 100; i++ {
-		fmt.Fprintf(ws, "From here  %v", i)
+	type jn struct {
+		Id string `json:"id"`
+	}
+	type jl struct {
+		Source int     `json:"source"`
+		Target int     `json:"target"`
+		Cost   float64 `json:"cost"`
+	}
+	type d struct {
+		Nodes []jn `json:"nodes"`
+		Links []jl `json:"links"`
+	}
+
+	jns := []jn{}
+	jls := []jl{}
+
+	nix := map[string]int{}
+
+	for i, n := range v.Nodes {
+		jns = append(jns, jn{string(n.ID)})
+		nix[string(n.ID)] = i
+	}
+
+	data := d{jns, jls}
+	b, _ := json.Marshal(data)
+
+	fmt.Fprintf(ws, string(b))
+
+	for {
+		jns := []jn{}
+		jls := []jl{}
+		type eIndex struct{ l, r string }
+		eix := map[eIndex]bool{}
+
+		for _, n := range v.Nodes {
+			for _, e := range n.Edges() {
+				ei := eIndex{e.Weight.LsnID, e.Weight.MsnID}
+				if _, ok := eix[ei]; !ok {
+					jls = append(jls, jl{
+						Source: nix[string(e.Weight.LsnID)],
+						Target: nix[string(e.Weight.MsnID)],
+						Cost:   e.Weight.Cost,
+					})
+					eix[ei] = true
+				}
+			}
+		}
+
+		data := d{jns, jls}
+		b, _ := json.Marshal(data)
+
+		fmt.Fprintf(ws, string(b))
 		<-v.update
 	}
 }
@@ -49,8 +100,9 @@ func (v Visualize) handleRun(w http.ResponseWriter, r *http.Request) {
 	v.update <- struct{}{}
 }
 
-func MakeVisualize([]*Node) Visualize {
+func MakeVisualize(ns []*Node) Visualize {
 	v := Visualize{}
+	v.Nodes = ns
 	v.update = make(chan struct{})
 	v.ServeMux = http.NewServeMux()
 	v.HandleFunc("/", v.handleRoot)
