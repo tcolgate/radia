@@ -76,7 +76,7 @@ func (v Visualize) updateSocket(ws *websocket.Conn) {
 		for _, n := range v.Nodes {
 			for _, e := range n.Edges() {
 				ei := eIndex{e.Weight.LsnID, e.Weight.MsnID}
-				if _, ok := eix[ei]; !ok {
+				if _, ok := eix[ei]; !ok && !e.Disabled {
 					jls = append(jls, jl{
 						Source: nix[string(e.Weight.LsnID)],
 						Target: nix[string(e.Weight.MsnID)],
@@ -97,12 +97,14 @@ func (v Visualize) updateSocket(ws *websocket.Conn) {
 
 func (v Visualize) handleRun(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+	v.OnRun()
 	v.update <- struct{}{}
 }
 
-func MakeVisualize(ns []*Node) Visualize {
+func MakeVisualize(ns []*Node, onRun func()) Visualize {
 	v := Visualize{}
 	v.Nodes = ns
+	v.OnRun = onRun
 	v.update = make(chan struct{})
 	v.ServeMux = http.NewServeMux()
 	v.HandleFunc("/", v.handleRoot)

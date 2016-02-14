@@ -23,7 +23,8 @@ import (
 )
 
 type Edge struct {
-	Weight Weight
+	Weight   Weight
+	Disabled bool
 
 	local  *Node
 	remote *Node
