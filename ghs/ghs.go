@@ -86,6 +86,10 @@ func (s *State) procWakeUp() {
 	s.EdgeStates = make([]EdgeState, len(s.Edges()))
 	s.Fragment = FragID{MsnID: string(s.ID)}
 
+	s.inBranch = NIL
+	s.testEdge = NIL
+	s.bestEdge = NIL
+
 	j := s.Edges().MinEdge()
 	s.EdgeStates[j] = EdgeStateBranch
 	s.Level = 0
@@ -165,7 +169,6 @@ func (s *State) Test(j int, level uint32, fragment FragID) {
 		} else {
 			if s.EdgeStates[j] == EdgeStateBasic {
 				s.EdgeStates[j] = EdgeStateRejected
-				s.Edges()[j].Disabled = true
 			}
 			if s.testEdge != j {
 				s.SendGHS(j, RejectMessage())
@@ -190,7 +193,6 @@ func (s *State) Accept(j int) {
 func (s *State) Reject(j int) {
 	if s.EdgeStates[j] == EdgeStateBasic {
 		s.EdgeStates[j] = EdgeStateRejected
-		s.Edges()[j].Disabled = true
 	}
 	s.procTest()
 }
@@ -220,7 +222,11 @@ func (s *State) Report(j int, w graphalg.Weight) {
 				s.procChangeRoot()
 			} else {
 				if w.Equal(s.bestWt) {
-					s.SetDone(true)
+					s.Println("Trying to halt")
+					// We deviate from the original algorithm here
+					// as originall only core nodes halt. We'll
+					// broadcast a halt to all nodes.
+					s.procHalt()
 				}
 			}
 		}
@@ -240,6 +246,29 @@ func (s *State) procChangeRoot() {
 // ChangeRoot - (12) Response to receipt of Change-root
 func (s *State) ChangeRoot() {
 	s.procChangeRoot()
+}
+
+// ProcHalt - Tell all nodes we have finished
+func (s *State) procHalt() {
+	for i := range s.EdgeStates {
+		s.Println("Trying halt on ", i, s.Edge(i), s.EdgeStates[i])
+		s.Println(".... ", s.inBranch, s.Edge(i), s.Fragment)
+		if i != s.inBranch && s.EdgeStates[i] == EdgeStateBranch &&
+			FragmentID(s.Edge(i).Weight) != s.Fragment {
+			s.Println("Sending halt to ", i, s.Edge(i))
+			s.Println("halt to ", i, s.Fragment, s.bestWt, s.bestEdge)
+			s.SendGHS(i, HaltMessage())
+		}
+	}
+	s.SetDone(true)
+	s.Println("Quit")
+	return
+}
+
+// Halt - Response to receipt of Halt
+func (s *State) Halt(j int) {
+	s.inBranch = j
+	s.procHalt()
 }
 
 //func (s *State) String() string {

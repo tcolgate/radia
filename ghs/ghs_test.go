@@ -29,8 +29,6 @@ import (
 func TestGHS1(t *testing.T) {
 	wg := sync.WaitGroup{}
 
-	// We'll only ever get halt messages from the core edge, so only
-	// two nodes halt
 	wg.Add(2)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
@@ -59,7 +57,7 @@ func TestGHS2(t *testing.T) {
 
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
-	wg.Add(2)
+	wg.Add(3)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
 		Logger: log.New(os.Stdout, "node(n1)", 0),
@@ -94,7 +92,7 @@ func TestGHS3(t *testing.T) {
 
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
-	wg.Add(2)
+	wg.Add(3)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
 		Logger: log.New(os.Stdout, "node(n1)", 0),
@@ -130,7 +128,7 @@ func TestGHS4(t *testing.T) {
 
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
-	wg.Add(2)
+	wg.Add(3)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
 		Logger: log.New(os.Stdout, "node(n1)", 0),
@@ -166,7 +164,7 @@ func TestGHS5(t *testing.T) {
 
 	// We'll only ever get halt messages from the core edge, so only
 	// two nodes halt
-	wg.Add(2)
+	wg.Add(4)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
 		Logger: log.New(os.Stdout, "node(n1)", 0),

@@ -111,6 +111,15 @@ func ChangeRootMessage() Message {
 	}
 }
 
+func HaltMessage() Message {
+	return Message{
+		GHSMessage: &GHSMessage{
+			Type: GHSMessage_HALT,
+			Halt: &GHSMessage_Halt{},
+		},
+	}
+}
+
 func (s *State) QueueGHS(j int, m Message) {
 	b, err := proto.Marshal(m.GHSMessage)
 	if err != nil {
@@ -120,6 +129,7 @@ func (s *State) QueueGHS(j int, m Message) {
 }
 
 func (s *State) SendGHS(j int, m Message) {
+	s.Printf(" --> %+v %+v\n", s.Edge(j), m.GHSMessage)
 	b, err := proto.Marshal(m.GHSMessage)
 	if err != nil {
 		log.Println(err)
@@ -131,6 +141,7 @@ func (s *State) SendGHS(j int, m Message) {
 func (s *State) Dispatch(j int, b []byte) {
 	m := GHSMessage{}
 	proto.Unmarshal(b, &m)
+	s.Printf(" <-- %+v %+v\n", s.Edge(j), m)
 
 	switch m.Type {
 	case GHSMessage_CONNECT:
@@ -156,6 +167,8 @@ func (s *State) Dispatch(j int, b []byte) {
 		s.Report(j, *w)
 	case GHSMessage_CHANGEROOT:
 		s.ChangeRoot()
+	case GHSMessage_HALT:
+		s.Halt(j)
 	default:
 		log.Println("unknown message type m.Type")
 	}

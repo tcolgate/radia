@@ -53,6 +53,9 @@ message GHSMessage {
   message ChangeRoot {
   }
 
+  message Halt {
+  }
+
   enum Type {
     CONNECT    = 0;
     INITIATE   = 1;
@@ -61,6 +64,7 @@ message GHSMessage {
     REJECT     = 4;
     REPORT     = 5;
     CHANGEROOT = 6;
+    HALT = 7;
   };
 
   Type type = 1;
@@ -73,5 +77,6 @@ message GHSMessage {
     Reject reject = 6;
     Report report = 7;
     ChangeRoot changeroot = 8;
+    Halt halt = 9;
   };
 }

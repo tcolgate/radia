@@ -29,6 +29,7 @@ const (
 	GHSMessage_REJECT     GHSMessage_Type = 4
 	GHSMessage_REPORT     GHSMessage_Type = 5
 	GHSMessage_CHANGEROOT GHSMessage_Type = 6
+	GHSMessage_HALT       GHSMessage_Type = 7
 )
 
 var GHSMessage_Type_name = map[int32]string{
@@ -39,6 +40,7 @@ var GHSMessage_Type_name = map[int32]string{
 	4: "REJECT",
 	5: "REPORT",
 	6: "CHANGEROOT",
+	7: "HALT",
 }
 var GHSMessage_Type_value = map[string]int32{
 	"CONNECT":    0,
@@ -48,6 +50,7 @@ var GHSMessage_Type_value = map[string]int32{
 	"REJECT":     4,
 	"REPORT":     5,
 	"CHANGEROOT": 6,
+	"HALT":       7,
 }
 
 func (x GHSMessage_Type) String() string {
@@ -86,6 +89,7 @@ type GHSMessage struct {
 	Reject     *GHSMessage_Reject     `protobuf:"bytes,6,opt,name=reject" json:"reject,omitempty"`
 	Report     *GHSMessage_Report     `protobuf:"bytes,7,opt,name=report" json:"report,omitempty"`
 	Changeroot *GHSMessage_ChangeRoot `protobuf:"bytes,8,opt,name=changeroot" json:"changeroot,omitempty"`
+	Halt       *GHSMessage_Halt       `protobuf:"bytes,9,opt,name=halt" json:"halt,omitempty"`
 }
 
 func (m *GHSMessage) Reset()         { *m = GHSMessage{} }
@@ -137,6 +141,13 @@ func (m *GHSMessage) GetReport() *GHSMessage_Report {
 func (m *GHSMessage) GetChangeroot() *GHSMessage_ChangeRoot {
 	if m != nil {
 		return m.Changeroot
+	}
+	return nil
+}
+
+func (m *GHSMessage) GetHalt() *GHSMessage_Halt {
+	if m != nil {
+		return m.Halt
 	}
 	return nil
 }
@@ -217,6 +228,13 @@ type GHSMessage_ChangeRoot struct {
 func (m *GHSMessage_ChangeRoot) Reset()         { *m = GHSMessage_ChangeRoot{} }
 func (m *GHSMessage_ChangeRoot) String() string { return proto.CompactTextString(m) }
 func (*GHSMessage_ChangeRoot) ProtoMessage()    {}
+
+type GHSMessage_Halt struct {
+}
+
+func (m *GHSMessage_Halt) Reset()         { *m = GHSMessage_Halt{} }
+func (m *GHSMessage_Halt) String() string { return proto.CompactTextString(m) }
+func (*GHSMessage_Halt) ProtoMessage()    {}
 
 func init() {
 	proto.RegisterEnum("ghs.GHSMessage_Type", GHSMessage_Type_name, GHSMessage_Type_value)
