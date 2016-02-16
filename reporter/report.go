@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with vonq.  If not, see <http://www.gnu.org/licenses/>.
 
+// Package reporter provides implementations and definitions for
+// services for probes to pass data to.
 package reporter
 
 import "log"

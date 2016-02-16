@@ -17,10 +17,7 @@
 
 package graphalg
 
-import (
-	"log"
-	"sort"
-)
+import "sort"
 
 type NodeID string
 
@@ -32,7 +29,7 @@ type Node struct {
 
 	msgQueue []Message
 
-	*log.Logger
+	tracer.TracerService
 }
 
 func (n *Node) Edges() Edges {

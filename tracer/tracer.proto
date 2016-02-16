@@ -23,6 +23,31 @@ service TraceService {
   rpc Log (LogRequest) returns (LogResponse);
   rpc NodeUpdate (NodeUpdateRequest) returns (NodeUpdateResponse);
   rpc EdgeUpdate (EdgeUpdateRequest) returns (EdgeUpdateResponse);
-  rpc MessageUpdate (MessageUpdateRequest) returns (MessageUpdateLogResponse);
+  rpc MessageUpdate (MessageUpdateRequest) returns (MessageUpdateResponse);
 }
 
+
+message LogRequest {
+  string Message = 1;
+}
+
+message LogResponse {
+}
+
+message NodeUpdateRequest{
+}
+
+message NodeUpdateResponse{
+}
+
+message EdgeUpdateRequest{
+}
+
+message EdgeUpdateResponse{
+}
+
+message MessageUpdateRequest{
+}
+
+message MessageUpdateResponse{
+}
