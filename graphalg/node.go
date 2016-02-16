@@ -18,6 +18,7 @@
 package graphalg
 
 import "sort"
+import "github.com/tcolgate/vonq/tracer"
 
 type NodeID string
 
