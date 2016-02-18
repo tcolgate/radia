@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-package tracer;
+package proto;
 
 service TraceService {
   rpc Log (LogRequest) returns (LogResponse);

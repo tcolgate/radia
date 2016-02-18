@@ -3,7 +3,7 @@
 // DO NOT EDIT!
 
 /*
-Package tracer is a generated protocol buffer package.
+Package proto is a generated protocol buffer package.
 
 It is generated from these files:
 	tracer.proto
@@ -18,9 +18,9 @@ It has these top-level messages:
 	MessageUpdateRequest
 	MessageUpdateResponse
 */
-package tracer
+package proto
 
-import proto "github.com/golang/protobuf/proto"
+import proto1 "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 
@@ -30,20 +30,20 @@ import (
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ = proto.Marshal
+var _ = proto1.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
-const _ = proto.ProtoPackageIsVersion1
+const _ = proto1.ProtoPackageIsVersion1
 
 type LogRequest struct {
 	Message string `protobuf:"bytes,1,opt,name=Message" json:"Message,omitempty"`
 }
 
 func (m *LogRequest) Reset()                    { *m = LogRequest{} }
-func (m *LogRequest) String() string            { return proto.CompactTextString(m) }
+func (m *LogRequest) String() string            { return proto1.CompactTextString(m) }
 func (*LogRequest) ProtoMessage()               {}
 func (*LogRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
@@ -51,7 +51,7 @@ type LogResponse struct {
 }
 
 func (m *LogResponse) Reset()                    { *m = LogResponse{} }
-func (m *LogResponse) String() string            { return proto.CompactTextString(m) }
+func (m *LogResponse) String() string            { return proto1.CompactTextString(m) }
 func (*LogResponse) ProtoMessage()               {}
 func (*LogResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
@@ -59,7 +59,7 @@ type NodeUpdateRequest struct {
 }
 
 func (m *NodeUpdateRequest) Reset()                    { *m = NodeUpdateRequest{} }
-func (m *NodeUpdateRequest) String() string            { return proto.CompactTextString(m) }
+func (m *NodeUpdateRequest) String() string            { return proto1.CompactTextString(m) }
 func (*NodeUpdateRequest) ProtoMessage()               {}
 func (*NodeUpdateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
@@ -67,7 +67,7 @@ type NodeUpdateResponse struct {
 }
 
 func (m *NodeUpdateResponse) Reset()                    { *m = NodeUpdateResponse{} }
-func (m *NodeUpdateResponse) String() string            { return proto.CompactTextString(m) }
+func (m *NodeUpdateResponse) String() string            { return proto1.CompactTextString(m) }
 func (*NodeUpdateResponse) ProtoMessage()               {}
 func (*NodeUpdateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
@@ -75,7 +75,7 @@ type EdgeUpdateRequest struct {
 }
 
 func (m *EdgeUpdateRequest) Reset()                    { *m = EdgeUpdateRequest{} }
-func (m *EdgeUpdateRequest) String() string            { return proto.CompactTextString(m) }
+func (m *EdgeUpdateRequest) String() string            { return proto1.CompactTextString(m) }
 func (*EdgeUpdateRequest) ProtoMessage()               {}
 func (*EdgeUpdateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
@@ -83,7 +83,7 @@ type EdgeUpdateResponse struct {
 }
 
 func (m *EdgeUpdateResponse) Reset()                    { *m = EdgeUpdateResponse{} }
-func (m *EdgeUpdateResponse) String() string            { return proto.CompactTextString(m) }
+func (m *EdgeUpdateResponse) String() string            { return proto1.CompactTextString(m) }
 func (*EdgeUpdateResponse) ProtoMessage()               {}
 func (*EdgeUpdateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
@@ -91,7 +91,7 @@ type MessageUpdateRequest struct {
 }
 
 func (m *MessageUpdateRequest) Reset()                    { *m = MessageUpdateRequest{} }
-func (m *MessageUpdateRequest) String() string            { return proto.CompactTextString(m) }
+func (m *MessageUpdateRequest) String() string            { return proto1.CompactTextString(m) }
 func (*MessageUpdateRequest) ProtoMessage()               {}
 func (*MessageUpdateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
@@ -99,19 +99,19 @@ type MessageUpdateResponse struct {
 }
 
 func (m *MessageUpdateResponse) Reset()                    { *m = MessageUpdateResponse{} }
-func (m *MessageUpdateResponse) String() string            { return proto.CompactTextString(m) }
+func (m *MessageUpdateResponse) String() string            { return proto1.CompactTextString(m) }
 func (*MessageUpdateResponse) ProtoMessage()               {}
 func (*MessageUpdateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func init() {
-	proto.RegisterType((*LogRequest)(nil), "tracer.LogRequest")
-	proto.RegisterType((*LogResponse)(nil), "tracer.LogResponse")
-	proto.RegisterType((*NodeUpdateRequest)(nil), "tracer.NodeUpdateRequest")
-	proto.RegisterType((*NodeUpdateResponse)(nil), "tracer.NodeUpdateResponse")
-	proto.RegisterType((*EdgeUpdateRequest)(nil), "tracer.EdgeUpdateRequest")
-	proto.RegisterType((*EdgeUpdateResponse)(nil), "tracer.EdgeUpdateResponse")
-	proto.RegisterType((*MessageUpdateRequest)(nil), "tracer.MessageUpdateRequest")
-	proto.RegisterType((*MessageUpdateResponse)(nil), "tracer.MessageUpdateResponse")
+	proto1.RegisterType((*LogRequest)(nil), "proto.LogRequest")
+	proto1.RegisterType((*LogResponse)(nil), "proto.LogResponse")
+	proto1.RegisterType((*NodeUpdateRequest)(nil), "proto.NodeUpdateRequest")
+	proto1.RegisterType((*NodeUpdateResponse)(nil), "proto.NodeUpdateResponse")
+	proto1.RegisterType((*EdgeUpdateRequest)(nil), "proto.EdgeUpdateRequest")
+	proto1.RegisterType((*EdgeUpdateResponse)(nil), "proto.EdgeUpdateResponse")
+	proto1.RegisterType((*MessageUpdateRequest)(nil), "proto.MessageUpdateRequest")
+	proto1.RegisterType((*MessageUpdateResponse)(nil), "proto.MessageUpdateResponse")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -137,7 +137,7 @@ func NewTraceServiceClient(cc *grpc.ClientConn) TraceServiceClient {
 
 func (c *traceServiceClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error) {
 	out := new(LogResponse)
-	err := grpc.Invoke(ctx, "/tracer.TraceService/Log", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/proto.TraceService/Log", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (c *traceServiceClient) Log(ctx context.Context, in *LogRequest, opts ...gr
 
 func (c *traceServiceClient) NodeUpdate(ctx context.Context, in *NodeUpdateRequest, opts ...grpc.CallOption) (*NodeUpdateResponse, error) {
 	out := new(NodeUpdateResponse)
-	err := grpc.Invoke(ctx, "/tracer.TraceService/NodeUpdate", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/proto.TraceService/NodeUpdate", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (c *traceServiceClient) NodeUpdate(ctx context.Context, in *NodeUpdateReque
 
 func (c *traceServiceClient) EdgeUpdate(ctx context.Context, in *EdgeUpdateRequest, opts ...grpc.CallOption) (*EdgeUpdateResponse, error) {
 	out := new(EdgeUpdateResponse)
-	err := grpc.Invoke(ctx, "/tracer.TraceService/EdgeUpdate", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/proto.TraceService/EdgeUpdate", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (c *traceServiceClient) EdgeUpdate(ctx context.Context, in *EdgeUpdateReque
 
 func (c *traceServiceClient) MessageUpdate(ctx context.Context, in *MessageUpdateRequest, opts ...grpc.CallOption) (*MessageUpdateResponse, error) {
 	out := new(MessageUpdateResponse)
-	err := grpc.Invoke(ctx, "/tracer.TraceService/MessageUpdate", in, out, c.cc, opts...)
+	err := grpc.Invoke(ctx, "/proto.TraceService/MessageUpdate", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func _TraceService_MessageUpdate_Handler(srv interface{}, ctx context.Context, d
 }
 
 var _TraceService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "tracer.TraceService",
+	ServiceName: "proto.TraceService",
 	HandlerType: (*TraceServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -257,19 +257,19 @@ var _TraceService_serviceDesc = grpc.ServiceDesc{
 }
 
 var fileDescriptor0 = []byte{
-	// 222 bytes of a gzipped FileDescriptorProto
+	// 221 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xe2, 0x29, 0x29, 0x4a, 0x4c,
-	0x4e, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x83, 0xf0, 0x94, 0x64, 0xb9, 0xb8,
-	0x7c, 0xf2, 0xd3, 0x83, 0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x84, 0xf8, 0xb9, 0xd8, 0x7d, 0x53,
-	0x8b, 0x8b, 0x13, 0xd3, 0x53, 0x25, 0x18, 0x15, 0x18, 0x35, 0x38, 0x95, 0x78, 0xb9, 0xb8, 0xc1,
-	0xd2, 0xc5, 0x05, 0xf9, 0x79, 0xc5, 0xa9, 0x4a, 0xc2, 0x5c, 0x82, 0x7e, 0xf9, 0x29, 0xa9, 0xa1,
-	0x05, 0x29, 0x89, 0x25, 0xa9, 0x50, 0x4d, 0x4a, 0x22, 0x5c, 0x42, 0xc8, 0x82, 0x08, 0xa5, 0xae,
-	0x29, 0xe9, 0x98, 0x4a, 0x91, 0x05, 0xa1, 0x4a, 0xc5, 0xb8, 0x44, 0xa0, 0xb6, 0xa2, 0xaa, 0x16,
-	0xe7, 0x12, 0x45, 0x13, 0x87, 0x68, 0x30, 0x9a, 0xc6, 0xc4, 0xc5, 0x13, 0x02, 0x72, 0x7f, 0x70,
-	0x6a, 0x51, 0x59, 0x66, 0x72, 0xaa, 0x90, 0x1e, 0x17, 0x33, 0xd0, 0x99, 0x42, 0x42, 0x7a, 0x50,
-	0x3f, 0x22, 0xbc, 0x24, 0x25, 0x8c, 0x22, 0x06, 0x31, 0x40, 0xc8, 0x99, 0x8b, 0x0b, 0xe1, 0x64,
-	0x21, 0x49, 0x98, 0x12, 0x0c, 0xbf, 0x49, 0x49, 0x61, 0x93, 0x42, 0x18, 0x82, 0xf0, 0x0c, 0xc2,
-	0x10, 0x0c, 0x5f, 0x23, 0x0c, 0xc1, 0xf4, 0xbb, 0x90, 0x0f, 0x17, 0x2f, 0x8a, 0x1f, 0x85, 0x64,
-	0x60, 0x8a, 0xb1, 0x05, 0x89, 0x94, 0x2c, 0x0e, 0x59, 0x88, 0x69, 0x49, 0x6c, 0xe0, 0xc8, 0x35,
-	0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x6b, 0x7e, 0x48, 0xf4, 0xec, 0x01, 0x00, 0x00,
+	0x4e, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x05, 0x53, 0x4a, 0xb2, 0x5c, 0x5c,
+	0x3e, 0xf9, 0xe9, 0x41, 0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0xfc, 0x5c, 0xec, 0xbe, 0xa9,
+	0xc5, 0xc5, 0x89, 0xe9, 0xa9, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x4a, 0xbc, 0x5c, 0xdc, 0x60,
+	0xe9, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0x25, 0x61, 0x2e, 0x41, 0xbf, 0xfc, 0x94, 0xd4, 0xd0,
+	0x82, 0x94, 0xc4, 0x92, 0x54, 0xa8, 0x26, 0x25, 0x11, 0x2e, 0x21, 0x64, 0x41, 0x84, 0x52, 0xd7,
+	0x94, 0x74, 0x4c, 0xa5, 0xc8, 0x82, 0x50, 0xa5, 0x62, 0x5c, 0x22, 0x50, 0x5b, 0x51, 0x55, 0x8b,
+	0x73, 0x89, 0xa2, 0x89, 0x43, 0x34, 0x18, 0xf5, 0x31, 0x71, 0xf1, 0x84, 0x80, 0x3c, 0x13, 0x9c,
+	0x5a, 0x54, 0x96, 0x99, 0x9c, 0x2a, 0xa4, 0xc3, 0xc5, 0x0c, 0x74, 0xa6, 0x90, 0x20, 0xc4, 0x6f,
+	0x7a, 0x08, 0x1f, 0x49, 0x09, 0x21, 0x0b, 0x41, 0xb4, 0x0b, 0x39, 0x72, 0x71, 0x21, 0x1c, 0x2c,
+	0x24, 0x01, 0x55, 0x81, 0xe1, 0x31, 0x29, 0x49, 0x2c, 0x32, 0x08, 0x23, 0x10, 0x1e, 0x81, 0x1b,
+	0x81, 0xe1, 0x61, 0xb8, 0x11, 0x98, 0xbe, 0x16, 0xf2, 0xe2, 0xe2, 0x45, 0xf1, 0x9d, 0x90, 0x34,
+	0x54, 0x2d, 0xb6, 0xb0, 0x90, 0x92, 0xc1, 0x2e, 0x09, 0x31, 0x2b, 0x89, 0x0d, 0x2c, 0x69, 0x0c,
+	0x08, 0x00, 0x00, 0xff, 0xff, 0x5f, 0x23, 0xab, 0xd5, 0xe3, 0x01, 0x00, 0x00,
 }

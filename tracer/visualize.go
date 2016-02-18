@@ -1,4 +1,4 @@
-package graphalg
+package tracer
 
 import (
 	"encoding/json"
@@ -22,7 +22,7 @@ var tmpl *template.Template
 
 type Visualize struct {
 	*http.ServeMux
-	Nodes []*Node
+	//Nodes []*graphalg.Node
 	OnRun func()
 
 	update chan struct{}
