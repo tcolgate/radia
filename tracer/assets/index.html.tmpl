@@ -82,9 +82,14 @@
       }
 
       ws.onmessage = function(e) {
-        console.log("Got: " + event.data);
-        var data = JSON.parse(event.data);
-        update(data);
+        console.log("Got: " + e);
+        console.log("Got: " + e.data);
+        var data = JSON.parse(e.data);
+        if(data.hasOwnProperty("Log")){
+          console.log("Log: " + data.Log);
+        }
+
+        //update(data);
       };
 
       function tick() {

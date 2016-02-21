@@ -1,7 +1,10 @@
 package tracer
 
 import (
+	"encoding/json"
+	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"golang.org/x/net/websocket"
@@ -18,9 +21,14 @@ func init() {
 
 var tmpl *template.Template
 
+type jsonMsg struct {
+	Log string
+}
+
 type httpDisplay struct {
 	OnRun  func()
 	update chan struct{}
+	msgs   chan jsonMsg
 }
 
 func (h *httpDisplay) Log(s string) {
@@ -58,6 +66,17 @@ func (v httpDisplay) updateSocket(ws *websocket.Conn) {
 		Nodes []jn `json:"nodes"`
 		Links []jl `json:"links"`
 	}
+
+	for {
+		select {
+		case m := <-v.msgs:
+			log.Println(m)
+			b, _ := json.Marshal(m)
+			log.Println(b)
+			fmt.Fprintf(ws, string(b))
+		}
+	}
+
 	/*
 
 		jns := []jn{}
@@ -114,6 +133,7 @@ func NewHTTPDisplay(mux *http.ServeMux, onRun func()) *Tracer {
 	v := httpDisplay{}
 	v.OnRun = onRun
 	v.update = make(chan struct{})
+	v.msgs = make(chan jsonMsg)
 
 	mux.HandleFunc("/", v.handleRoot)
 	mux.Handle("/updates", websocket.Handler(v.updateSocket))

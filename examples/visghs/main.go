@@ -27,25 +27,26 @@ import (
 	"github.com/tcolgate/vonq/tracer"
 )
 
-type thing struct {
-	ss []*ghs.State
-	wg *sync.WaitGroup
+type state struct {
+	ghs []*ghs.State
+	wg  *sync.WaitGroup
 }
 
-func (s *thing) OnRun() {
-	for _, s := range s.ss {
+func (s *state) OnRun() {
+	log.Println("running")
 
-		n.Run(&ghs1, s.wg.Done)
+	for _, g := range s.ghs {
+		go graphalg.Run(g, s.wg.Done)
 	}
 
-	s.ss[0].WakeUp()
+	s.ghs[0].WakeUp()
 	s.wg.Wait()
 
 	log.Println("finished")
 }
 
 func setupGHS(mux *http.ServeMux) {
-	s := thing{}
+	s := state{}
 
 	t := tracer.NewHTTPDisplay(mux, s.OnRun)
 
@@ -85,23 +86,13 @@ func setupGHS(mux *http.ServeMux) {
 	n5.Join(&n1, 2.6, graphalg.MakeChanPair)
 	n3.Join(&n1, 1.7, graphalg.MakeChanPair)
 
-	ghs1 := ghs.State{Node: &n1}
-	ghs2 := ghs.State{Node: &n2}
-	ghs3 := ghs.State{Node: &n3}
-	ghs4 := ghs.State{Node: &n4}
-	ghs5 := ghs.State{Node: &n5}
-	ghs6 := ghs.State{Node: &n6}
-
-	onRun := func() {
-	}
-
-	s.ss = []*ghs.State{
-		&ghs1,
-		&ghs2,
-		&ghs3,
-		&ghs4,
-		&ghs5,
-		&ghs6,
+	s.ghs = []*ghs.State{
+		&ghs.State{Node: &n1},
+		&ghs.State{Node: &n2},
+		&ghs.State{Node: &n3},
+		&ghs.State{Node: &n4},
+		&ghs.State{Node: &n5},
+		&ghs.State{Node: &n6},
 	}
 }
 
