@@ -19,17 +19,22 @@ package main
 
 import (
 	"encoding/json"
-	"io"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 
 	"github.com/tcolgate/vonq/ghs"
 	"github.com/tcolgate/vonq/graphalg"
+	"github.com/tcolgate/vonq/tracer"
 )
 
-func setupGHS() graphalg.Visualize {
+type thing struct{}
+
+type (*thing)OnRun(){
+}
+
+func setupGHS() *http.ServeMux {
+	t := tracer.NewHTTPDisplay(nil)
 	wg := sync.WaitGroup{}
 
 	// We'll only ever get halt messages from the core edge, so only
@@ -37,27 +42,27 @@ func setupGHS() graphalg.Visualize {
 	wg.Add(2)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
-		Logger: log.New(os.Stdout, "node(n1)", 0),
+		Tracer: t,
 	}
 	n2 := graphalg.Node{
 		ID:     graphalg.NodeID("n2"),
-		Logger: log.New(os.Stdout, "node(n2)", 0),
+		Tracer: t,
 	}
 	n3 := graphalg.Node{
 		ID:     graphalg.NodeID("n3"),
-		Logger: log.New(os.Stdout, "node(n3)", 0),
+		Tracer: t,
 	}
 	n4 := graphalg.Node{
 		ID:     graphalg.NodeID("n4"),
-		Logger: log.New(os.Stdout, "node(n4)", 0),
+		Tracer: t,
 	}
 	n5 := graphalg.Node{
 		ID:     graphalg.NodeID("n5"),
-		Logger: log.New(os.Stdout, "node(n5)", 0),
+		Tracer: t,
 	}
 	n6 := graphalg.Node{
 		ID:     graphalg.NodeID("n6"),
-		Logger: log.New(os.Stdout, "node(n6)", 0),
+		Tracer: t,
 	}
 
 	n1.Join(&n2, 1.1, graphalg.MakeChanPair)
@@ -101,12 +106,7 @@ func setupGHS() graphalg.Visualize {
 		&n6,
 	}
 
-	return graphalg.MakeVisualize(nodes, onRun)
-}
-
-// hello world, the web server
-func HelloServer(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "hello, world!\n")
+	return t
 }
 
 func main() {

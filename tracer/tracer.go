@@ -4,6 +4,7 @@ import "os"
 
 var DefaultTracer *Tracer
 
+//go:generate protoc -I $GOPATH/src:. --js_out=assets/ internal/proto/tracer.proto
 type traceDisplay interface {
 	Log(s string)
 	NodeUpdate()
