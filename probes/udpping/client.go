@@ -23,21 +23,20 @@ import (
 	"os"
 	"time"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	pb "github.com/tcolgate/vonq/probes/udpping/proto"
 	"github.com/tcolgate/vonq/reporter"
 )
 
 type client struct {
-	addr net.Addr
+	addr net.UDPAddr
 	*udpPingProbe
 }
 
 func (cl *client) sendPing(c *net.UDPConn, count uint32) error {
 	thing := pb.PingRequest{}
-	tns := uint64(time.Now().UnixNano())
-	thing.Time = &tns
-	thing.Count = &count
+	thing.Time = uint64(time.Now().UnixNano())
+	thing.Count = count
 	bs, err := proto.Marshal(&thing)
 	if err != nil {
 		panic(err)
@@ -95,9 +94,9 @@ func (c *client) getReplies(so *net.UDPConn) {
 }
 
 func (c *client) processReply(r *pb.PingReply, timeIn uint64, sa *net.UDPAddr) {
-	t1 := time.Unix(0, int64(*r.TimeSent))
-	t2 := time.Unix(0, int64(*r.TimeIn))
-	t3 := time.Unix(0, int64(*r.TimeOut))
+	t1 := time.Unix(0, int64(r.TimeSent))
+	t2 := time.Unix(0, int64(r.TimeIn))
+	t3 := time.Unix(0, int64(r.TimeOut))
 	t4 := time.Unix(0, int64(timeIn))
 
 	dout := t2.Sub(t1)

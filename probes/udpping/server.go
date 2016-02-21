@@ -23,7 +23,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 
 	pb "github.com/tcolgate/vonq/probes/udpping/proto"
 )
@@ -67,9 +67,9 @@ func (s *server) processRequest(so *net.UDPConn, sa *net.UDPAddr, r *pb.PingRequ
 
 	thing := pb.PingReply{}
 	thing.TimeSent = r.Time
-	thing.TimeIn = &timeIn
+	thing.TimeIn = timeIn
 	thing.Count = r.Count
-	thing.TimeOut = &tns
+	thing.TimeOut = tns
 
 	bs, err := proto.Marshal(&thing)
 	if err != nil {
