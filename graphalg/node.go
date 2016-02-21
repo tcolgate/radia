@@ -87,6 +87,14 @@ func (n *Node) Queue(e int, d []byte) {
 	n.msgQueue = append(n.msgQueue, Message{e, d})
 }
 
+func (n *Node) Queued() []Message {
+	return n.msgQueue
+}
+
+func (n *Node) ClearQueue() {
+	n.msgQueue = []Message{}
+}
+
 func (n *Node) Log(s string) {
 	msg := fmt.Sprintf("node(%v): %s", n.ID, s)
 	n.Tracer.Log(msg)

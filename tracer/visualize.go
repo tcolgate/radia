@@ -21,8 +21,6 @@ var tmpl *template.Template
 type httpDisplay struct {
 	OnRun  func()
 	update chan struct{}
-
-	*http.ServeMux
 }
 
 func (h *httpDisplay) Log(s string) {
@@ -65,44 +63,44 @@ func (v httpDisplay) updateSocket(ws *websocket.Conn) {
 		jns := []jn{}
 		jls := []jl{}
 
-		nix := map[string]int{}
+			nix := map[string]int{}
 
-		//	for i, n := range v.Nodes {
-		//		jns = append(jns, jn{string(n.ID)})
-		//		nix[string(n.ID)] = i
-		//	}
-
-		data := d{jns, jls}
-		b, _ := json.Marshal(data)
-
-		fmt.Fprintf(ws, string(b))
-
-		for {
-			jns := []jn{}
-			jls := []jl{}
-			type eIndex struct{ l, r string }
-				eix := map[eIndex]bool{}
-
-					for _, n := range v.Nodes {
-						for _, e := range n.Edges() {
-							ei := eIndex{e.Weight.LsnID, e.Weight.MsnID}
-							if _, ok := eix[ei]; !ok && !e.Disabled {
-								jls = append(jls, jl{
-									Source: nix[string(e.Weight.LsnID)],
-									Target: nix[string(e.Weight.MsnID)],
-									Cost:   e.Weight.Cost,
-								})
-								eix[ei] = true
-							}
-						}
-					}
+			//	for i, n := range v.Nodes {
+			//		jns = append(jns, jn{string(n.ID)})
+			//		nix[string(n.ID)] = i
+			//	}
 
 			data := d{jns, jls}
 			b, _ := json.Marshal(data)
 
 			fmt.Fprintf(ws, string(b))
-			<-v.update
-		}
+
+			for {
+				jns := []jn{}
+				jls := []jl{}
+				type eIndex struct{ l, r string }
+					eix := map[eIndex]bool{}
+
+						for _, n := range v.Nodes {
+							for _, e := range n.Edges() {
+								ei := eIndex{e.Weight.LsnID, e.Weight.MsnID}
+								if _, ok := eix[ei]; !ok && !e.Disabled {
+									jls = append(jls, jl{
+										Source: nix[string(e.Weight.LsnID)],
+										Target: nix[string(e.Weight.MsnID)],
+										Cost:   e.Weight.Cost,
+									})
+									eix[ei] = true
+								}
+							}
+						}
+
+				data := d{jns, jls}
+				b, _ := json.Marshal(data)
+
+				fmt.Fprintf(ws, string(b))
+				<-v.update
+			}
 	*/
 }
 
@@ -112,14 +110,14 @@ func (v httpDisplay) handleRun(w http.ResponseWriter, r *http.Request) {
 	v.update <- struct{}{}
 }
 
-func NewHTTPDisplay(onRun func()) *Tracer {
+func NewHTTPDisplay(mux *http.ServeMux, onRun func()) *Tracer {
 	v := httpDisplay{}
 	v.OnRun = onRun
 	v.update = make(chan struct{})
-	v.ServeMux = http.NewServeMux()
-	v.HandleFunc("/", v.handleRoot)
-	v.Handle("/updates", websocket.Handler(v.updateSocket))
-	v.HandleFunc("/run", v.handleRun)
+
+	mux.HandleFunc("/", v.handleRoot)
+	mux.Handle("/updates", websocket.Handler(v.updateSocket))
+	mux.HandleFunc("/run", v.handleRun)
 
 	return &Tracer{&v}
 }

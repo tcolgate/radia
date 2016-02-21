@@ -28,6 +28,9 @@ type Queuer interface {
 
 type Dispatcher interface {
 	Dispatch(edge int, data []byte)
+	Edges() Edges
+	Queued() []Message
+	ClearQueue()
 }
 
 type Doner interface {

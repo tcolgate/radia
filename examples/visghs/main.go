@@ -18,7 +18,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"sync"
@@ -28,18 +27,31 @@ import (
 	"github.com/tcolgate/vonq/tracer"
 )
 
-type thing struct{}
-
-type (*thing)OnRun(){
+type thing struct {
+	ss []*ghs.State
+	wg *sync.WaitGroup
 }
 
-func setupGHS() *http.ServeMux {
-	t := tracer.NewHTTPDisplay(nil)
-	wg := sync.WaitGroup{}
+func (s *thing) OnRun() {
+	for _, s := range s.ss {
 
-	// We'll only ever get halt messages from the core edge, so only
-	// two nodes halt
-	wg.Add(2)
+		n.Run(&ghs1, s.wg.Done)
+	}
+
+	s.ss[0].WakeUp()
+	s.wg.Wait()
+
+	log.Println("finished")
+}
+
+func setupGHS(mux *http.ServeMux) {
+	s := thing{}
+
+	t := tracer.NewHTTPDisplay(mux, s.OnRun)
+
+	s.wg = &sync.WaitGroup{}
+
+	s.wg.Add(2)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
 		Tracer: t,
@@ -81,36 +93,22 @@ func setupGHS() *http.ServeMux {
 	ghs6 := ghs.State{Node: &n6}
 
 	onRun := func() {
-		go n1.Run(&ghs1, wg.Done)
-		go n2.Run(&ghs2, wg.Done)
-		go n3.Run(&ghs3, wg.Done)
-		go n4.Run(&ghs4, wg.Done)
-		go n5.Run(&ghs5, wg.Done)
-		go n6.Run(&ghs6, wg.Done)
-
-		ghs1.WakeUp()
-		wg.Wait()
-
-		b, _ := json.Marshal(ghs6)
-
-		log.Println(string(b))
-		log.Println("finished")
 	}
 
-	nodes := []*graphalg.Node{
-		&n1,
-		&n2,
-		&n3,
-		&n4,
-		&n5,
-		&n6,
+	s.ss = []*ghs.State{
+		&ghs1,
+		&ghs2,
+		&ghs3,
+		&ghs4,
+		&ghs5,
+		&ghs6,
 	}
-
-	return t
 }
 
 func main() {
-	err := http.ListenAndServe(":12345", setupGHS())
+	mux := http.NewServeMux()
+	setupGHS(mux)
+	err := http.ListenAndServe(":12345", mux)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

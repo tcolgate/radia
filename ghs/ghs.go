@@ -264,8 +264,3 @@ func (s *State) Halt(j int) {
 	s.inBranch = j
 	s.procHalt()
 }
-
-//func (s *State) String() string {
-//	return fmt.Sprintf("node(%v)(SN: %v, LN: %v, F: %v, ES: %v, BE: %v, BW: %v, TE: %v, IB: %v, FC: %v)",
-//		n.ID, n.State, n.Level, n.Fragment, n.Edges, n.bestEdge, n.bestWt, n.testEdge, n.inBranch, n.findCount)
-//}

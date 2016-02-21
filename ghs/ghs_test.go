@@ -40,8 +40,8 @@ func TestGHS1(t *testing.T) {
 	ghs1 := State{Node: &n1}
 	ghs2 := State{Node: &n2}
 
-	go n1.Run(&ghs1, wg.Done)
-	go n2.Run(&ghs2, wg.Done)
+	go graphalg.Run(&ghs1, wg.Done)
+	go graphalg.Run(&ghs2, wg.Done)
 
 	ghs1.WakeUp()
 
@@ -71,9 +71,9 @@ func TestGHS2(t *testing.T) {
 	ghs2 := State{Node: &n2}
 	ghs3 := State{Node: &n3}
 
-	go n1.Run(&ghs1, wg.Done)
-	go n2.Run(&ghs2, wg.Done)
-	go n3.Run(&ghs3, wg.Done)
+	go graphalg.Run(&ghs1, wg.Done)
+	go graphalg.Run(&ghs2, wg.Done)
+	go graphalg.Run(&ghs3, wg.Done)
 
 	ghs1.WakeUp()
 
@@ -104,9 +104,9 @@ func TestGHS3(t *testing.T) {
 	ghs2 := State{Node: &n2}
 	ghs3 := State{Node: &n3}
 
-	go n1.Run(&ghs1, wg.Done)
-	go n2.Run(&ghs2, wg.Done)
-	go n3.Run(&ghs3, wg.Done)
+	go graphalg.Run(&ghs1, wg.Done)
+	go graphalg.Run(&ghs2, wg.Done)
+	go graphalg.Run(&ghs3, wg.Done)
 
 	ghs1.WakeUp()
 
@@ -137,9 +137,9 @@ func TestGHS4(t *testing.T) {
 	ghs2 := State{Node: &n2}
 	ghs3 := State{Node: &n3}
 
-	go n1.Run(&ghs1, wg.Done)
-	go n2.Run(&ghs2, wg.Done)
-	go n3.Run(&ghs3, wg.Done)
+	go graphalg.Run(&ghs1, wg.Done)
+	go graphalg.Run(&ghs2, wg.Done)
+	go graphalg.Run(&ghs3, wg.Done)
 
 	ghs1.WakeUp()
 
@@ -175,10 +175,10 @@ func TestGHS5(t *testing.T) {
 	ghs3 := State{Node: &n3}
 	ghs4 := State{Node: &n4}
 
-	go n1.Run(&ghs1, wg.Done)
-	go n2.Run(&ghs2, wg.Done)
-	go n3.Run(&ghs3, wg.Done)
-	go n4.Run(&ghs4, wg.Done)
+	go graphalg.Run(&ghs1, wg.Done)
+	go graphalg.Run(&ghs2, wg.Done)
+	go graphalg.Run(&ghs3, wg.Done)
+	go graphalg.Run(&ghs4, wg.Done)
 
 	ghs1.WakeUp()
 
@@ -225,12 +225,12 @@ func TestGHS6(t *testing.T) {
 	ghs5 := State{Node: &n5}
 	ghs6 := State{Node: &n6}
 
-	go n1.Run(&ghs1, wg.Done)
-	go n2.Run(&ghs2, wg.Done)
-	go n3.Run(&ghs3, wg.Done)
-	go n4.Run(&ghs4, wg.Done)
-	go n5.Run(&ghs5, wg.Done)
-	go n6.Run(&ghs6, wg.Done)
+	go graphalg.Run(&ghs1, wg.Done)
+	go graphalg.Run(&ghs2, wg.Done)
+	go graphalg.Run(&ghs3, wg.Done)
+	go graphalg.Run(&ghs4, wg.Done)
+	go graphalg.Run(&ghs5, wg.Done)
+	go graphalg.Run(&ghs6, wg.Done)
 
 	ghs1.WakeUp()
 
