@@ -18,6 +18,7 @@
 package graphalg
 
 import "sort"
+
 import "github.com/tcolgate/vonq/tracer"
 
 type NodeID string
@@ -30,7 +31,7 @@ type Node struct {
 
 	msgQueue []Message
 
-	tracer.TracerService
+	*tracer.Tracer
 }
 
 func (n *Node) Edges() Edges {

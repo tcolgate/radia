@@ -1,15 +1,8 @@
 package tracer
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"text/template"
-
-	"golang.org/x/net/websocket"
-)
-
+//go:generate protoc -I $GOPATH/src:. --js_out=assets/ internal/proto/tracer.proto
 //go:generate go-bindata -pkg $GOPACKAGE -o assets.go assets/
+/*
 func init() {
 	data, err := Asset("assets/index.html.tmpl")
 	if err != nil {
@@ -57,10 +50,10 @@ func (v Visualize) updateSocket(ws *websocket.Conn) {
 
 	nix := map[string]int{}
 
-	for i, n := range v.Nodes {
-		jns = append(jns, jn{string(n.ID)})
-		nix[string(n.ID)] = i
-	}
+	//	for i, n := range v.Nodes {
+	//		jns = append(jns, jn{string(n.ID)})
+	//		nix[string(n.ID)] = i
+	//	}
 
 	data := d{jns, jls}
 	b, _ := json.Marshal(data)
@@ -113,3 +106,4 @@ func MakeVisualize(ns []*Node, onRun func()) Visualize {
 
 	return v
 }
+*/

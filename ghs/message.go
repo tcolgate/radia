@@ -109,15 +109,16 @@ func HaltMessage() *Message {
 }
 
 func (s *State) QueueGHS(j int, m *Message) {
+	s.Printf(" ^^^ %+v %+v\n", s.Edge(j), m.U)
 	b, err := proto.Marshal(m)
 	if err != nil {
-		log.Println(err)
+		s.Println(err)
 	}
 	s.Node.Queue(j, b)
 }
 
 func (s *State) SendGHS(j int, m *Message) {
-	//s.Printf(" --> %+v %+v\n", s.Edge(j), m)
+	s.Printf(" --> %+v %+v\n", s.Edge(j), m.U)
 	b, err := proto.Marshal(m)
 	if err != nil {
 		log.Println(err)
@@ -129,7 +130,7 @@ func (s *State) SendGHS(j int, m *Message) {
 func (s *State) Dispatch(j int, b []byte) {
 	m := Message{}
 	proto.Unmarshal(b, &m)
-	//s.Printf(" <-- %+v %+v\n", s.Edge(j), m)
+	s.Printf(" <-- %+v %+v\n", s.Edge(j), m.U)
 
 	switch m.U.(type) {
 	case *Message_Connect:
@@ -158,6 +159,6 @@ func (s *State) Dispatch(j int, b []byte) {
 	case *Message_Halt:
 		s.Halt(j)
 	default:
-		log.Println("unknown message type m.Type")
+		s.Println("unknown message type m.Type")
 	}
 }

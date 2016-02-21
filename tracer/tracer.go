@@ -2,6 +2,7 @@ package tracer
 
 import (
 	"io"
+	"log"
 	"os"
 )
 
@@ -15,20 +16,16 @@ func init() {
 	DefaultTracer = Tracer{os.Stdout}
 }
 
-func Log() {
-	DefaultTracer.Log()
-}
-
-func Print() {
+func Print(v ...interface{}) {
 	DefaultTracer.Print()
 }
 
-func Println() {
+func Println(v ...interface{}) {
 	DefaultTracer.Println()
 }
 
-func Printf() {
-	DefaultTracer.Printf()
+func Printf(s string, v ...interface{}) {
+	DefaultTracer.Printf(s, v...)
 }
 
 func NodeUpdate() {
@@ -40,23 +37,23 @@ func EdgeUpdate() {
 func Message() {
 }
 
-func (Tracer) Log() {
+func (*Tracer) Print(v ...interface{}) {
+	log.Print(v...)
 }
 
-func (Tracer) Print() {
+func (*Tracer) Println(v ...interface{}) {
+	log.Println(v...)
 }
 
-func (Tracer) Println() {
+func (*Tracer) Printf(s string, v ...interface{}) {
+	log.Printf(s, v...)
 }
 
-func (Tracer) Printf() {
+func (*Tracer) NodeUpdate() {
 }
 
-func (Tracer) NodeUpdate() {
+func (*Tracer) EdgeUpdate() {
 }
 
-func (Tracer) EdgeUpdate() {
-}
-
-func (Tracer) Message() {
+func (*Tracer) Message() {
 }
