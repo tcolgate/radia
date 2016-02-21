@@ -32,6 +32,7 @@ type httpDisplay struct {
 }
 
 func (h *httpDisplay) Log(s string) {
+	h.msgs <- jsonMsg{Log: s}
 }
 
 func (h *httpDisplay) NodeUpdate() {
@@ -41,6 +42,7 @@ func (h *httpDisplay) EdgeUpdate() {
 }
 
 func (h *httpDisplay) EdgeMessage(str string) {
+	log.Println(str)
 }
 
 func (v httpDisplay) handleRoot(w http.ResponseWriter, r *http.Request) {

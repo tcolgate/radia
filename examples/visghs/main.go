@@ -52,7 +52,7 @@ func setupGHS(mux *http.ServeMux) {
 
 	s.wg = &sync.WaitGroup{}
 
-	s.wg.Add(2)
+	s.wg.Add(6)
 	n1 := graphalg.Node{
 		ID:     graphalg.NodeID("n1"),
 		Tracer: t,
