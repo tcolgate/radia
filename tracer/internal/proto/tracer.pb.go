@@ -15,8 +15,8 @@ It has these top-level messages:
 	NodeUpdateResponse
 	EdgeUpdateRequest
 	EdgeUpdateResponse
-	MessageUpdateRequest
-	MessageUpdateResponse
+	EdgeMessageRequest
+	EdgeMessageResponse
 */
 package proto
 
@@ -87,21 +87,21 @@ func (m *EdgeUpdateResponse) String() string            { return proto1.CompactT
 func (*EdgeUpdateResponse) ProtoMessage()               {}
 func (*EdgeUpdateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
 
-type MessageUpdateRequest struct {
+type EdgeMessageRequest struct {
 }
 
-func (m *MessageUpdateRequest) Reset()                    { *m = MessageUpdateRequest{} }
-func (m *MessageUpdateRequest) String() string            { return proto1.CompactTextString(m) }
-func (*MessageUpdateRequest) ProtoMessage()               {}
-func (*MessageUpdateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+func (m *EdgeMessageRequest) Reset()                    { *m = EdgeMessageRequest{} }
+func (m *EdgeMessageRequest) String() string            { return proto1.CompactTextString(m) }
+func (*EdgeMessageRequest) ProtoMessage()               {}
+func (*EdgeMessageRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
 
-type MessageUpdateResponse struct {
+type EdgeMessageResponse struct {
 }
 
-func (m *MessageUpdateResponse) Reset()                    { *m = MessageUpdateResponse{} }
-func (m *MessageUpdateResponse) String() string            { return proto1.CompactTextString(m) }
-func (*MessageUpdateResponse) ProtoMessage()               {}
-func (*MessageUpdateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+func (m *EdgeMessageResponse) Reset()                    { *m = EdgeMessageResponse{} }
+func (m *EdgeMessageResponse) String() string            { return proto1.CompactTextString(m) }
+func (*EdgeMessageResponse) ProtoMessage()               {}
+func (*EdgeMessageResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
 
 func init() {
 	proto1.RegisterType((*LogRequest)(nil), "proto.LogRequest")
@@ -110,8 +110,8 @@ func init() {
 	proto1.RegisterType((*NodeUpdateResponse)(nil), "proto.NodeUpdateResponse")
 	proto1.RegisterType((*EdgeUpdateRequest)(nil), "proto.EdgeUpdateRequest")
 	proto1.RegisterType((*EdgeUpdateResponse)(nil), "proto.EdgeUpdateResponse")
-	proto1.RegisterType((*MessageUpdateRequest)(nil), "proto.MessageUpdateRequest")
-	proto1.RegisterType((*MessageUpdateResponse)(nil), "proto.MessageUpdateResponse")
+	proto1.RegisterType((*EdgeMessageRequest)(nil), "proto.EdgeMessageRequest")
+	proto1.RegisterType((*EdgeMessageResponse)(nil), "proto.EdgeMessageResponse")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -124,7 +124,7 @@ type TraceServiceClient interface {
 	Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error)
 	NodeUpdate(ctx context.Context, in *NodeUpdateRequest, opts ...grpc.CallOption) (*NodeUpdateResponse, error)
 	EdgeUpdate(ctx context.Context, in *EdgeUpdateRequest, opts ...grpc.CallOption) (*EdgeUpdateResponse, error)
-	MessageUpdate(ctx context.Context, in *MessageUpdateRequest, opts ...grpc.CallOption) (*MessageUpdateResponse, error)
+	EdgeMessage(ctx context.Context, in *EdgeMessageRequest, opts ...grpc.CallOption) (*EdgeMessageResponse, error)
 }
 
 type traceServiceClient struct {
@@ -162,9 +162,9 @@ func (c *traceServiceClient) EdgeUpdate(ctx context.Context, in *EdgeUpdateReque
 	return out, nil
 }
 
-func (c *traceServiceClient) MessageUpdate(ctx context.Context, in *MessageUpdateRequest, opts ...grpc.CallOption) (*MessageUpdateResponse, error) {
-	out := new(MessageUpdateResponse)
-	err := grpc.Invoke(ctx, "/proto.TraceService/MessageUpdate", in, out, c.cc, opts...)
+func (c *traceServiceClient) EdgeMessage(ctx context.Context, in *EdgeMessageRequest, opts ...grpc.CallOption) (*EdgeMessageResponse, error) {
+	out := new(EdgeMessageResponse)
+	err := grpc.Invoke(ctx, "/proto.TraceService/EdgeMessage", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ type TraceServiceServer interface {
 	Log(context.Context, *LogRequest) (*LogResponse, error)
 	NodeUpdate(context.Context, *NodeUpdateRequest) (*NodeUpdateResponse, error)
 	EdgeUpdate(context.Context, *EdgeUpdateRequest) (*EdgeUpdateResponse, error)
-	MessageUpdate(context.Context, *MessageUpdateRequest) (*MessageUpdateResponse, error)
+	EdgeMessage(context.Context, *EdgeMessageRequest) (*EdgeMessageResponse, error)
 }
 
 func RegisterTraceServiceServer(s *grpc.Server, srv TraceServiceServer) {
@@ -220,12 +220,12 @@ func _TraceService_EdgeUpdate_Handler(srv interface{}, ctx context.Context, dec 
 	return out, nil
 }
 
-func _TraceService_MessageUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
-	in := new(MessageUpdateRequest)
+func _TraceService_EdgeMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error) (interface{}, error) {
+	in := new(EdgeMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
-	out, err := srv.(TraceServiceServer).MessageUpdate(ctx, in)
+	out, err := srv.(TraceServiceServer).EdgeMessage(ctx, in)
 	if err != nil {
 		return nil, err
 	}
@@ -249,28 +249,27 @@ var _TraceService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _TraceService_EdgeUpdate_Handler,
 		},
 		{
-			MethodName: "MessageUpdate",
-			Handler:    _TraceService_MessageUpdate_Handler,
+			MethodName: "EdgeMessage",
+			Handler:    _TraceService_EdgeMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{},
 }
 
 var fileDescriptor0 = []byte{
-	// 226 bytes of a gzipped FileDescriptorProto
+	// 224 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xe2, 0x29, 0x29, 0x4a, 0x4c,
 	0x4e, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x05, 0x53, 0x4a, 0x6a, 0x5c, 0x5c,
 	0x3e, 0xf9, 0xe9, 0x41, 0xa9, 0x85, 0xa5, 0xa9, 0xc5, 0x25, 0x42, 0x12, 0x5c, 0xec, 0xbe, 0xa9,
 	0xc5, 0xc5, 0x89, 0xe9, 0xa9, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41, 0xec, 0xb9, 0x10, 0xae,
 	0x12, 0x2f, 0x17, 0x37, 0x58, 0x5d, 0x71, 0x41, 0x7e, 0x5e, 0x71, 0xaa, 0x92, 0x30, 0x97, 0xa0,
 	0x5f, 0x7e, 0x4a, 0x6a, 0x68, 0x41, 0x4a, 0x62, 0x49, 0x2a, 0x54, 0xb7, 0x92, 0x08, 0x97, 0x10,
-	0xb2, 0x20, 0x42, 0xa9, 0x6b, 0x4a, 0x3a, 0xa6, 0x52, 0x64, 0x41, 0xa8, 0x52, 0x31, 0x2e, 0x11,
-	0xa8, 0xf5, 0xa8, 0xaa, 0xc5, 0xb9, 0x44, 0xd1, 0xc4, 0x21, 0x1a, 0x8c, 0xfa, 0x98, 0xb8, 0x78,
-	0x42, 0x40, 0xbe, 0x0a, 0x4e, 0x2d, 0x2a, 0xcb, 0x4c, 0x4e, 0x15, 0xd2, 0xe1, 0x62, 0x06, 0x3a,
-	0x53, 0x48, 0x10, 0xe2, 0x49, 0x3d, 0x84, 0xd7, 0xa4, 0x84, 0x90, 0x85, 0x20, 0xda, 0x85, 0x1c,
-	0xb9, 0xb8, 0x10, 0x0e, 0x16, 0x92, 0x80, 0xaa, 0xc0, 0xf0, 0x98, 0x94, 0x24, 0x16, 0x19, 0x84,
-	0x11, 0x08, 0x8f, 0xc0, 0x8d, 0xc0, 0xf0, 0x30, 0xdc, 0x08, 0x4c, 0x5f, 0x0b, 0x79, 0x71, 0xf1,
-	0xa2, 0xf8, 0x4e, 0x48, 0x1a, 0xaa, 0x16, 0x5b, 0x58, 0x48, 0xc9, 0x60, 0x97, 0x84, 0x98, 0x95,
-	0xc4, 0x06, 0x96, 0x34, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x07, 0x62, 0xde, 0xa1, 0xec, 0x01,
-	0x00, 0x00,
+	0xb2, 0x20, 0x42, 0xa9, 0x6b, 0x4a, 0x3a, 0xa6, 0x52, 0x64, 0x41, 0xa8, 0x52, 0xa8, 0x28, 0xd4,
+	0x09, 0x30, 0xb5, 0xa2, 0x5c, 0xc2, 0x28, 0xa2, 0x10, 0xc5, 0x46, 0x1d, 0x4c, 0x5c, 0x3c, 0x21,
+	0x20, 0x1f, 0x05, 0xa7, 0x16, 0x95, 0x65, 0x26, 0xa7, 0x0a, 0xe9, 0x70, 0x31, 0x03, 0x9d, 0x28,
+	0x24, 0x08, 0xf1, 0xa0, 0x1e, 0xc2, 0x5b, 0x52, 0x42, 0xc8, 0x42, 0x10, 0xed, 0x42, 0x8e, 0x5c,
+	0x5c, 0x08, 0xc7, 0x0a, 0x49, 0x40, 0x55, 0x60, 0x78, 0x4a, 0x4a, 0x12, 0x8b, 0x0c, 0xc2, 0x08,
+	0x84, 0x27, 0xe0, 0x46, 0x60, 0x78, 0x16, 0x6e, 0x04, 0xa6, 0x8f, 0x85, 0x5c, 0xb8, 0xb8, 0x91,
+	0xfc, 0x26, 0x84, 0xac, 0x12, 0x35, 0x14, 0xa4, 0xa4, 0xb0, 0x49, 0x41, 0x4c, 0x49, 0x62, 0x03,
+	0x4b, 0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0x6e, 0x1a, 0xde, 0x0f, 0xe2, 0x01, 0x00, 0x00,
 }

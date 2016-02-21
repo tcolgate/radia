@@ -1,59 +1,56 @@
 package tracer
 
-import (
-	"io"
-	"log"
-	"os"
-)
+import "os"
 
-var DefaultTracer Tracer
+var DefaultTracer *Tracer
+
+type traceDisplay interface {
+	Log(s string)
+	NodeUpdate()
+	EdgeUpdate()
+	EdgeMessage(str string)
+}
 
 type Tracer struct {
-	io.Writer
+	td traceDisplay
 }
 
 func init() {
-	DefaultTracer = Tracer{os.Stdout}
+	DefaultTracer = &Tracer{NewLogDisplay(os.Stdout)}
 }
 
-func Print(v ...interface{}) {
-	DefaultTracer.Print()
-}
-
-func Println(v ...interface{}) {
-	DefaultTracer.Println()
-}
-
-func Printf(s string, v ...interface{}) {
-	DefaultTracer.Printf(s, v...)
+func Log(s string) {
+	DefaultTracer.Log(s)
 }
 
 func NodeUpdate() {
+	DefaultTracer.NodeUpdate()
 }
 
 func EdgeUpdate() {
+	DefaultTracer.EdgeUpdate()
 }
 
-func Message() {
+func (t *Tracer) Log(s string) {
+	if t != nil {
+		t.td.Log(s)
+	}
 }
 
-func (*Tracer) Print(v ...interface{}) {
-	log.Print(v...)
+func (t *Tracer) NodeUpdate() {
+	if t != nil {
+		t.td.NodeUpdate()
+	}
 }
 
-func (*Tracer) Println(v ...interface{}) {
-	log.Println(v...)
+func (t *Tracer) EdgeUpdate() {
+	if t != nil {
+		t.td.NodeUpdate()
+	}
 }
 
-func (*Tracer) Printf(s string, v ...interface{}) {
-	log.Printf(s, v...)
-}
-
-func (*Tracer) NodeUpdate() {
-}
-
-func (*Tracer) EdgeUpdate() {
-}
-
-func (*Tracer) Message() {
+func (t *Tracer) EdgeMessage(str string) {
+	if t != nil {
+		t.td.EdgeMessage(str)
+	}
 }

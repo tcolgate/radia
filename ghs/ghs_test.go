@@ -30,11 +30,9 @@ func TestGHS1(t *testing.T) {
 	wg.Add(2)
 	n1 := graphalg.Node{
 		ID: graphalg.NodeID("n1"),
-		//		Tracer: log.New(os.Stdout, "node(n1)", 0),
 	}
 	n2 := graphalg.Node{
 		ID: graphalg.NodeID("n2"),
-		//		Tracer: log.New(os.Stdout, "node(n2)", 0),
 	}
 
 	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
@@ -58,15 +56,12 @@ func TestGHS2(t *testing.T) {
 	wg.Add(3)
 	n1 := graphalg.Node{
 		ID: graphalg.NodeID("n1"),
-		//		Tracer: log.New(os.Stdout, "node(n1)", 0),
 	}
 	n2 := graphalg.Node{
 		ID: graphalg.NodeID("n2"),
-		//		Tracer: log.New(os.Stdout, "node(n2)", 0),
 	}
 	n3 := graphalg.Node{
 		ID: graphalg.NodeID("n3"),
-		//		Tracer: log.New(os.Stdout, "node(n3)", 0),
 	}
 
 	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
@@ -93,15 +88,12 @@ func TestGHS3(t *testing.T) {
 	wg.Add(3)
 	n1 := graphalg.Node{
 		ID: graphalg.NodeID("n1"),
-		//		Tracer: log.New(os.Stdout, "node(n1)", 0),
 	}
 	n2 := graphalg.Node{
 		ID: graphalg.NodeID("n2"),
-		//		Tracer: log.New(os.Stdout, "node(n2)", 0),
 	}
 	n3 := graphalg.Node{
 		ID: graphalg.NodeID("n3"),
-		//		Tracer: log.New(os.Stdout, "node(n3)", 0),
 	}
 
 	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
@@ -129,15 +121,12 @@ func TestGHS4(t *testing.T) {
 	wg.Add(3)
 	n1 := graphalg.Node{
 		ID: graphalg.NodeID("n1"),
-		//		Tracer: log.New(os.Stdout, "node(n1)", 0),
 	}
 	n2 := graphalg.Node{
 		ID: graphalg.NodeID("n2"),
-		//		Tracer: log.New(os.Stdout, "node(n2)", 0),
 	}
 	n3 := graphalg.Node{
 		ID: graphalg.NodeID("n3"),
-		//		Tracer: log.New(os.Stdout, "node(n3)", 0),
 	}
 
 	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
@@ -165,19 +154,15 @@ func TestGHS5(t *testing.T) {
 	wg.Add(4)
 	n1 := graphalg.Node{
 		ID: graphalg.NodeID("n1"),
-		//		Tracer: log.New(os.Stdout, "node(n1)", 0),
 	}
 	n2 := graphalg.Node{
 		ID: graphalg.NodeID("n2"),
-		//		Tracer: log.New(os.Stdout, "node(n2)", 0),
 	}
 	n3 := graphalg.Node{
 		ID: graphalg.NodeID("n3"),
-		//		Tracer: log.New(os.Stdout, "node(n3)", 0),
 	}
 	n4 := graphalg.Node{
 		ID: graphalg.NodeID("n4"),
-		//		Tracer: log.New(os.Stdout, "node(n4)", 0),
 	}
 
 	n1.Join(&n2, 1.0, graphalg.MakeChanPair)
@@ -208,27 +193,21 @@ func TestGHS6(t *testing.T) {
 	wg.Add(6)
 	n1 := graphalg.Node{
 		ID: graphalg.NodeID("n1"),
-		//		Tracer: log.New(os.Stdout, "node(n1)", 0),
 	}
 	n2 := graphalg.Node{
 		ID: graphalg.NodeID("n2"),
-		//		Tracer: log.New(os.Stdout, "node(n2)", 0),
 	}
 	n3 := graphalg.Node{
 		ID: graphalg.NodeID("n3"),
-		//		Tracer: log.New(os.Stdout, "node(n3)", 0),
 	}
 	n4 := graphalg.Node{
 		ID: graphalg.NodeID("n4"),
-		//		Tracer: log.New(os.Stdout, "node(n4)", 0),
 	}
 	n5 := graphalg.Node{
 		ID: graphalg.NodeID("n5"),
-		//		Tracer: log.New(os.Stdout, "node(n5)", 0),
 	}
 	n6 := graphalg.Node{
 		ID: graphalg.NodeID("n6"),
-		//		Tracer: log.New(os.Stdout, "node(n6)", 0),
 	}
 
 	n1.Join(&n2, 1.1, graphalg.MakeChanPair)

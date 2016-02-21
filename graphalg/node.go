@@ -17,7 +17,10 @@
 
 package graphalg
 
-import "sort"
+import (
+	"fmt"
+	"sort"
+)
 
 import "github.com/tcolgate/vonq/tracer"
 
@@ -82,4 +85,21 @@ func (n *Node) Send(e int, d []byte) {
 // Queue - re-queue a message to the internal queue
 func (n *Node) Queue(e int, d []byte) {
 	n.msgQueue = append(n.msgQueue, Message{e, d})
+}
+
+func (n *Node) Log(s string) {
+	msg := fmt.Sprintf("node(%v): %s", n.ID, s)
+	n.Tracer.Log(msg)
+}
+
+func (n *Node) Print(v ...interface{}) {
+	n.Log(fmt.Sprint(v...))
+}
+
+func (n *Node) Println(v ...interface{}) {
+	n.Log(fmt.Sprintln(v...))
+}
+
+func (n *Node) Printf(str string, v ...interface{}) {
+	n.Log(fmt.Sprintf(str, v...))
 }

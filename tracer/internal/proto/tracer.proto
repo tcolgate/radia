@@ -21,7 +21,7 @@ service TraceService {
   rpc Log (LogRequest) returns (LogResponse);
   rpc NodeUpdate (NodeUpdateRequest) returns (NodeUpdateResponse);
   rpc EdgeUpdate (EdgeUpdateRequest) returns (EdgeUpdateResponse);
-  rpc MessageUpdate (MessageUpdateRequest) returns (MessageUpdateResponse);
+  rpc EdgeMessage (EdgeMessageRequest) returns (EdgeMessageResponse);
 }
 
 
@@ -44,8 +44,8 @@ message EdgeUpdateRequest{
 message EdgeUpdateResponse{
 }
 
-message MessageUpdateRequest{
+message EdgeMessageRequest{
 }
 
-message MessageUpdateResponse{
+message EdgeMessageResponse{
 }
