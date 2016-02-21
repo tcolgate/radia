@@ -24,48 +24,41 @@ import (
 	"github.com/tcolgate/vonq/graphalg"
 )
 
-func init() {
-	NodeStateSleeping = NodeState(GHSMessage_Initiate_NodeState_value["sleeping"])
-	NodeStateFind = NodeState(GHSMessage_Initiate_NodeState_value["find"])
-	NodeStateFound = NodeState(GHSMessage_Initiate_NodeState_value["found"])
-}
-
 //go:generate protoc -I $GOPATH/src:. --go_out=.  ghs.proto
-type Message struct {
-	*GHSMessage
+func init() {
+	NodeStateSleeping = NodeState(Message_InitiateMsg_NodeState_value["sleeping"])
+	NodeStateFind = NodeState(Message_InitiateMsg_NodeState_value["find"])
+	NodeStateFound = NodeState(Message_InitiateMsg_NodeState_value["found"])
 }
 
-func ConnectMessage(level uint32) Message {
-	return Message{
-		&GHSMessage{
-			Type: GHSMessage_CONNECT,
-			Connect: &GHSMessage_Connect{
+func ConnectMessage(level uint32) *Message {
+	return &Message{
+		U: &Message_Connect{
+			Connect: &Message_ConnectMsg{
 				Level: level,
 			},
 		},
 	}
 }
 
-func InitiateMessage(level uint32, fragment FragID, state NodeState) Message {
+func InitiateMessage(level uint32, fragment FragID, state NodeState) *Message {
 	wg := graphalg.Weight(fragment)
-	return Message{
-		&GHSMessage{
-			Type: GHSMessage_INITIATE,
-			Initiate: &GHSMessage_Initiate{
+	return &Message{
+		U: &Message_Initiate{
+			Initiate: &Message_InitiateMsg{
 				Level:     level,
 				Fragment:  &wg,
-				NodeState: GHSMessage_Initiate_NodeState(state),
+				NodeState: Message_InitiateMsg_NodeState(state),
 			},
 		},
 	}
 }
 
-func TestMessage(level uint32, fragment FragID) Message {
+func TestMessage(level uint32, fragment FragID) *Message {
 	wg := graphalg.Weight(fragment)
-	return Message{
-		&GHSMessage{
-			Type: GHSMessage_TEST,
-			Test: &GHSMessage_Test{
+	return &Message{
+		U: &Message_Test{
+			Test: &Message_TestMsg{
 				Level:    level,
 				Fragment: &wg,
 			},
@@ -73,64 +66,59 @@ func TestMessage(level uint32, fragment FragID) Message {
 	}
 }
 
-func AcceptMessage() Message {
-	return Message{
-		GHSMessage: &GHSMessage{
-			Type:   GHSMessage_ACCEPT,
-			Accept: &GHSMessage_Accept{},
+func AcceptMessage() *Message {
+	return &Message{
+		U: &Message_Accept{
+			Accept: &Message_AcceptMsg{},
 		},
 	}
 }
 
-func RejectMessage() Message {
-	return Message{
-		GHSMessage: &GHSMessage{
-			Type:   GHSMessage_REJECT,
-			Reject: &GHSMessage_Reject{},
+func RejectMessage() *Message {
+	return &Message{
+		U: &Message_Reject{
+			Reject: &Message_RejectMsg{},
 		},
 	}
 }
 
-func ReportMessage(best graphalg.Weight) Message {
-	return Message{
-		GHSMessage: &GHSMessage{
-			Type: GHSMessage_REPORT,
-			Report: &GHSMessage_Report{
+func ReportMessage(best graphalg.Weight) *Message {
+	return &Message{
+		U: &Message_Report{
+			Report: &Message_ReportMsg{
 				Weight: &best,
 			},
 		},
 	}
 }
 
-func ChangeRootMessage() Message {
-	return Message{
-		GHSMessage: &GHSMessage{
-			Type:       GHSMessage_CHANGEROOT,
-			Changeroot: &GHSMessage_ChangeRoot{},
+func ChangeRootMessage() *Message {
+	return &Message{
+		U: &Message_ChangeRoot{
+			ChangeRoot: &Message_ChangeRootMsg{},
 		},
 	}
 }
 
-func HaltMessage() Message {
-	return Message{
-		GHSMessage: &GHSMessage{
-			Type: GHSMessage_HALT,
-			Halt: &GHSMessage_Halt{},
+func HaltMessage() *Message {
+	return &Message{
+		U: &Message_Halt{
+			Halt: &Message_HaltMsg{},
 		},
 	}
 }
 
-func (s *State) QueueGHS(j int, m Message) {
-	b, err := proto.Marshal(m.GHSMessage)
+func (s *State) QueueGHS(j int, m *Message) {
+	b, err := proto.Marshal(m)
 	if err != nil {
 		log.Println(err)
 	}
 	s.Node.Queue(j, b)
 }
 
-func (s *State) SendGHS(j int, m Message) {
-	s.Printf(" --> %+v %+v\n", s.Edge(j), m.GHSMessage)
-	b, err := proto.Marshal(m.GHSMessage)
+func (s *State) SendGHS(j int, m *Message) {
+	//s.Printf(" --> %+v %+v\n", s.Edge(j), m)
+	b, err := proto.Marshal(m)
 	if err != nil {
 		log.Println(err)
 	}
@@ -139,35 +127,35 @@ func (s *State) SendGHS(j int, m Message) {
 }
 
 func (s *State) Dispatch(j int, b []byte) {
-	m := GHSMessage{}
+	m := Message{}
 	proto.Unmarshal(b, &m)
-	s.Printf(" <-- %+v %+v\n", s.Edge(j), m)
+	//s.Printf(" <-- %+v %+v\n", s.Edge(j), m)
 
-	switch m.Type {
-	case GHSMessage_CONNECT:
+	switch m.U.(type) {
+	case *Message_Connect:
 		s.Connect(j, m.GetConnect().Level)
-	case GHSMessage_INITIATE:
+	case *Message_Initiate:
 		im := m.GetInitiate()
 		l := im.Level
 		wf := im.Fragment
 		ns := NodeState(im.NodeState)
 		s.Initiate(j, l, FragmentID(*wf), ns)
-	case GHSMessage_TEST:
+	case *Message_Test:
 		im := m.GetTest()
 		l := im.Level
 		wf := im.Fragment
 		s.Test(j, l, FragmentID(*wf))
-	case GHSMessage_ACCEPT:
+	case *Message_Accept:
 		s.Accept(j)
-	case GHSMessage_REJECT:
+	case *Message_Reject:
 		s.Reject(j)
-	case GHSMessage_REPORT:
+	case *Message_Report:
 		rm := m.GetReport()
 		w := rm.GetWeight()
 		s.Report(j, *w)
-	case GHSMessage_CHANGEROOT:
+	case *Message_ChangeRoot:
 		s.ChangeRoot()
-	case GHSMessage_HALT:
+	case *Message_Halt:
 		s.Halt(j)
 	default:
 		log.Println("unknown message type m.Type")

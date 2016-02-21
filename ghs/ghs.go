@@ -43,7 +43,7 @@ type State struct {
 }
 
 // NodeState is the state of the node.
-type NodeState GHSMessage_Initiate_NodeState
+type NodeState Message_InitiateMsg_NodeState
 
 // This is perfect, but these values will be set based
 // on what the protoc compiler assigned these values
@@ -222,7 +222,7 @@ func (s *State) Report(j int, w graphalg.Weight) {
 				s.procChangeRoot()
 			} else {
 				if w.Equal(s.bestWt) {
-					s.Println("Trying to halt")
+					//					s.Println("Trying to halt")
 					// We deviate from the original algorithm here
 					// as originall only core nodes halt. We'll
 					// broadcast a halt to all nodes.
@@ -251,17 +251,17 @@ func (s *State) ChangeRoot() {
 // ProcHalt - Tell all nodes we have finished
 func (s *State) procHalt() {
 	for i := range s.EdgeStates {
-		s.Println("Trying halt on ", i, s.Edge(i), s.EdgeStates[i])
-		s.Println(".... ", s.inBranch, s.Edge(i), s.Fragment)
+		//s.Println("Trying halt on ", i, s.Edge(i), s.EdgeStates[i])
+		//s.Println(".... ", s.inBranch, s.Edge(i), s.Fragment)
 		if i != s.inBranch && s.EdgeStates[i] == EdgeStateBranch &&
 			FragmentID(s.Edge(i).Weight) != s.Fragment {
-			s.Println("Sending halt to ", i, s.Edge(i))
-			s.Println("halt to ", i, s.Fragment, s.bestWt, s.bestEdge)
+			//s.Println("Sending halt to ", i, s.Edge(i))
+			//s.Println("halt to ", i, s.Fragment, s.bestWt, s.bestEdge)
 			s.SendGHS(i, HaltMessage())
 		}
 	}
 	s.SetDone(true)
-	s.Println("Quit")
+	//s.Println("Quit")
 	return
 }
 

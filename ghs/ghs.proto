@@ -19,12 +19,12 @@ import 'github.com/tcolgate/vonq/graphalg/graphalg.proto'; // We'll be passing w
 
 package ghs;
 
-message GHSMessage {
-  message Connect {
+message Message {
+  message ConnectMsg {
    uint32 Level = 1;
   }
 
-  message Initiate {
+  message InitiateMsg {
    enum NodeState {
      sleeping = 0;
      find     = 1;
@@ -35,48 +35,36 @@ message GHSMessage {
    NodeState nodeState = 3;
   }
 
-  message Test {
+  message TestMsg {
    uint32 level    = 1;
    graphalg.Weight fragment = 2;
   }
 
-  message Accept {
+  message AcceptMsg {
   }
 
-  message Reject {
+  message RejectMsg {
   }
 
-  message Report {
+  message ReportMsg {
     graphalg.Weight weight = 1;
   }
 
-  message ChangeRoot {
+  message ChangeRootMsg {
   }
 
-  message Halt {
+  message HaltMsg {
   }
 
-  enum Type {
-    CONNECT    = 0;
-    INITIATE   = 1;
-    TEST       = 2;
-    ACCEPT     = 3;
-    REJECT     = 4;
-    REPORT     = 5;
-    CHANGEROOT = 6;
-    HALT = 7;
-  };
-
-  Type type = 1;
-
-  oneof msg_type {
-    Connect connect = 2;
-    Initiate initiate = 3;
-    Test test = 4;
-    Accept accept = 5;
-    Reject reject = 6;
-    Report report = 7;
-    ChangeRoot changeroot = 8;
-    Halt halt = 9;
-  };
+  oneof U {
+    ConnectMsg connect = 2;
+    InitiateMsg initiate = 3;
+    TestMsg test = 4;
+    AcceptMsg accept = 5;
+    RejectMsg reject = 6;
+    ReportMsg report = 7;
+    ChangeRootMsg changeRoot = 8;
+    HaltMsg halt = 9;
+  }
 }
+
