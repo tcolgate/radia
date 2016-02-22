@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.15/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment-with-locales.min.js"></script>
 
 <style type="text/css">
   .chart rect {
@@ -82,11 +83,9 @@
       }
 
       ws.onmessage = function(e) {
-        console.log("Got: " + e);
-        console.log("Got: " + e.data);
         var data = JSON.parse(e.data);
         if(data.hasOwnProperty("Log")){
-          console.log("Log: " + data.Log);
+          console.log(moment(data.T/1000) + ": node(" + data.NodeID + ") " + data.Log);
         }
 
         //update(data);

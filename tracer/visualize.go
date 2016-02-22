@@ -22,7 +22,12 @@ func init() {
 var tmpl *template.Template
 
 type jsonMsg struct {
-	Log string
+	T        int64
+	NodeID   string
+	EdgeName string `json:",omitempty"`
+	Log      string `json:",omitempty"`
+	State    string `json:",omitempty"`
+	Message  string `json:",omitempty"`
 }
 
 type httpDisplay struct {
@@ -31,18 +36,20 @@ type httpDisplay struct {
 	msgs   chan jsonMsg
 }
 
-func (h *httpDisplay) Log(s string) {
-	h.msgs <- jsonMsg{Log: s}
+func (h *httpDisplay) Log(t int64, id, s string) {
+	h.msgs <- jsonMsg{T: t, NodeID: id, Log: s}
 }
 
-func (h *httpDisplay) NodeUpdate() {
+func (h *httpDisplay) NodeUpdate(t int64, n, str string) {
+	h.msgs <- jsonMsg{T: t, NodeID: n, State: str}
 }
 
-func (h *httpDisplay) EdgeUpdate() {
+func (h *httpDisplay) EdgeUpdate(t int64, n, en, s string) {
+	h.msgs <- jsonMsg{T: t, NodeID: n, EdgeName: en, State: s}
 }
 
-func (h *httpDisplay) EdgeMessage(str string) {
-	log.Println(str)
+func (h *httpDisplay) EdgeMessage(t int64, n, en, m string) {
+	h.msgs <- jsonMsg{T: t, NodeID: n, EdgeName: en, Message: m}
 }
 
 func (v httpDisplay) handleRoot(w http.ResponseWriter, r *http.Request) {

@@ -20,6 +20,7 @@ package graphalg
 import (
 	"fmt"
 	"sort"
+	"time"
 )
 
 import "github.com/tcolgate/vonq/tracer"
@@ -96,8 +97,7 @@ func (n *Node) ClearQueue() {
 }
 
 func (n *Node) Log(s string) {
-	msg := fmt.Sprintf("node(%v): %s", n.ID, s)
-	n.Tracer.Log(msg)
+	n.Tracer.Log(time.Now().UnixNano(), string(n.ID), s)
 }
 
 func (n *Node) Print(v ...interface{}) {

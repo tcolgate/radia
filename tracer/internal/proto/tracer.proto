@@ -26,25 +26,38 @@ service TraceService {
 
 
 message LogRequest {
-  string Message = 1;
+  int64  Time    = 1;
+  string NodeID  = 2;
+  string Message = 3;
 }
 
 message LogResponse {
 }
 
 message NodeUpdateRequest{
+  int64  Time   = 1;
+  string NodeID = 2;
+  string Status = 3;
 }
 
 message NodeUpdateResponse{
 }
 
 message EdgeUpdateRequest{
+  int64  Time     = 1;
+  string NodeID   = 2;
+  string EdgeName = 3;
+  string Status   = 4;
 }
 
 message EdgeUpdateResponse{
 }
 
 message EdgeMessageRequest{
+  int64  Time     = 1;
+  string NodeID   = 2;
+  string EdgeName = 3;
+  string Message  = 4;
 }
 
 message EdgeMessageResponse{

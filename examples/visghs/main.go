@@ -21,6 +21,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/tcolgate/vonq/ghs"
 	"github.com/tcolgate/vonq/graphalg"
@@ -33,12 +34,6 @@ type state struct {
 }
 
 func (s *state) OnRun() {
-	log.Println("running")
-
-	for _, g := range s.ghs {
-		go graphalg.Run(g, s.wg.Done)
-	}
-
 	s.ghs[0].WakeUp()
 	s.wg.Wait()
 
@@ -94,6 +89,14 @@ func setupGHS(mux *http.ServeMux) {
 		&ghs.State{Node: &n5},
 		&ghs.State{Node: &n6},
 	}
+
+	for _, g := range s.ghs {
+		n := g.Node
+		go n.Tracer.NodeUpdate(time.Now().UnixNano(), string(n.ID), "state")
+		go graphalg.Run(g, s.wg.Done)
+	}
+
+	log.Println("running")
 }
 
 func main() {
