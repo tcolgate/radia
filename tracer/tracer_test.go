@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"testing"
+	"time"
 
 	pb "github.com/tcolgate/vonq/tracer/internal/proto"
 	"google.golang.org/grpc"
@@ -28,7 +29,12 @@ func TestTracerServer1(t *testing.T) {
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
-	c.Log("Something")
+	err = c.Log(1, "2", "Something")
+	log.Println("HERE AGAIN")
+	time.Sleep(1 * time.Second) // This isn't going to work
+	if err != nil {
+		log.Fatalf("failed to call client: %v", err)
+	}
 	exp := "vonq: Something\n"
 	if got := out.String(); got != exp {
 		t.Fatalf("expected %v got: %v", exp, got)

@@ -18,10 +18,10 @@ syntax = "proto3";
 package proto;
 
 service TraceService {
-  rpc Log (LogRequest) returns (LogResponse);
-  rpc NodeUpdate (NodeUpdateRequest) returns (NodeUpdateResponse);
-  rpc EdgeUpdate (EdgeUpdateRequest) returns (EdgeUpdateResponse);
-  rpc EdgeMessage (EdgeMessageRequest) returns (EdgeMessageResponse);
+  rpc Log (stream LogRequest) returns (LogResponse);
+  rpc NodeUpdate (stream NodeUpdateRequest) returns (NodeUpdateResponse);
+  rpc EdgeUpdate (stream EdgeUpdateRequest) returns (EdgeUpdateResponse);
+  rpc EdgeMessage (stream EdgeMessageRequest) returns (EdgeMessageResponse);
 }
 
 

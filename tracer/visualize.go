@@ -36,20 +36,24 @@ type httpDisplay struct {
 	msgs   chan jsonMsg
 }
 
-func (h *httpDisplay) Log(t int64, id, s string) {
+func (h *httpDisplay) Log(t int64, id, s string) error {
 	h.msgs <- jsonMsg{T: t, NodeID: id, Log: s}
+	return nil
 }
 
-func (h *httpDisplay) NodeUpdate(t int64, n, str string) {
+func (h *httpDisplay) NodeUpdate(t int64, n, str string) error {
 	h.msgs <- jsonMsg{T: t, NodeID: n, State: str}
+	return nil
 }
 
-func (h *httpDisplay) EdgeUpdate(t int64, n, en, s string) {
+func (h *httpDisplay) EdgeUpdate(t int64, n, en, s string) error {
 	h.msgs <- jsonMsg{T: t, NodeID: n, EdgeName: en, State: s}
+	return nil
 }
 
-func (h *httpDisplay) EdgeMessage(t int64, n, en, m string) {
+func (h *httpDisplay) EdgeMessage(t int64, n, en, m string) error {
 	h.msgs <- jsonMsg{T: t, NodeID: n, EdgeName: en, Message: m}
+	return nil
 }
 
 func (v httpDisplay) handleRoot(w http.ResponseWriter, r *http.Request) {
