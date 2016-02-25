@@ -18,6 +18,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"sync"
@@ -92,7 +93,12 @@ func setupGHS(mux *http.ServeMux) {
 
 	for _, g := range s.ghs {
 		n := g.Node
-		go n.Tracer.NodeUpdate(time.Now().UnixNano(), string(n.ID), "state")
+		bs, err := json.Marshal(n.Edges())
+		if err != nil {
+			log.Println(err)
+		}
+
+		go n.Tracer.NodeUpdate(time.Now().UnixNano(), string(n.ID), string(bs))
 		go graphalg.Run(g, s.wg.Done)
 	}
 

@@ -18,6 +18,7 @@
 package ghs
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -109,7 +110,7 @@ func HaltMessage() *Message {
 }
 
 func (s *State) QueueGHS(j int, m *Message) {
-	s.Printf(" ^^^ %+v %+v\n", s.Edge(j), m.U)
+	s.Edges()[j].EdgeMessage(fmt.Sprintf("^^^ %+v\n", m.U))
 	b, err := proto.Marshal(m)
 	if err != nil {
 		s.Println(err)
@@ -118,7 +119,7 @@ func (s *State) QueueGHS(j int, m *Message) {
 }
 
 func (s *State) SendGHS(j int, m *Message) {
-	s.Printf(" --> %+v %+v\n", s.Edge(j), m.U)
+	s.Edges()[j].EdgeMessage(fmt.Sprintf("--> %+v\n", m.U))
 	b, err := proto.Marshal(m)
 	if err != nil {
 		log.Println(err)
@@ -130,7 +131,7 @@ func (s *State) SendGHS(j int, m *Message) {
 func (s *State) Dispatch(j int, b []byte) {
 	m := Message{}
 	proto.Unmarshal(b, &m)
-	s.Printf(" <-- %+v %+v\n", s.Edge(j), m.U)
+	s.Edges()[j].EdgeMessage(fmt.Sprintf("<-- %+v\n", m.U))
 
 	switch m.U.(type) {
 	case *Message_Connect:

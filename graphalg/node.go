@@ -111,3 +111,15 @@ func (n *Node) Println(v ...interface{}) {
 func (n *Node) Printf(str string, v ...interface{}) {
 	n.Log(fmt.Sprintf(str, v...))
 }
+
+func (n *Node) NodeUpdate(s string) {
+	n.Tracer.NodeUpdate(time.Now().UnixNano(), string(n.ID), s)
+}
+
+func (e *Edge) EdgeUpdate(s string) {
+	e.local.Tracer.EdgeUpdate(time.Now().UnixNano(), string(e.local.ID), s)
+}
+
+func (e *Edge) EdgeMessage(s string) {
+	e.local.Tracer.EdgeMessage(time.Now().UnixNano(), string(e.local.ID), e.Weight.String(), s)
+}
