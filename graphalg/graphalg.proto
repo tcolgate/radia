@@ -24,9 +24,9 @@ service MessageService {
 }
 
 message Weight {
-  double cost  = 1;
-  string lsnID = 2;
-  string msnID = 3;
+  double Cost = 1;
+  string Lsn  = 2;
+  string Msn  = 3;
 }
 
 message GraphID {
