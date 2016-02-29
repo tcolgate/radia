@@ -58,6 +58,11 @@ message EdgeMessageRequest{
   string NodeID   = 2;
   string EdgeName = 3;
   string Message  = 4;
+  enum Dir {
+    IN  = 0;
+    OUT = 1;
+  }
+  Dir Direction   = 5;
 }
 
 message EdgeMessageResponse{

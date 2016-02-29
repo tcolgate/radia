@@ -110,28 +110,30 @@ func HaltMessage() *Message {
 }
 
 func (s *State) QueueGHS(j int, m *Message) {
-	s.Edges()[j].EdgeMessage(fmt.Sprintf("^^^ %+v\n", m.U))
+	s.Edges()[j].EdgeMessage(m.U)
+
 	b, err := proto.Marshal(m)
 	if err != nil {
 		s.Println(err)
 	}
-	s.Node.Queue(j, b)
+	s.Queue(j, b)
 }
 
 func (s *State) SendGHS(j int, m *Message) {
-	s.Edges()[j].EdgeMessage(fmt.Sprintf("--> %+v\n", m.U))
+	s.Edges()[j].EdgeMessage(m.U)
+
 	b, err := proto.Marshal(m)
 	if err != nil {
 		log.Println(err)
 	}
 
-	s.Node.Send(j, b)
+	s.Send(j, b)
 }
 
 func (s *State) Dispatch(j int, b []byte) {
 	m := Message{}
 	proto.Unmarshal(b, &m)
-	s.Edges()[j].EdgeMessage(fmt.Sprintf("<-- %+v\n", m.U))
+	s.Edges()[j].EdgeMessage(fmt.Sprint(m.U))
 
 	switch m.U.(type) {
 	case *Message_Connect:

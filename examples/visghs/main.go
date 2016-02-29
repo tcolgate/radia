@@ -22,7 +22,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/tcolgate/vonq/ghs"
 	"github.com/tcolgate/vonq/graphalg"
@@ -98,7 +97,7 @@ func setupGHS(mux *http.ServeMux) {
 			log.Println(err)
 		}
 
-		go n.Tracer.NodeUpdate(time.Now().UnixNano(), string(n.ID), string(bs))
+		go n.Tracer.NodeUpdate(string(n.ID), string(bs))
 		go graphalg.Run(g, s.wg.Done)
 	}
 

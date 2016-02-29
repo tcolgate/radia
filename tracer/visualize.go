@@ -21,8 +21,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -39,7 +39,8 @@ func init() {
 var tmpl *template.Template
 
 type jsonMsg struct {
-	T        int64
+	T        time.Time
+	Type     string
 	NodeID   string
 	EdgeName string `json:",omitempty"`
 	Log      string `json:",omitempty"`
@@ -53,20 +54,20 @@ type httpDisplay struct {
 	msgs   chan jsonMsg
 }
 
-func (h *httpDisplay) Log(t int64, id, s string) {
-	h.msgs <- jsonMsg{T: t, NodeID: id, Log: s}
+func (h *httpDisplay) Log(t time.Time, id, s string) {
+	h.msgs <- jsonMsg{T: t, Type: "log", NodeID: id, Log: s}
 }
 
-func (h *httpDisplay) NodeUpdate(t int64, n, str string) {
-	h.msgs <- jsonMsg{T: t, NodeID: n, State: str}
+func (h *httpDisplay) NodeUpdate(t time.Time, n, str string) {
+	h.msgs <- jsonMsg{T: t, Type: "nodeUpdate", NodeID: n, State: str}
 }
 
-func (h *httpDisplay) EdgeUpdate(t int64, n, en, s string) {
-	h.msgs <- jsonMsg{T: t, NodeID: n, EdgeName: en, State: s}
+func (h *httpDisplay) EdgeUpdate(t time.Time, n, en, s string) {
+	h.msgs <- jsonMsg{T: t, Type: "edgeUpdate", NodeID: n, EdgeName: en, State: s}
 }
 
-func (h *httpDisplay) EdgeMessage(t int64, n, en, m string) {
-	h.msgs <- jsonMsg{T: t, NodeID: n, EdgeName: en, Message: m}
+func (h *httpDisplay) EdgeMessage(t time.Time, n, en, m string) {
+	h.msgs <- jsonMsg{T: t, Type: "edgeMessage", NodeID: n, EdgeName: en, Message: m}
 }
 
 func (v httpDisplay) handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -80,25 +81,10 @@ func (v httpDisplay) handleRoot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (v httpDisplay) updateSocket(ws *websocket.Conn) {
-	type jn struct {
-		Id string `json:"id"`
-	}
-	type jl struct {
-		Source int     `json:"source"`
-		Target int     `json:"target"`
-		Cost   float64 `json:"cost"`
-	}
-	type d struct {
-		Nodes []jn `json:"nodes"`
-		Links []jl `json:"links"`
-	}
-
 	for {
 		select {
 		case m := <-v.msgs:
-			log.Println(m)
 			b, _ := json.Marshal(m)
-			log.Println(b)
 			fmt.Fprintf(ws, string(b))
 		}
 	}

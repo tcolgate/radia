@@ -29,6 +29,4 @@ message Messsage {
   int64  SrcTime = 1;
   string SrcID   = 2;
   string DstID   = 3;
-  string basic   = 4;
-  bytes  payload = 5;
 }

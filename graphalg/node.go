@@ -20,7 +20,6 @@ package graphalg
 import (
 	"fmt"
 	"sort"
-	"time"
 )
 
 import "github.com/tcolgate/vonq/tracer"
@@ -97,7 +96,7 @@ func (n *Node) ClearQueue() {
 }
 
 func (n *Node) Log(s string) {
-	n.Tracer.Log(time.Now().UnixNano(), string(n.ID), s)
+	n.Tracer.Log(string(n.ID), s)
 }
 
 func (n *Node) Print(v ...interface{}) {
@@ -113,13 +112,13 @@ func (n *Node) Printf(str string, v ...interface{}) {
 }
 
 func (n *Node) NodeUpdate(s string) {
-	n.Tracer.NodeUpdate(time.Now().UnixNano(), string(n.ID), s)
+	n.Tracer.NodeUpdate(string(n.ID), s)
 }
 
 func (e *Edge) EdgeUpdate(s string) {
-	e.local.Tracer.EdgeUpdate(time.Now().UnixNano(), string(e.local.ID), s)
+	e.local.Tracer.EdgeUpdate(string(e.local.ID), s)
 }
 
 func (e *Edge) EdgeMessage(s string) {
-	e.local.Tracer.EdgeMessage(time.Now().UnixNano(), string(e.local.ID), e.Weight.String(), s)
+	e.local.Tracer.EdgeMessage(string(e.local.ID), e.Weight.String(), s)
 }
