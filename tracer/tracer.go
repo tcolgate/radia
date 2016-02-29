@@ -71,8 +71,8 @@ func NodeUpdate(id, s string) {
 	DefaultTracer.NodeUpdate(id, s)
 }
 
-func EdgeUpdate(id, s string) {
-	DefaultTracer.EdgeUpdate(id, s)
+func EdgeUpdate(id, edgeId, s string) {
+	DefaultTracer.EdgeUpdate(id, edgeId, s)
 }
 
 func EdgeMessage(id, edgeId string, dir MessageDir, s string) {
@@ -91,9 +91,9 @@ func (t *Tracer) NodeUpdate(id, s string) {
 	}
 }
 
-func (t *Tracer) EdgeUpdate(id, s string) {
+func (t *Tracer) EdgeUpdate(id, edgeId, s string) {
 	if t != nil {
-		t.td.NodeUpdate(time.Now(), id, s)
+		t.td.EdgeUpdate(time.Now(), id, edgeId, s)
 	}
 }
 

@@ -126,7 +126,7 @@ func (n *Node) NodeUpdate(s string) {
 }
 
 func (e *Edge) EdgeUpdate(s string) {
-	e.local.Tracer.EdgeUpdate(string(e.local.ID), s)
+	e.local.Tracer.EdgeUpdate(string(e.local.ID), e.String(), s)
 }
 
 func (e *Edge) EdgeMessage(s string, d tracer.MessageDir) {
