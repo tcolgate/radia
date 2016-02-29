@@ -18,7 +18,6 @@
 package ghs
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/golang/protobuf/proto"
@@ -119,14 +118,10 @@ func HaltMessage() *Message {
 }
 
 func (s *State) QueueGHS(j int, m *Message) {
-	s.Edges()[j].EdgeMessage(fmt.Sprintf("%+v", m.U))
-
 	s.Queue(j, m)
 }
 
 func (s *State) SendGHS(j int, m *Message) {
-	s.Edges()[j].EdgeMessage(fmt.Sprintf("%+v", m.U))
-
 	s.Send(j, m)
 }
 
@@ -135,7 +130,6 @@ func (s *State) Dispatch(j int, i interface{}) {
 	if !ok {
 		log.Fatalf("Non ghs.Message recieved")
 	}
-	s.Edges()[j].EdgeMessage(fmt.Sprint(m.U))
 
 	switch m.U.(type) {
 	case *Message_Connect:

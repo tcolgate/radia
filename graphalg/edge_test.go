@@ -25,12 +25,17 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
+func init() {
+	typeURL = RegisterMessage(TestMessage{})
+}
+
+var typeURL string
+
 func (t TestMessage) MarshalMessage() ([]byte, string) {
-	url := "blah"
 	bs, err := proto.Marshal(&t)
 	log.Println(err)
 
-	return bs, url
+	return bs, typeURL
 }
 
 func TestEdgeTestMessage1(t *testing.T) {
@@ -54,9 +59,14 @@ func TestEdgeTestMessage1(t *testing.T) {
 	sentm := TestMessage{1}
 	go func() { n1.Edges()[0].Send(sentm) }()
 
-	gotm, ok := n2.Edges()[0].Recieve().(TestMessage)
+	goti, err := n2.Edges()[0].Recieve()
+	if err != nil {
+		t.Fatalf("error recieving, %v", err)
+	}
+
+	gotm, ok := goti.(TestMessage)
 	if !ok {
-		log.Fatalf("failure type switching message")
+		t.Fatalf("failure type switching message")
 	}
 
 	//	gotm.Edge = nil
@@ -91,9 +101,24 @@ func TestEdgeTestMessage2(t *testing.T) {
 
 	sentm := TestMessage{1}
 	c := make(chan interface{})
-	go func() { c <- n1.Edges()[0].Recieve() }()
-	go func() { n3.Edges()[0].Send(sentm) }()
-	gotm := n2.Edges()[1].Recieve().(TestMessage)
+	go func() {
+		m, err := n1.Edges()[0].Recieve()
+		if err != nil {
+			t.Fatalf("error recieving, %v", err)
+		}
+		c <- m
+	}()
+
+	go func() {
+		n3.Edges()[0].Send(sentm)
+	}()
+
+	goti, err := n2.Edges()[1].Recieve()
+	if err != nil {
+		t.Fatalf("error recieving, %v", err)
+	}
+
+	gotm := goti.(TestMessage)
 	select {
 	case <-c:
 		t.Fatalf("expected recieve to block")

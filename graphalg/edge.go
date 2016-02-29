@@ -78,9 +78,8 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 	return &Edge{SenderReciever: c1}, &Edge{SenderReciever: c2}
 }
 
-func (e *Edge) Recieve() interface{} {
-	m := e.SenderReciever.Recieve()
-	return m
+func (e *Edge) Recieve() (interface{}, error) {
+	return e.SenderReciever.Recieve()
 }
 
 func (e *Edge) Send(m MessageMarshaler) {

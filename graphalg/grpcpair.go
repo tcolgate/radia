@@ -17,44 +17,38 @@
 
 package graphalg
 
-import "log"
+import google_protobuf "github.com/golang/protobuf/ptypes/any"
 
-func Run(a NodeAlgorithm, onDone func()) {
-	ms := make(chan QueuedMessage)
-	defer close(ms)
+// grpcPair is a sender reciever using channels
+type grpcPair struct {
+	send chan<- Message
+	recv <-chan Message
+}
 
-	a.Edges().SortByMinEdge()
-	defer func() {
-		if onDone != nil {
-			onDone()
-		}
-	}()
+func (p grpcPair) Send(m MessageMarshaler) {
+	bs, url := m.MarshalMessage()
 
-	for ei, e := range a.Edges() {
-		go func(e *Edge, ei int) {
-			for {
-				pb, err := e.Recieve()
-				if err != nil {
-					// What to do with this error?
-					log.Println(err)
-					continue
-				}
-
-				ms <- QueuedMessage{ei, pb}
-			}
-		}(e, ei)
+	p.send <- Message{
+		Payload: &google_protobuf.Any{
+			TypeUrl: url,
+			Value:   bs,
+		},
 	}
+}
 
-	for nm := range ms {
-		delayed := a.Queued()
-		a.ClearQueue()
+func (p grpcPair) Recieve() (interface{}, error) {
+	m := <-p.recv
 
-		a.Dispatch(nm.e, nm.m)
-		for _, om := range delayed {
-			a.Dispatch(om.e, om.m)
-		}
-		if a.Done() {
-			return
-		}
-	}
+	return unmarshalAny(m.Payload)
+}
+
+func (p grpcPair) Close() {
+	close(p.send)
+}
+
+// MakeGRPCPair is an edge sender/reciever built using a
+// channel
+func MakeGRPCPair() (SenderReciever, SenderReciever) {
+	c1, c2 := make(chan Message), make(chan Message)
+	return grpcPair{c1, c2}, grpcPair{c2, c1}
 }
