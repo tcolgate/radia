@@ -18,7 +18,6 @@
 package graphalg
 
 import (
-	"log"
 	"reflect"
 	"testing"
 
@@ -32,8 +31,7 @@ func init() {
 var typeURL string
 
 func (t TestMessage) MarshalMessage() ([]byte, string) {
-	bs, err := proto.Marshal(&t)
-	log.Println(err)
+	bs, _ := proto.Marshal(&t)
 
 	return bs, typeURL
 }

@@ -36,13 +36,13 @@ func (l *logDisplay) Log(t time.Time, id, s string) {
 }
 
 func (l *logDisplay) NodeUpdate(t time.Time, n, str string) {
-	l.Println(t, n, str)
+	l.Print(t, n, str)
 }
 
 func (l *logDisplay) EdgeUpdate(t time.Time, n, en, str string) {
-	l.Println(t, n, en, str)
+	l.Print(t, n, en, str)
 }
 
-func (l *logDisplay) EdgeMessage(t time.Time, n, en, str string) {
-	l.Println(t, n, en, str)
+func (l *logDisplay) EdgeMessage(t time.Time, n, en string, dir MessageDir, str string) {
+	l.Print(t, n, en, dir, str)
 }

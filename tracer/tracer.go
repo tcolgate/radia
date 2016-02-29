@@ -20,16 +20,39 @@ package tracer
 import (
 	"os"
 	"time"
+
+	pb "github.com/tcolgate/vonq/tracer/internal/proto"
 )
 
-var DefaultTracer *Tracer
+type MessageDir pb.EdgeMessageRequest_Dir
+
+var (
+	DefaultTracer *Tracer
+
+	EMDirIN    MessageDir = MessageDir(pb.EdgeMessageRequest_IN)
+	EMDirOUT   MessageDir = MessageDir(pb.EdgeMessageRequest_OUT)
+	EMDirQUEUE MessageDir = MessageDir(pb.EdgeMessageRequest_QUEUE)
+)
+
+func (m MessageDir) String() string {
+	switch m {
+	case EMDirIN:
+		return "IN"
+	case EMDirOUT:
+		return "OUT"
+	case EMDirQUEUE:
+		return "QUEUE"
+	default:
+		return "UNKNOWN"
+	}
+}
 
 //go:generate protoc -I $GOPATH/src:. --js_out=assets/ internal/proto/tracer.proto
 type traceDisplay interface {
-	Log(ts time.Time, id, s string)                     // Log a plain text message
-	NodeUpdate(ts time.Time, id, s string)              // Log change of state of a node
-	EdgeUpdate(ts time.Time, id, edgeName, s string)    // Log change of state of an edge
-	EdgeMessage(ts time.Time, id, edgeName, str string) // Log send/recv of a message
+	Log(ts time.Time, id, s string)                                          // Log a plain text message
+	NodeUpdate(ts time.Time, id, s string)                                   // Log change of state of a node
+	EdgeUpdate(ts time.Time, id, edgeName, s string)                         // Log change of state of an edge
+	EdgeMessage(ts time.Time, id, edgeName string, d MessageDir, str string) // Log send/recv of a message
 }
 
 type Tracer struct {
@@ -52,8 +75,8 @@ func EdgeUpdate(id, s string) {
 	DefaultTracer.EdgeUpdate(id, s)
 }
 
-func EdgeMessage(id, edgeId, s string) {
-	DefaultTracer.EdgeUpdate(id, s)
+func EdgeMessage(id, edgeId string, dir MessageDir, s string) {
+	DefaultTracer.EdgeMessage(id, edgeId, dir, s)
 }
 
 func (t *Tracer) Log(id, s string) {
@@ -74,8 +97,8 @@ func (t *Tracer) EdgeUpdate(id, s string) {
 	}
 }
 
-func (t *Tracer) EdgeMessage(id, edgeId, str string) {
+func (t *Tracer) EdgeMessage(id, edgeId string, dir MessageDir, str string) {
 	if t != nil {
-		t.td.EdgeMessage(time.Now(), id, edgeId, str)
+		t.td.EdgeMessage(time.Now(), id, edgeId, dir, str)
 	}
 }

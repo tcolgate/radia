@@ -59,8 +59,9 @@ message EdgeMessageRequest{
   string EdgeName = 3;
   string Message  = 4;
   enum Dir {
-    IN  = 0;
-    OUT = 1;
+    IN    = 0;
+    OUT   = 1;
+    QUEUE = 2;
   }
   Dir Direction   = 5;
 }

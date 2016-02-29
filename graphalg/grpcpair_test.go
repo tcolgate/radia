@@ -49,7 +49,6 @@ func TestRPCPairTestMessage1(t *testing.T) {
 		t.Fatalf("error recieving, %v", err)
 	}
 
-	log.Println(goti)
 	gotm, ok := goti.(*TestMessage)
 
 	if !ok {

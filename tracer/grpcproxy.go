@@ -51,7 +51,7 @@ func (g *grpcClientDisplay) EdgeUpdate(t time.Time, id, eid, s string) {
 	g.TraceServiceClient.EdgeUpdate(context.Background(), &r)
 }
 
-func (g *grpcClientDisplay) EdgeMessage(t time.Time, id, eid, str string) {
+func (g *grpcClientDisplay) EdgeMessage(t time.Time, id, eid string, dir MessageDir, str string) {
 	r := pb.EdgeMessageRequest{}
 	g.TraceServiceClient.EdgeMessage(context.Background(), &r)
 }
@@ -80,6 +80,6 @@ func (s *grpcServerDisplay) EdgeUpdate(ctx context.Context, r *pb.EdgeUpdateRequ
 }
 
 func (s *grpcServerDisplay) EdgeMessage(ctx context.Context, r *pb.EdgeMessageRequest) (*pb.EdgeMessageResponse, error) {
-	s.o.EdgeMessage(time.Unix(0, r.Time), r.NodeID, r.EdgeName, r.Message)
+	s.o.EdgeMessage(time.Unix(0, r.Time), r.NodeID, r.EdgeName, MessageDir(r.Direction), r.Message)
 	return &pb.EdgeMessageResponse{}, nil
 }

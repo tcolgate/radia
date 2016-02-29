@@ -46,6 +46,7 @@ type jsonMsg struct {
 	Log      string `json:",omitempty"`
 	State    string `json:",omitempty"`
 	Message  string `json:",omitempty"`
+	Dir      string `json:",omitempty"`
 }
 
 type httpDisplay struct {
@@ -66,8 +67,8 @@ func (h *httpDisplay) EdgeUpdate(t time.Time, n, en, s string) {
 	h.msgs <- jsonMsg{T: t, Type: "edgeUpdate", NodeID: n, EdgeName: en, State: s}
 }
 
-func (h *httpDisplay) EdgeMessage(t time.Time, n, en, m string) {
-	h.msgs <- jsonMsg{T: t, Type: "edgeMessage", NodeID: n, EdgeName: en, Message: m}
+func (h *httpDisplay) EdgeMessage(t time.Time, n, en string, dir MessageDir, m string) {
+	h.msgs <- jsonMsg{T: t, Type: "edgeMessage", NodeID: n, EdgeName: en, Dir: dir.String(), Message: m}
 }
 
 func (v httpDisplay) handleRoot(w http.ResponseWriter, r *http.Request) {

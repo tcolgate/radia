@@ -18,6 +18,7 @@
 package graphalg
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 )
@@ -89,6 +90,10 @@ func (n *Node) Send(e int, d MessageMarshaler) {
 
 // Queue - re-queue a message to the internal queue
 func (n *Node) Queue(e int, d interface{}) {
+	if n.Tracer != nil {
+		str, _ := json.Marshal(d)
+		n.Edges()[e].EdgeMessage(string(str), tracer.EMDirQUEUE)
+	}
 	n.msgQueue = append(n.msgQueue, QueuedMessage{e, d})
 }
 
@@ -124,6 +129,6 @@ func (e *Edge) EdgeUpdate(s string) {
 	e.local.Tracer.EdgeUpdate(string(e.local.ID), s)
 }
 
-func (e *Edge) EdgeMessage(s string) {
-	e.local.Tracer.EdgeMessage(string(e.local.ID), e.Weight.String(), s)
+func (e *Edge) EdgeMessage(s string, d tracer.MessageDir) {
+	e.local.Tracer.EdgeMessage(string(e.local.ID), e.Weight.String(), d, s)
 }

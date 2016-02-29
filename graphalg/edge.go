@@ -18,8 +18,11 @@
 package graphalg
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
+
+	"github.com/tcolgate/vonq/tracer"
 )
 
 type Edge struct {
@@ -79,9 +82,19 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 }
 
 func (e *Edge) Recieve() (interface{}, error) {
-	return e.SenderReciever.Recieve()
+	i, err := e.SenderReciever.Recieve()
+	if e.local.Tracer != nil {
+		str, _ := json.Marshal(i)
+		e.EdgeMessage(string(str), tracer.EMDirIN)
+	}
+
+	return i, err
 }
 
 func (e *Edge) Send(m MessageMarshaler) {
 	e.SenderReciever.Send(m)
+	if e.local.Tracer != nil {
+		str, _ := json.Marshal(m)
+		e.EdgeMessage(string(str), tracer.EMDirOUT)
+	}
 }

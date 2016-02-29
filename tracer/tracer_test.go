@@ -21,7 +21,9 @@ import (
 	"bytes"
 	"log"
 	"net"
+	"strings"
 	"testing"
+	"time"
 
 	pb "github.com/tcolgate/vonq/tracer/internal/proto"
 	"google.golang.org/grpc"
@@ -45,9 +47,9 @@ func TestTracerServer1(t *testing.T) {
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
-	c.Log("Something")
-	exp := "vonq: Something\n"
-	if got := out.String(); got != exp {
+	c.Log(time.Now(), "n1", "Something")
+	exp := " Something\n"
+	if got := out.String(); !strings.HasSuffix(got, exp) {
 		t.Fatalf("expected %v got: %v", exp, got)
 	}
 }
