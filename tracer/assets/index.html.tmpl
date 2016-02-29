@@ -103,9 +103,12 @@
 
       ws.onmessage = function(e) {
         var data = JSON.parse(e.data);
+        console.log(data)
+        /*
         if(data.hasOwnProperty("Log")){
           console.log(moment(data.T/1000) + ": node(" + data.NodeID + ") " + data.Log);
         }
+        */
 
         //update(data);
       };
