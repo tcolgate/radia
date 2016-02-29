@@ -84,7 +84,7 @@ func (s *State) WakeUp() {
 // procWakeUp - (2) wakeup node procedure
 func (s *State) procWakeUp() {
 	s.EdgeStates = make([]EdgeState, len(s.Edges()))
-	s.Fragment = FragID{MsnID: string(s.ID)}
+	s.Fragment = FragID{Msn: string(s.ID)}
 
 	s.inBranch = NIL
 	s.testEdge = NIL
