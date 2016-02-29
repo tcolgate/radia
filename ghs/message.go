@@ -30,6 +30,15 @@ func init() {
 	NodeStateSleeping = NodeState(Message_InitiateMsg_NodeState_value["sleeping"])
 	NodeStateFind = NodeState(Message_InitiateMsg_NodeState_value["find"])
 	NodeStateFound = NodeState(Message_InitiateMsg_NodeState_value["found"])
+
+	typeURL = graphalg.RegisterMessage(Message{})
+}
+
+var typeURL = ""
+
+func (m Message) MarshalMessage() ([]byte, string) {
+	bs, _ := proto.Marshal(&m)
+	return bs, typeURL
 }
 
 func ConnectMessage(level uint32) *Message {
@@ -110,29 +119,22 @@ func HaltMessage() *Message {
 }
 
 func (s *State) QueueGHS(j int, m *Message) {
-	s.Edges()[j].EdgeMessage(m.U)
+	s.Edges()[j].EdgeMessage(fmt.Sprintf("%+v", m.U))
 
-	b, err := proto.Marshal(m)
-	if err != nil {
-		s.Println(err)
-	}
-	s.Queue(j, b)
+	s.Queue(j, m)
 }
 
 func (s *State) SendGHS(j int, m *Message) {
-	s.Edges()[j].EdgeMessage(m.U)
+	s.Edges()[j].EdgeMessage(fmt.Sprintf("%+v", m.U))
 
-	b, err := proto.Marshal(m)
-	if err != nil {
-		log.Println(err)
-	}
-
-	s.Send(j, b)
+	s.Send(j, m)
 }
 
-func (s *State) Dispatch(j int, b []byte) {
-	m := Message{}
-	proto.Unmarshal(b, &m)
+func (s *State) Dispatch(j int, i interface{}) {
+	m, ok := i.(*Message)
+	if !ok {
+		log.Fatalf("Non ghs.Message recieved")
+	}
 	s.Edges()[j].EdgeMessage(fmt.Sprint(m.U))
 
 	switch m.U.(type) {

@@ -17,17 +17,12 @@
 
 package graphalg
 
-type Message struct {
-	Edge int
-	Data []byte
-}
-
 type Sender interface {
-	Send([]byte)
+	Send(MessageMarshaler)
 }
 
 type Reciever interface {
-	Recieve() []byte
+	Recieve() interface{}
 }
 
 type Closer interface {
@@ -41,3 +36,7 @@ type SenderReciever interface {
 }
 
 type SenderRecieverMaker func() (SenderReciever, SenderReciever)
+
+type MessageMarshaler interface {
+	MarshalMessage() ([]byte, string)
+}

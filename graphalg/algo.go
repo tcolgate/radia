@@ -23,13 +23,13 @@ type NodeAlgorithm interface {
 }
 
 type Queuer interface {
-	Queue(edge int, m Message)
+	Queue(edge int, m interface{})
 }
 
 type Dispatcher interface {
-	Dispatch(edge int, data []byte)
+	Dispatch(edge int, m interface{})
 	Edges() Edges
-	Queued() []Message
+	Queued() []QueuedMessage
 	ClearQueue()
 }
 

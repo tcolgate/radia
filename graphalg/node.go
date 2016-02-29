@@ -26,13 +26,18 @@ import "github.com/tcolgate/vonq/tracer"
 
 type NodeID string
 
+type QueuedMessage struct {
+	e int
+	m interface{}
+}
+
 type Node struct {
 	Base
 	ID NodeID
 
 	edges Edges
 
-	msgQueue []Message
+	msgQueue []QueuedMessage
 
 	*tracer.Tracer
 }
@@ -78,21 +83,21 @@ func (n1 *Node) Join(n2 *Node, w float64, f SenderRecieverMaker) {
 }
 
 // Send - send a message to the specified
-func (n *Node) Send(e int, d []byte) {
+func (n *Node) Send(e int, d MessageMarshaler) {
 	n.edges[e].Send(d)
 }
 
 // Queue - re-queue a message to the internal queue
-func (n *Node) Queue(e int, d []byte) {
-	n.msgQueue = append(n.msgQueue, Message{e, d})
+func (n *Node) Queue(e int, d interface{}) {
+	n.msgQueue = append(n.msgQueue, QueuedMessage{e, d})
 }
 
-func (n *Node) Queued() []Message {
+func (n *Node) Queued() []QueuedMessage {
 	return n.msgQueue
 }
 
 func (n *Node) ClearQueue() {
-	n.msgQueue = []Message{}
+	n.msgQueue = []QueuedMessage{}
 }
 
 func (n *Node) Log(s string) {

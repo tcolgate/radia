@@ -19,34 +19,47 @@ package graphalg
 
 import (
 	"log"
-	"os"
 	"reflect"
 	"testing"
+
+	"github.com/golang/protobuf/proto"
 )
 
+func (t TestMessage) MarshalMessage() ([]byte, string) {
+	url := "blah"
+	bs, err := proto.Marshal(&t)
+	log.Println(err)
+
+	return bs, url
+}
+
 func TestEdgeTestMessage1(t *testing.T) {
+	RegisterMessage(TestMessage{})
+
 	n1 := Node{
-		ID:     NodeID("n1"),
-		Logger: log.New(os.Stdout, "node(n1) ", 0),
+		ID: NodeID("n1"),
 	}
 	n2 := Node{
-		ID:     NodeID("n2"),
-		Logger: log.New(os.Stdout, "node(n2) ", 0),
+		ID: NodeID("n2"),
 	}
 	Join(&n1, &n2, 1.0, MakeChanPair)
 
-	if len(n1.Edges) != 1 {
-		t.Fatalf("expected %v edges, got %v", 1, len(n1.Edges))
+	if len(n1.Edges()) != 1 {
+		t.Fatalf("expected %v edges, got %v", 1, len(n1.Edges()))
 	}
-	if len(n2.Edges) != 1 {
-		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
+	if len(n2.Edges()) != 1 {
+		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges()))
 	}
 
-	sentm := ConnectMessage(0)
-	go func() { n1.Edges[0].Send(sentm) }()
-	gotm := n2.Edges[0].Recieve()
+	sentm := TestMessage{1}
+	go func() { n1.Edges()[0].Send(sentm) }()
 
-	gotm.Edge = nil
+	gotm, ok := n2.Edges()[0].Recieve().(TestMessage)
+	if !ok {
+		log.Fatalf("failure type switching message")
+	}
+
+	//	gotm.Edge = nil
 	if !reflect.DeepEqual(sentm, gotm) {
 		t.Fatalf("expected %+v, got %+v", sentm, gotm)
 	}
@@ -54,43 +67,39 @@ func TestEdgeTestMessage1(t *testing.T) {
 
 func TestEdgeTestMessage2(t *testing.T) {
 	n1 := Node{
-		ID:     NodeID("n1"),
-		Logger: log.New(os.Stdout, "node(n1) ", 0),
+		ID: NodeID("n1"),
 	}
 	n2 := Node{
-		ID:     NodeID("n2"),
-		Logger: log.New(os.Stdout, "node(n2) ", 0),
+		ID: NodeID("n2"),
 	}
 	n3 := Node{
-		ID:     NodeID("n3"),
-		Logger: log.New(os.Stdout, "node(n3) ", 0),
+		ID: NodeID("n3"),
 	}
 	Join(&n1, &n2, 1.0, MakeChanPair)
 	Join(&n3, &n2, 1.0, MakeChanPair)
 
-	if len(n1.Edges) != 1 {
-		t.Fatalf("expected %v edges, got %v", 1, len(n1.Edges))
+	if len(n1.Edges()) != 1 {
+		t.Fatalf("expected %v edges, got %v", 1, len(n1.Edges()))
 	}
-	if len(n2.Edges) != 2 {
-		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
-	}
-
-	if len(n3.Edges) != 1 {
-		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges))
+	if len(n2.Edges()) != 2 {
+		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges()))
 	}
 
-	sentm := ConnectMessage(1)
-	c := make(chan Message)
-	go func() { c <- n1.Edges[0].Recieve() }()
-	go func() { n3.Edges[0].Send(sentm) }()
-	gotm := n2.Edges[1].Recieve()
+	if len(n3.Edges()) != 1 {
+		t.Fatalf("expected %v edges, got %v", 1, len(n2.Edges()))
+	}
+
+	sentm := TestMessage{1}
+	c := make(chan interface{})
+	go func() { c <- n1.Edges()[0].Recieve() }()
+	go func() { n3.Edges()[0].Send(sentm) }()
+	gotm := n2.Edges()[1].Recieve().(TestMessage)
 	select {
 	case <-c:
 		t.Fatalf("expected recieve to block")
 	default:
 	}
 
-	gotm.Edge = nil
 	if !reflect.DeepEqual(sentm, gotm) {
 		t.Fatalf("expected %+v, got %+v", sentm, gotm)
 	}

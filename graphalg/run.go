@@ -18,7 +18,7 @@
 package graphalg
 
 func Run(a NodeAlgorithm, onDone func()) {
-	ms := make(chan Message)
+	ms := make(chan QueuedMessage)
 	defer close(ms)
 
 	a.Edges().SortByMinEdge()
@@ -32,7 +32,7 @@ func Run(a NodeAlgorithm, onDone func()) {
 		go func(e *Edge, ei int) {
 			for {
 				pb := e.Recieve()
-				ms <- Message{ei, pb}
+				ms <- QueuedMessage{ei, pb}
 			}
 		}(e, ei)
 	}
@@ -41,9 +41,9 @@ func Run(a NodeAlgorithm, onDone func()) {
 		delayed := a.Queued()
 		a.ClearQueue()
 
-		a.Dispatch(nm.Edge, nm.Data)
+		a.Dispatch(nm.e, nm.m)
 		for _, om := range delayed {
-			a.Dispatch(om.Edge, om.Data)
+			a.Dispatch(om.e, om.m)
 		}
 		if a.Done() {
 			return

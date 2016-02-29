@@ -15,9 +15,13 @@
 
 syntax = "proto3";
 
-import "google/protobuf/any.proto";
+import "github.com/golang/protobuf/ptypes/any/any.proto";
 
 package graphalg;
+
+service MessageService {
+  rpc SendMessage (stream SendMessageRequest) returns (SendMessageResponse);
+}
 
 message Weight {
   double cost  = 1;
@@ -25,8 +29,33 @@ message Weight {
   string msnID = 3;
 }
 
-message Messsage {
-  int64  SrcTime = 1;
-  string SrcID   = 2;
-  string DstID   = 3;
+message GraphID {
+  repeated int32 ids = 1;
+}
+
+message AlgorithmID {
+  repeated int32 ids = 1;
+}
+
+message Message {
+  google.protobuf.Any Payload = 4;
+}
+
+message SendMessageRequest {
+  GraphID gid     = 1;
+  AlgorithmID aid = 2;
+  Message msg     = 3;
+}
+
+message Error {
+  int32  error   = 1;
+  string msg     = 2;
+}
+
+message SendMessageResponse {
+  Error error = 1;
+}
+
+message TestMessage {
+  int32 Value = 1;
 }

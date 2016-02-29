@@ -10,13 +10,29 @@ It is generated from these files:
 
 It has these top-level messages:
 	Weight
+	GraphID
+	AlgorithmID
+	Message
+	SendMessageRequest
+	Error
+	SendMessageResponse
+	TestMessage
 */
 package graphalg
 
-import "github.com/golang/protobuf/proto"
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
+import google_protobuf "github.com/golang/protobuf/ptypes/any"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
+var _ = fmt.Errorf
+var _ = math.Inf
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+const _ = proto.ProtoPackageIsVersion1
 
 type Weight struct {
 	Cost  float64 `protobuf:"fixed64,1,opt,name=cost" json:"cost,omitempty"`
@@ -24,6 +40,147 @@ type Weight struct {
 	MsnID string  `protobuf:"bytes,3,opt,name=msnID" json:"msnID,omitempty"`
 }
 
-func (m *Weight) Reset()         { *m = Weight{} }
-func (m *Weight) String() string { return proto.CompactTextString(m) }
-func (*Weight) ProtoMessage()    {}
+func (m *Weight) Reset()                    { *m = Weight{} }
+func (m *Weight) String() string            { return proto.CompactTextString(m) }
+func (*Weight) ProtoMessage()               {}
+func (*Weight) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+
+type GraphID struct {
+	Ids []int32 `protobuf:"varint,1,rep,name=ids" json:"ids,omitempty"`
+}
+
+func (m *GraphID) Reset()                    { *m = GraphID{} }
+func (m *GraphID) String() string            { return proto.CompactTextString(m) }
+func (*GraphID) ProtoMessage()               {}
+func (*GraphID) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+type AlgorithmID struct {
+	Ids []int32 `protobuf:"varint,1,rep,name=ids" json:"ids,omitempty"`
+}
+
+func (m *AlgorithmID) Reset()                    { *m = AlgorithmID{} }
+func (m *AlgorithmID) String() string            { return proto.CompactTextString(m) }
+func (*AlgorithmID) ProtoMessage()               {}
+func (*AlgorithmID) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+type Message struct {
+	Payload *google_protobuf.Any `protobuf:"bytes,4,opt,name=Payload,json=payload" json:"Payload,omitempty"`
+}
+
+func (m *Message) Reset()                    { *m = Message{} }
+func (m *Message) String() string            { return proto.CompactTextString(m) }
+func (*Message) ProtoMessage()               {}
+func (*Message) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *Message) GetPayload() *google_protobuf.Any {
+	if m != nil {
+		return m.Payload
+	}
+	return nil
+}
+
+type SendMessageRequest struct {
+	Gid *GraphID     `protobuf:"bytes,1,opt,name=gid" json:"gid,omitempty"`
+	Aid *AlgorithmID `protobuf:"bytes,2,opt,name=aid" json:"aid,omitempty"`
+	Msg *Message     `protobuf:"bytes,3,opt,name=msg" json:"msg,omitempty"`
+}
+
+func (m *SendMessageRequest) Reset()                    { *m = SendMessageRequest{} }
+func (m *SendMessageRequest) String() string            { return proto.CompactTextString(m) }
+func (*SendMessageRequest) ProtoMessage()               {}
+func (*SendMessageRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+func (m *SendMessageRequest) GetGid() *GraphID {
+	if m != nil {
+		return m.Gid
+	}
+	return nil
+}
+
+func (m *SendMessageRequest) GetAid() *AlgorithmID {
+	if m != nil {
+		return m.Aid
+	}
+	return nil
+}
+
+func (m *SendMessageRequest) GetMsg() *Message {
+	if m != nil {
+		return m.Msg
+	}
+	return nil
+}
+
+type Error struct {
+	Error int32  `protobuf:"varint,1,opt,name=error" json:"error,omitempty"`
+	Msg   string `protobuf:"bytes,2,opt,name=msg" json:"msg,omitempty"`
+}
+
+func (m *Error) Reset()                    { *m = Error{} }
+func (m *Error) String() string            { return proto.CompactTextString(m) }
+func (*Error) ProtoMessage()               {}
+func (*Error) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+
+type SendMessageResponse struct {
+	Error *Error `protobuf:"bytes,1,opt,name=error" json:"error,omitempty"`
+}
+
+func (m *SendMessageResponse) Reset()                    { *m = SendMessageResponse{} }
+func (m *SendMessageResponse) String() string            { return proto.CompactTextString(m) }
+func (*SendMessageResponse) ProtoMessage()               {}
+func (*SendMessageResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
+
+func (m *SendMessageResponse) GetError() *Error {
+	if m != nil {
+		return m.Error
+	}
+	return nil
+}
+
+type TestMessage struct {
+	Value int32 `protobuf:"varint,1,opt,name=Value,json=value" json:"Value,omitempty"`
+}
+
+func (m *TestMessage) Reset()                    { *m = TestMessage{} }
+func (m *TestMessage) String() string            { return proto.CompactTextString(m) }
+func (*TestMessage) ProtoMessage()               {}
+func (*TestMessage) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
+
+func init() {
+	proto.RegisterType((*Weight)(nil), "graphalg.Weight")
+	proto.RegisterType((*GraphID)(nil), "graphalg.GraphID")
+	proto.RegisterType((*AlgorithmID)(nil), "graphalg.AlgorithmID")
+	proto.RegisterType((*Message)(nil), "graphalg.Message")
+	proto.RegisterType((*SendMessageRequest)(nil), "graphalg.SendMessageRequest")
+	proto.RegisterType((*Error)(nil), "graphalg.Error")
+	proto.RegisterType((*SendMessageResponse)(nil), "graphalg.SendMessageResponse")
+	proto.RegisterType((*TestMessage)(nil), "graphalg.TestMessage")
+}
+
+var fileDescriptor0 = []byte{
+	// 381 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x74, 0x51, 0x51, 0x4b, 0xf3, 0x30,
+	0x14, 0xa5, 0xeb, 0xba, 0x7e, 0xdf, 0x2d, 0x4c, 0x8d, 0x13, 0xc6, 0x54, 0x94, 0x0e, 0x71, 0x4f,
+	0x2d, 0xd4, 0x27, 0xc1, 0x97, 0x81, 0xa2, 0x82, 0x82, 0x64, 0xa2, 0x6f, 0x42, 0xb6, 0xc6, 0xac,
+	0xd0, 0x36, 0xb5, 0x69, 0x07, 0xfd, 0x05, 0xfe, 0x6d, 0x93, 0xb4, 0x75, 0x1b, 0xea, 0x43, 0x21,
+	0xf7, 0xde, 0x73, 0xcf, 0x39, 0xf7, 0x14, 0xfa, 0x2c, 0x27, 0xd9, 0x92, 0xc4, 0xcc, 0xcb, 0x72,
+	0x5e, 0x70, 0xf4, 0xaf, 0xad, 0x47, 0x3e, 0x8b, 0x8a, 0x65, 0x39, 0xf7, 0x16, 0x3c, 0xf1, 0x19,
+	0x8f, 0x49, 0xca, 0x7c, 0x0d, 0x99, 0x97, 0xef, 0x7e, 0x56, 0x54, 0x19, 0x15, 0x3e, 0x49, 0x2b,
+	0xf5, 0xd5, 0xab, 0xee, 0x1d, 0xf4, 0x5e, 0x69, 0xc4, 0x96, 0x05, 0x42, 0xd0, 0x5d, 0x70, 0x51,
+	0x0c, 0x8d, 0x53, 0x63, 0x62, 0x60, 0xfd, 0x46, 0x03, 0xb0, 0x62, 0x91, 0xde, 0x5f, 0x0f, 0x3b,
+	0xb2, 0xf9, 0x1f, 0xd7, 0x85, 0xea, 0x26, 0xba, 0x6b, 0xd6, 0x5d, 0x5d, 0xb8, 0x87, 0x60, 0xdf,
+	0x2a, 0x1b, 0x12, 0xb0, 0x0b, 0x66, 0x14, 0x0a, 0xc9, 0x64, 0x4e, 0x2c, 0xac, 0x9e, 0xee, 0x09,
+	0x38, 0xd3, 0x98, 0xf1, 0x5c, 0xba, 0x4b, 0x7e, 0x05, 0x5c, 0x82, 0xfd, 0x48, 0x85, 0x20, 0x8c,
+	0x22, 0x0f, 0xec, 0x27, 0x52, 0xc5, 0x9c, 0x84, 0xc3, 0xae, 0x14, 0x70, 0x82, 0x81, 0xc7, 0x38,
+	0x67, 0x31, 0xf5, 0xda, 0x53, 0xbc, 0x69, 0x5a, 0x61, 0x3b, 0xab, 0x41, 0xee, 0xa7, 0x01, 0x68,
+	0x46, 0xd3, 0xb0, 0xd9, 0xc7, 0xf4, 0xa3, 0xa4, 0xd2, 0xfb, 0x18, 0x4c, 0x16, 0x85, 0xfa, 0x1c,
+	0x27, 0xd8, 0xf3, 0xbe, 0x23, 0x6b, 0x4c, 0x62, 0x35, 0x45, 0xe7, 0x60, 0x12, 0x09, 0xea, 0x68,
+	0xd0, 0xc1, 0x1a, 0xb4, 0x61, 0x16, 0x2b, 0x84, 0x62, 0x4b, 0x04, 0xd3, 0x17, 0x6f, 0xb1, 0xb5,
+	0xa2, 0x6a, 0xea, 0xfa, 0x60, 0xdd, 0xe4, 0x39, 0xcf, 0x55, 0x42, 0x54, 0x3d, 0xb4, 0xba, 0x85,
+	0xeb, 0x42, 0x5d, 0xad, 0x38, 0xea, 0x2c, 0xf5, 0xc2, 0x15, 0xec, 0x6f, 0x39, 0x17, 0x19, 0x4f,
+	0x05, 0x45, 0x67, 0x9b, 0xeb, 0x4e, 0xb0, 0xb3, 0x96, 0xd3, 0xf4, 0x0d, 0x9f, 0x3b, 0x06, 0xe7,
+	0x59, 0x5e, 0xda, 0xe6, 0x26, 0x45, 0x5f, 0x48, 0x5c, 0xd2, 0x56, 0x74, 0xa5, 0x8a, 0xe0, 0x0d,
+	0xfa, 0x0d, 0x60, 0x46, 0xf3, 0x55, 0xb4, 0xa0, 0xe8, 0x01, 0x9c, 0x0d, 0x51, 0x74, 0xb4, 0x66,
+	0xff, 0x99, 0xe2, 0xe8, 0xf8, 0x8f, 0x69, 0xed, 0x74, 0x62, 0xcc, 0x7b, 0xfa, 0xa7, 0x5c, 0x7c,
+	0x05, 0x00, 0x00, 0xff, 0xff, 0x75, 0x70, 0x03, 0xea, 0x94, 0x02, 0x00, 0x00,
+}
