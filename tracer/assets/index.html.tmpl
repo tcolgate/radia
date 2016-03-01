@@ -28,8 +28,9 @@
   }
 
   .inactiveLink {
-    stroke: #000;
-    stroke-width: 0px;
+    stroke: #aaa;
+    stroke-width: 0.5px;
+    stroke-dasharray: "10,10";
   }
 
   .node {
@@ -59,7 +60,7 @@
           .nodes(nodes)
           .links(links)
           .charge(-400)
-          .linkDistance(linkStrength)
+          .linkStrength(linkStrength)
           .linkDistance(linkDist)
           .size([width, height])
           .on("tick",tick);
@@ -98,39 +99,35 @@
       }
 
       function nodeUpdate(ts,id,state) {
-        console.log("nu",ts,id,state);
         if(! nodesIdx.hasOwnProperty(id)){
           let n = {"id": id};
           nodes.push(n);
           nodesIdx[id] = nodes.length - 1;
-          console.log("nodes", nodes);
-          console.log("nodesIdx", nodesIdx);
         };
       }
 
       function edgeUpdate(ts,id,edgeName,state) {
-        console.log("eu",ts,id,edgeName,state);
         let estate = JSON.parse(state);
         if(!linksIdx.hasOwnProperty(edgeName)){
           if(!halfLinks.hasOwnProperty(edgeName)){
             let newhenode = nodes[nodesIdx[id]];
             let newhe = {"source": newhenode};
             halfLinks[edgeName] = newhe;
-            console.log("hls", halfLinks);
           } else {
             let oldhe = halfLinks[edgeName];
             if (oldhe.source != id && !oldhe.hasOwnProperty("target")){
               let newtnode = nodes[nodesIdx[id]];
               let edata = JSON.parse(edgeName);
-              let newlink = {"source": oldhe.source,"target": newtnode,"cost": edata.Cost,"disabled": estate.Disabaled};
+              let newlink = {"source": oldhe.source,"target": newtnode,"cost": edata.Cost,"disabled": estate.Disabled};
               links.push(newlink);
               linksIdx[edgeName] = links.length - 1;
               halfLinks[edgeName] = newlink;
             };
           };
         } else {
-          let aedge = links[linksIdx[edgeName]];
+          let aedge =links[linksIdx[edgeName]];
           aedge["disabled"] = estate.Disabled;
+          links[linksIdx[edgeName]] = aedge;
         };
       };
 
@@ -166,7 +163,9 @@
             .attr("y1", function(d) { return d.source.y; })
             .attr("x2", function(d) { return d.target.x; })
             .attr("y2", function(d) { return d.target.y; })
-            .attr("class", function(d) { return d.disable == 1? "inactiveLink" : "activeLink"; });
+            .attr("class", function(d,i) {
+              return d.disabled ? "inactiveLink" : "activeLink";
+            });
       };
 
       function run(){

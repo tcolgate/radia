@@ -169,6 +169,10 @@ func (s *State) Test(j int, level uint32, fragment FragID) {
 		} else {
 			if s.EdgeStates[j] == EdgeStateBasic {
 				s.EdgeStates[j] = EdgeStateRejected
+
+				// TODO: Ideally, this would be somemwhere else
+				s.Edges()[j].Disabled = true
+				s.Edges()[j].EdgeUpdate()
 			}
 			if s.testEdge != j {
 				s.SendGHS(j, RejectMessage())
