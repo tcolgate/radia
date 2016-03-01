@@ -18,3 +18,5 @@
 // Package graphalg implements a set of structs and interfaces for
 // running graph algorithms over sets of nodes and edges.
 package graphalg
+
+//go:generate protoc -I $GOPATH/src:. --go_out=:. graphalg.proto

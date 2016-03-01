@@ -47,7 +47,6 @@ func (m MessageDir) String() string {
 	}
 }
 
-//go:generate protoc -I $GOPATH/src:. --js_out=assets/ internal/proto/tracer.proto
 type traceDisplay interface {
 	Log(ts time.Time, id, s string)                                          // Log a plain text message
 	NodeUpdate(ts time.Time, id, s string)                                   // Log change of state of a node
