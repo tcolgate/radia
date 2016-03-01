@@ -22,11 +22,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment-with-locales.min.js"></script>
 
 <style type="text/css">
-  .chart rect {
-    fill: steelblue;
-    stroke: white;
-  }
-
   .link {
     stroke: #000;
     stroke-width: 1.5px;
@@ -37,10 +32,6 @@
     stroke: #fff;
     stroke-width: 1.5px;
   }
-
-  .node.a { fill: #1f77b4; }
-  .node.b { fill: #ff7f0e; }
-  .node.c { fill: #2ca02c; }
 </style>
 
 <body>
@@ -53,7 +44,12 @@
       var color = d3.scale.category10();
 
       var nodes = [],
+          halfLinks = [],
           links = [];
+
+      var nodesIdx = {}; // map node IDs to nodes index
+      var halfLinksIdx = {}; // map half edge IDs to edges index
+      var linksIdx = {}; // map edge IDs to edges index
 
       var force = d3.layout.force()
           .nodes(nodes)
@@ -71,23 +67,9 @@
           link = svg.selectAll(".link");
 
       function linkDist(l,li){
-        return l.cost * 60
+        //return l.cost * 6
+        return 6
       }
-
-      function update(data) {
-        // Add any nodes
-        data.nodes.forEach(function(n){
-          nodes.push(n);
-        });
-
-        links = []
-        data.links.forEach(function(l){
-          links.push({source: nodes[l.source],target: nodes[l.target], cost: l.cost});
-        });
-        force.links(links)
-
-        start();
-      };
 
       function start() {
         link = link.data(force.links(), function(d) { return d.source.id + "-" + d.target.id; });
@@ -101,20 +83,72 @@
         force.start();
       }
 
+      function nodeUpdate(ts,id,state) {
+        console.log("nu",ts,id,state);
+        if(! nodesIdx.hasOwnProperty(id)){
+          let n = {"id": id};
+          nodes.push(n);
+          nodesIdx[id] = nodes.length - 1;
+          console.log("nodes", nodes);
+          console.log("nodesIdx", nodesIdx);
+        };
+      }
+
+      function edgeUpdate(ts,id,edgeName,state) {
+        console.log("eu",ts,id,edgeName,state);
+        if(!linksIdx.hasOwnProperty(edgeName)){
+          if(!halfLinks.hasOwnProperty(edgeName)){
+            var newhenode = nodes[nodesIdx[id]];
+            var newhe = {"source": newhenode};
+            halfLinks[edgeName] = newhe;
+            console.log("hls", halfLinks);
+          } else {
+            console.log("GOT HERE");
+            var oldhe = halfLinks[edgeName];
+            if (oldhe.source != id){
+              if (!oldhe.hasOwnProperty("target")){
+                console.log("old half edge",oldhe);
+                var newtnode = nodes[nodesIdx[id]];
+                console.log("newtnode", newtnode);
+                var newlink = {"source": oldhe.source,"target": newtnode};
+                console.log("new link",newlink);
+                links.push(newlink);
+                linksIdx[edgeName] = links.length - 1;
+                halfLinks[edgeName] = newlink;
+
+                console.log("links", links);
+                console.log("linksIdx", linksIdx);
+              };
+            };
+          };
+        };
+      };
+
+      function edgeMessage(ts,id,edgeName,dir,msgStr) {
+        console.log(msgStr);
+        let msg = JSON.parse(msgStr)["U"];
+        console.log("em",ts,id,edgeName,dir,msg);
+      }
+
       ws.onmessage = function(e) {
         var data = JSON.parse(e.data);
-        console.log(data)
-        /*
-        if(data.hasOwnProperty("Log")){
-          console.log(moment(data.T/1000) + ": node(" + data.NodeID + ") " + data.Log);
+        if(data.hasOwnProperty("Type")){
+          if (data["Type"] == "nodeUpdate"){
+            nodeUpdate(data["T"], data["NodeID"], data["State"]);
+          } else if (data["Type"] == "edgeUpdate"){
+            edgeUpdate(data["T"], data["NodeID"], data["EdgeName"], data["State"]);
+          } else if (data["Type"] == "edgeMessage"){
+            edgeMessage(data['T'], data["NodeID"], data["EdgeName"], data["Dir"], data["Message"]);
+          } else if (data["Type"] == "log"){
+            console.log(data.Log);
+          } else {
+            console.log(data);
+          }
         }
-        */
-
-        //update(data);
+        start();
       };
 
       function tick() {
-        console.log("tick")
         node.attr("cx", function(d) { return d.x; })
             .attr("cy", function(d) { return d.y; })
 
@@ -129,6 +163,8 @@
           console.log("Requested run");
         });
       };
+      
+      start();
   </script>
   <div id="graph-area"></div>
   <input type="button" id="runBtn" value="Run" onclick="run()"></input>

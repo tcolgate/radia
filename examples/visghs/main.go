@@ -90,14 +90,16 @@ func setupGHS(mux *http.ServeMux) {
 	}
 
 	for _, g := range s.ghs {
-		n := g.Node
 
-		go n.NodeUpdate("from node")
-		for _, e := range n.Edges() {
-			go e.EdgeUpdate("from edge")
-		}
+		go func(g *ghs.State) {
+			n := g.Node
+			n.NodeUpdate("from node")
+			for _, e := range n.Edges() {
+				e.EdgeUpdate("from edge")
+			}
 
-		go graphalg.Run(g, s.wg.Done)
+			graphalg.Run(g, s.wg.Done)
+		}(g)
 	}
 
 	log.Println("running")
