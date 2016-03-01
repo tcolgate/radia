@@ -98,3 +98,14 @@ func (e *Edge) Send(m MessageMarshaler) {
 		e.EdgeMessage(string(str), tracer.EMDirOUT)
 	}
 }
+
+func (e *Edge) EdgeUpdate() {
+	bs, _ := json.Marshal(e.Weight)
+	sbs, _ := json.Marshal(e)
+	e.local.Tracer.EdgeUpdate(string(e.local.ID), string(bs), string(sbs))
+}
+
+func (e *Edge) EdgeMessage(s string, d tracer.MessageDir) {
+	bs, _ := json.Marshal(e.Weight)
+	e.local.Tracer.EdgeMessage(string(e.local.ID), string(bs), d, s)
+}

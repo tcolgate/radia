@@ -124,11 +124,3 @@ func (n *Node) Printf(str string, v ...interface{}) {
 func (n *Node) NodeUpdate(s string) {
 	n.Tracer.NodeUpdate(string(n.ID), s)
 }
-
-func (e *Edge) EdgeUpdate(s string) {
-	e.local.Tracer.EdgeUpdate(string(e.local.ID), e.Weight.String(), s)
-}
-
-func (e *Edge) EdgeMessage(s string, d tracer.MessageDir) {
-	e.local.Tracer.EdgeMessage(string(e.local.ID), e.Weight.String(), d, s)
-}

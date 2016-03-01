@@ -22,14 +22,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment-with-locales.min.js"></script>
 
 <style type="text/css">
-  .link {
+  .activeLink {
     stroke: #000;
     stroke-width: 1.5px;
   }
 
+  .inactiveLink {
+    stroke: #000;
+    stroke-width: 0px;
+  }
+
   .node {
-    fill: #000;
-    stroke: #fff;
+    stroke: #000;
     stroke-width: 1.5px;
   }
 </style>
@@ -41,7 +45,7 @@
       var width = 960,
           height = 500;
 
-      var color = d3.scale.category10();
+      var c20c = d3.scale.category20c();
 
       var nodes = [],
           halfLinks = [],
@@ -55,6 +59,7 @@
           .nodes(nodes)
           .links(links)
           .charge(-400)
+          .linkDistance(linkStrength)
           .linkDistance(linkDist)
           .size([width, height])
           .on("tick",tick);
@@ -67,17 +72,26 @@
           link = svg.selectAll(".link");
 
       function linkDist(l,li){
-        //return l.cost * 6
-        return 6
+        return l.cost * 12
+      }
+
+      function linkStrength(l,li){
+        if (l.disabled){
+          return 0;
+        };
+        return 1;
       }
 
       function start() {
         link = link.data(force.links(), function(d) { return d.source.id + "-" + d.target.id; });
-        link.enter().insert("line", ".node").attr("class", "link");
+        link.enter().insert("line", ".node");
         link.exit().remove();
 
         node = node.data(force.nodes(), function(d) { return d.id;});
-        node.enter().append("circle").attr("class", function(d) { return "node " + d.id; }).attr("r", 8);
+        node.enter().append("circle")
+          .attr("fill", function(d,i) {return c20c(nodes.length);})
+          .attr("class", "node")
+          .attr("r", 8);
         node.exit().remove();
 
         force.start();
@@ -96,31 +110,27 @@
 
       function edgeUpdate(ts,id,edgeName,state) {
         console.log("eu",ts,id,edgeName,state);
+        let estate = JSON.parse(state);
         if(!linksIdx.hasOwnProperty(edgeName)){
           if(!halfLinks.hasOwnProperty(edgeName)){
-            var newhenode = nodes[nodesIdx[id]];
-            var newhe = {"source": newhenode};
+            let newhenode = nodes[nodesIdx[id]];
+            let newhe = {"source": newhenode};
             halfLinks[edgeName] = newhe;
             console.log("hls", halfLinks);
           } else {
-            console.log("GOT HERE");
-            var oldhe = halfLinks[edgeName];
-            if (oldhe.source != id){
-              if (!oldhe.hasOwnProperty("target")){
-                console.log("old half edge",oldhe);
-                var newtnode = nodes[nodesIdx[id]];
-                console.log("newtnode", newtnode);
-                var newlink = {"source": oldhe.source,"target": newtnode};
-                console.log("new link",newlink);
-                links.push(newlink);
-                linksIdx[edgeName] = links.length - 1;
-                halfLinks[edgeName] = newlink;
-
-                console.log("links", links);
-                console.log("linksIdx", linksIdx);
-              };
+            let oldhe = halfLinks[edgeName];
+            if (oldhe.source != id && !oldhe.hasOwnProperty("target")){
+              let newtnode = nodes[nodesIdx[id]];
+              let edata = JSON.parse(edgeName);
+              let newlink = {"source": oldhe.source,"target": newtnode,"cost": edata.Cost,"disabled": estate.Disabaled};
+              links.push(newlink);
+              linksIdx[edgeName] = links.length - 1;
+              halfLinks[edgeName] = newlink;
             };
           };
+        } else {
+          let aedge = links[linksIdx[edgeName]];
+          aedge["disabled"] = estate.Disabled;
         };
       };
 
@@ -155,7 +165,8 @@
         link.attr("x1", function(d) { return d.source.x; })
             .attr("y1", function(d) { return d.source.y; })
             .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
+            .attr("y2", function(d) { return d.target.y; })
+            .attr("class", function(d) { return d.disable == 1? "inactiveLink" : "activeLink"; });
       };
 
       function run(){
@@ -163,7 +174,7 @@
           console.log("Requested run");
         });
       };
-      
+
       start();
   </script>
   <div id="graph-area"></div>
