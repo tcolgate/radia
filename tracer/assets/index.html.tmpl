@@ -70,10 +70,12 @@
           .attr("height", height);
 
       var node = svg.selectAll(".node"),
-          link = svg.selectAll(".link");
+          link = svg.selectAll("line"),
+          linkPath = svg.selectAll(".linkPath"),
+          linkLabel = svg.selectAll(".linkLabel");
 
       function linkDist(l,li){
-        return l.cost * 12
+        return l.cost * 24
       }
 
       function linkStrength(l,li){
@@ -83,17 +85,52 @@
         return 1;
       }
 
+      function distance(p1,p2) {
+        var x1 = p1.x < p2.x ? p1.x : p2.x;
+        var x2 = p1.x < p2.x ? p2.x : p1.x;
+        var y1 = p1.y < p2.y ? p1.y : p2.y;
+        var y2 = p1.y < p2.y ? p2.y : p1.y;
+        return  Math.sqrt(( x2 - x1 )^2 + ( y2 - y1)^2);
+      }
+
       function start() {
-        link = link.data(force.links(), function(d) { return d.source.id + "-" + d.target.id; });
-        link.enter().insert("line", ".node");
+        link = link.data(links);
+        link.enter().append("line")
+                    .attr("id",function(d,i) {return 'link'+i});
         link.exit().remove();
 
-        node = node.data(force.nodes(), function(d) { return d.id;});
+        node = node.data(nodes);
         node.enter().append("circle")
-          .attr("fill", function(d,i) {return c20c(nodes.length);})
-          .attr("class", "node")
-          .attr("r", 8);
+                    .attr("fill", function(d,i) {return c20c(nodes.length);})
+                    .attr("class", "node")
+                    .attr("r", 8);
         node.exit().remove();
+
+        linkPath = linkPath.data(links);
+        linkPath.enter().append('path')
+                .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
+                       'class':'linkPath',
+                       'fill-opacity':0,
+                       'stroke-opacity':0,
+                       'fill':'blue',
+                       'stroke':'red',
+                       'id':function(d,i) {return 'linkPath'+i}})
+                .style("pointer-events", "none");
+
+        linkLabel = linkLabel.data(links);
+        linkLabel.enter().append('text')
+                         .style("pointer-events", "none")
+                         .attr({'class':'linkLabel',
+                                'id':function(d,i){return 'linkLabel'+i},
+                                //'dx':function(d,i){return distance(d.source,d.target)/2},
+                                'dx': 30,
+                                'dy':0,
+                                'font-size':10,
+                                'fill':'#aaa'})
+                         .append('textPath')
+                         .attr('xlink:href',function(d,i) {return '#linkPath'+i})
+                         .style("pointer-events", "none")
+                         .text(function(d,i){return d.cost});
 
         force.start();
       }
@@ -166,6 +203,21 @@
             .attr("class", function(d,i) {
               return d.disabled ? "inactiveLink" : "activeLink";
             });
+
+        linkPath.attr('d', function(d) { var path='M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y;
+                                                       return path});
+
+        linkLabel.attr('transform',function(d,i){
+            if (d.target.x<d.source.x){
+                bbox = this.getBBox();
+                rx = bbox.x+bbox.width/2;
+                ry = bbox.y+bbox.height/2;
+                return 'rotate(180 '+rx+' '+ry+')';
+                }
+            else {
+                return 'rotate(0)';
+                }
+        });
       };
 
       function run(){
