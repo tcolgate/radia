@@ -15,40 +15,19 @@
 
 syntax = "proto3";
 
-import "github.com/golang/protobuf/ptypes/any/any.proto";
-import "github.com/tcolgate/vonq/graph/graph.proto";
+package graph;
 
-package graphalg;
-
-service MessageService {
-  rpc SendMessage (stream SendMessageRequest) returns (SendMessageResponse);
+// GraphID is an identified for a specific arrangemnt of nodes and edges.
+// We can use this to select the specific topology we wish to pass messages
+// to.
+message GraphID {
+  repeated int32 id = 1; // Componenets o the id
 }
 
-message Weight {
-  double Cost = 1;
-  string Lsn  = 2;
-  string Msn  = 3;
+// AlgorithmID identifies a specific instance of a running algorithm. It
+// should be possible to run multiple instances of any algorithms
+// over a given graph at any one time
+message AlgorithmID {
+  repeated int32 id = 1; // Componenets o the id
 }
 
-message Message {
-  google.protobuf.Any Payload = 4;
-}
-
-message SendMessageRequest {
-  graph.GraphID gid     = 1;
-  graph.AlgorithmID aid = 2;
-  Message msg           = 3;
-}
-
-message Error {
-  int32  error   = 1;
-  string msg     = 2;
-}
-
-message SendMessageResponse {
-  Error error = 1;
-}
-
-message TestMessage {
-  int32 Value = 1;
-}
