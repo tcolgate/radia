@@ -99,13 +99,6 @@
                     .attr("id",function(d,i) {return 'link'+i});
         link.exit().remove();
 
-        node = node.data(nodes);
-        node.enter().append("circle")
-                    .attr("fill", function(d,i) {return c20c(nodes.length);})
-                    .attr("class", "node")
-                    .attr("r", 8);
-        node.exit().remove();
-
         linkPath = linkPath.data(links);
         linkPath.enter().append('path')
                 .attr({'d': function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y},
@@ -132,37 +125,44 @@
                          .style("pointer-events", "none")
                          .text(function(d,i){return d.cost});
 
+        node = node.data(nodes);
+        node.enter().append("circle")
+                    .attr("fill", function(d,i) {return c20c(nodes.length);})
+                    .attr("class", "node")
+                    .attr("r", 8);
+        node.exit().remove();
+
         force.start();
       }
 
       function nodeUpdate(ts,id,state) {
         if(! nodesIdx.hasOwnProperty(id)){
-          let n = {"id": id};
+          var n = {"id": id};
           nodes.push(n);
           nodesIdx[id] = nodes.length - 1;
         };
       }
 
       function edgeUpdate(ts,id,edgeName,state) {
-        let estate = JSON.parse(state);
+        var estate = JSON.parse(state);
         if(!linksIdx.hasOwnProperty(edgeName)){
           if(!halfLinks.hasOwnProperty(edgeName)){
-            let newhenode = nodes[nodesIdx[id]];
-            let newhe = {"source": newhenode};
+            var newhenode = nodes[nodesIdx[id]];
+            var newhe = {"source": newhenode};
             halfLinks[edgeName] = newhe;
           } else {
-            let oldhe = halfLinks[edgeName];
+            var oldhe = halfLinks[edgeName];
             if (oldhe.source != id && !oldhe.hasOwnProperty("target")){
-              let newtnode = nodes[nodesIdx[id]];
-              let edata = JSON.parse(edgeName);
-              let newlink = {"source": oldhe.source,"target": newtnode,"cost": edata.Cost,"disabled": estate.Disabled};
+              var newtnode = nodes[nodesIdx[id]];
+              var edata = JSON.parse(edgeName);
+              var newlink = {"source": oldhe.source,"target": newtnode,"cost": edata.Cost,"disabled": estate.Disabled};
               links.push(newlink);
               linksIdx[edgeName] = links.length - 1;
               halfLinks[edgeName] = newlink;
             };
           };
         } else {
-          let aedge =links[linksIdx[edgeName]];
+          var aedge =links[linksIdx[edgeName]];
           aedge["disabled"] = estate.Disabled;
           links[linksIdx[edgeName]] = aedge;
         };
@@ -170,7 +170,7 @@
 
       function edgeMessage(ts,id,edgeName,dir,msgStr) {
         console.log(msgStr);
-        let msg = JSON.parse(msgStr)["U"];
+        var msg = JSON.parse(msgStr)["U"];
         console.log("em",ts,id,edgeName,dir,msg);
       }
 

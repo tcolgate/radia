@@ -15,6 +15,8 @@
 
 syntax = "proto3";
 
+import "github.com/tcolgate/vonq/graph/graph.proto";
+
 package proto;
 
 service TraceService {
@@ -26,44 +28,52 @@ service TraceService {
 
 
 message LogRequest {
-  int64  Time    = 1;
-  string NodeID  = 2;
-  string Message = 3;
+  int64             Time    = 1;
+  graph.GraphID     Gid     = 2;
+  graph.AlgorithmID Aid     = 3;
+  string            NodeID  = 4;
+  string            Message = 5;
 }
 
 message LogResponse {
 }
 
 message NodeUpdateRequest{
-  int64  Time   = 1;
-  string NodeID = 2;
-  string Status = 3;
+  int64             Time   = 1;
+  graph.GraphID     Gid    = 2;
+  graph.AlgorithmID Aid    = 3;
+  string            NodeID = 4;
+  string            Status = 5;
 }
 
 message NodeUpdateResponse{
 }
 
 message EdgeUpdateRequest{
-  int64  Time     = 1;
-  string NodeID   = 2;
-  string EdgeName = 3;
-  string Status   = 4;
+  int64             Time     = 1;
+  graph.GraphID     Gid      = 2;
+  graph.AlgorithmID Aid      = 3;
+  string            NodeID   = 4;
+  string            EdgeName = 5;
+  string            Status   = 6;
 }
 
 message EdgeUpdateResponse{
 }
 
 message EdgeMessageRequest{
-  int64  Time     = 1;
-  string NodeID   = 2;
-  string EdgeName = 3;
-  string Message  = 4;
+  int64             Time     = 1;
+  graph.GraphID     Gid      = 2;
+  graph.AlgorithmID Aid      = 3;
+  string            NodeID   = 4;
+  string            EdgeName = 5;
+  string            Message  = 6;
   enum Dir {
     IN    = 0;
     OUT   = 1;
     QUEUE = 2;
   }
-  Dir Direction   = 5;
+  Dir           Direction   = 7;
 }
 
 message EdgeMessageResponse{
