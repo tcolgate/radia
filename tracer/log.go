@@ -21,6 +21,8 @@ import (
 	"io"
 	"log"
 	"time"
+
+	"github.com/tcolgate/vonq/graph"
 )
 
 func NewLogDisplay(w io.Writer) traceDisplay {
@@ -31,18 +33,18 @@ type logDisplay struct {
 	*log.Logger
 }
 
-func (l *logDisplay) Log(t time.Time, id, s string) {
+func (l *logDisplay) Log(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
 	l.Printf("%v node(%v): %s", t, id, s)
 }
 
-func (l *logDisplay) NodeUpdate(t time.Time, n, str string) {
+func (l *logDisplay) NodeUpdate(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, n, str string) {
 	l.Print(t, n, str)
 }
 
-func (l *logDisplay) EdgeUpdate(t time.Time, n, en, str string) {
+func (l *logDisplay) EdgeUpdate(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, n, en, str string) {
 	l.Print(t, n, en, str)
 }
 
-func (l *logDisplay) EdgeMessage(t time.Time, n, en string, dir MessageDir, str string) {
+func (l *logDisplay) EdgeMessage(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, n, en string, dir MessageDir, str string) {
 	l.Print(t, n, en, dir, str)
 }

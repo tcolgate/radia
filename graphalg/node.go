@@ -23,7 +23,10 @@ import (
 	"sort"
 )
 
-import "github.com/tcolgate/vonq/tracer"
+import (
+	"github.com/tcolgate/vonq/graph"
+	"github.com/tcolgate/vonq/tracer"
+)
 
 type NodeID string
 
@@ -106,7 +109,7 @@ func (n *Node) ClearQueue() {
 }
 
 func (n *Node) Log(s string) {
-	n.Tracer.Log(string(n.ID), s)
+	n.Tracer.Log(graph.GraphID{}, graph.AlgorithmID{}, string(n.ID), s)
 }
 
 func (n *Node) Print(v ...interface{}) {
@@ -122,5 +125,5 @@ func (n *Node) Printf(str string, v ...interface{}) {
 }
 
 func (n *Node) NodeUpdate(s string) {
-	n.Tracer.NodeUpdate(string(n.ID), s)
+	n.Tracer.NodeUpdate(graph.GraphID{}, graph.AlgorithmID{}, string(n.ID), s)
 }

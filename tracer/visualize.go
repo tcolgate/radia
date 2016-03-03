@@ -24,6 +24,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/tcolgate/vonq/graph"
+
 	"golang.org/x/net/websocket"
 )
 
@@ -55,19 +57,19 @@ type httpDisplay struct {
 	msgs   chan jsonMsg
 }
 
-func (h *httpDisplay) Log(t time.Time, id, s string) {
+func (h *httpDisplay) Log(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
 	h.msgs <- jsonMsg{T: t, Type: "log", NodeID: id, Log: s}
 }
 
-func (h *httpDisplay) NodeUpdate(t time.Time, n, str string) {
+func (h *httpDisplay) NodeUpdate(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, n, str string) {
 	h.msgs <- jsonMsg{T: t, Type: "nodeUpdate", NodeID: n, State: str}
 }
 
-func (h *httpDisplay) EdgeUpdate(t time.Time, n, en, s string) {
+func (h *httpDisplay) EdgeUpdate(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, n, en, s string) {
 	h.msgs <- jsonMsg{T: t, Type: "edgeUpdate", NodeID: n, EdgeName: en, State: s}
 }
 
-func (h *httpDisplay) EdgeMessage(t time.Time, n, en string, dir MessageDir, m string) {
+func (h *httpDisplay) EdgeMessage(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, n, en string, dir MessageDir, m string) {
 	h.msgs <- jsonMsg{T: t, Type: "edgeMessage", NodeID: n, EdgeName: en, Dir: dir.String(), Message: m}
 }
 

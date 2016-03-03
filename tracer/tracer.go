@@ -21,6 +21,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/tcolgate/vonq/graph"
 	pb "github.com/tcolgate/vonq/tracer/internal/proto"
 )
 
@@ -48,10 +49,10 @@ func (m MessageDir) String() string {
 }
 
 type traceDisplay interface {
-	Log(ts time.Time, id, s string)                                          // Log a plain text message
-	NodeUpdate(ts time.Time, id, s string)                                   // Log change of state of a node
-	EdgeUpdate(ts time.Time, id, edgeName, s string)                         // Log change of state of an edge
-	EdgeMessage(ts time.Time, id, edgeName string, d MessageDir, str string) // Log send/recv of a message
+	Log(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string)                                          // Log a plain text message
+	NodeUpdate(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string)                                   // Log change of state of a node
+	EdgeUpdate(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, edgeName, s string)                         // Log change of state of an edge
+	EdgeMessage(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, edgeName string, d MessageDir, str string) // Log send/recv of a message
 }
 
 type Tracer struct {
@@ -62,42 +63,42 @@ func init() {
 	DefaultTracer = &Tracer{NewLogDisplay(os.Stdout)}
 }
 
-func Log(id, s string) {
-	DefaultTracer.Log(id, s)
+func Log(gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
+	DefaultTracer.Log(gid, aid, id, s)
 }
 
-func NodeUpdate(id, s string) {
-	DefaultTracer.NodeUpdate(id, s)
+func NodeUpdate(gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
+	DefaultTracer.NodeUpdate(gid, aid, id, s)
 }
 
-func EdgeUpdate(id, edgeId, s string) {
-	DefaultTracer.EdgeUpdate(id, edgeId, s)
+func EdgeUpdate(gid graph.GraphID, aid graph.AlgorithmID, id, edgeId, s string) {
+	DefaultTracer.EdgeUpdate(gid, aid, id, edgeId, s)
 }
 
-func EdgeMessage(id, edgeId string, dir MessageDir, s string) {
-	DefaultTracer.EdgeMessage(id, edgeId, dir, s)
+func EdgeMessage(gid graph.GraphID, aid graph.AlgorithmID, id, edgeId string, dir MessageDir, s string) {
+	DefaultTracer.EdgeMessage(gid, aid, id, edgeId, dir, s)
 }
 
-func (t *Tracer) Log(id, s string) {
+func (t *Tracer) Log(gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
 	if t != nil {
-		t.td.Log(time.Now(), id, s)
+		t.td.Log(time.Now(), gid, aid, id, s)
 	}
 }
 
-func (t *Tracer) NodeUpdate(id, s string) {
+func (t *Tracer) NodeUpdate(gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
 	if t != nil {
-		t.td.NodeUpdate(time.Now(), id, s)
+		t.td.NodeUpdate(time.Now(), gid, aid, id, s)
 	}
 }
 
-func (t *Tracer) EdgeUpdate(id, edgeId, s string) {
+func (t *Tracer) EdgeUpdate(gid graph.GraphID, aid graph.AlgorithmID, id, edgeId, s string) {
 	if t != nil {
-		t.td.EdgeUpdate(time.Now(), id, edgeId, s)
+		t.td.EdgeUpdate(time.Now(), gid, aid, id, edgeId, s)
 	}
 }
 
-func (t *Tracer) EdgeMessage(id, edgeId string, dir MessageDir, str string) {
+func (t *Tracer) EdgeMessage(gid graph.GraphID, aid graph.AlgorithmID, id, edgeId string, dir MessageDir, str string) {
 	if t != nil {
-		t.td.EdgeMessage(time.Now(), id, edgeId, dir, str)
+		t.td.EdgeMessage(time.Now(), gid, aid, id, edgeId, dir, str)
 	}
 }

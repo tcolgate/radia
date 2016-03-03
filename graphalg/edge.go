@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/tcolgate/vonq/graph"
 	"github.com/tcolgate/vonq/tracer"
 )
 
@@ -102,10 +103,10 @@ func (e *Edge) Send(m MessageMarshaler) {
 func (e *Edge) EdgeUpdate() {
 	bs, _ := json.Marshal(e.Weight)
 	sbs, _ := json.Marshal(e)
-	e.local.Tracer.EdgeUpdate(string(e.local.ID), string(bs), string(sbs))
+	e.local.Tracer.EdgeUpdate(graph.GraphID{}, graph.AlgorithmID{}, string(e.local.ID), string(bs), string(sbs))
 }
 
 func (e *Edge) EdgeMessage(s string, d tracer.MessageDir) {
 	bs, _ := json.Marshal(e.Weight)
-	e.local.Tracer.EdgeMessage(string(e.local.ID), string(bs), d, s)
+	e.local.Tracer.EdgeMessage(graph.GraphID{}, graph.AlgorithmID{}, string(e.local.ID), string(bs), d, s)
 }
