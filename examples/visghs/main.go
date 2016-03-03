@@ -18,7 +18,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"sync"
 
@@ -46,47 +48,26 @@ func setupGHS(mux *http.ServeMux) {
 
 	s.wg = &sync.WaitGroup{}
 
-	s.wg.Add(6)
-	n1 := graphalg.Node{
-		ID:     graphalg.NodeID("n1"),
-		Tracer: t,
-	}
-	n2 := graphalg.Node{
-		ID:     graphalg.NodeID("n2"),
-		Tracer: t,
-	}
-	n3 := graphalg.Node{
-		ID:     graphalg.NodeID("n3"),
-		Tracer: t,
-	}
-	n4 := graphalg.Node{
-		ID:     graphalg.NodeID("n4"),
-		Tracer: t,
-	}
-	n5 := graphalg.Node{
-		ID:     graphalg.NodeID("n5"),
-		Tracer: t,
-	}
-	n6 := graphalg.Node{
-		ID:     graphalg.NodeID("n6"),
-		Tracer: t,
+	count := 20
+	s.wg.Add(count)
+	nodes := make([]*graphalg.Node, 0)
+	s.ghs = make([]*ghs.State, 0)
+
+	for i := 0; i < count; i++ {
+		n := &graphalg.Node{
+			ID:     graphalg.NodeID(fmt.Sprintf("n%v", i+1)),
+			Tracer: t,
+		}
+		nodes = append(nodes, n)
+		s.ghs = append(s.ghs, &ghs.State{Node: n})
 	}
 
-	n1.Join(&n2, 1.1, graphalg.MakeChanPair)
-	n2.Join(&n4, 3.1, graphalg.MakeChanPair)
-	n4.Join(&n6, 3.7, graphalg.MakeChanPair)
-	n6.Join(&n5, 2.1, graphalg.MakeChanPair)
-	n5.Join(&n3, 3.8, graphalg.MakeChanPair)
-	n5.Join(&n1, 2.6, graphalg.MakeChanPair)
-	n3.Join(&n1, 1.7, graphalg.MakeChanPair)
-
-	s.ghs = []*ghs.State{
-		&ghs.State{Node: &n1},
-		&ghs.State{Node: &n2},
-		&ghs.State{Node: &n3},
-		&ghs.State{Node: &n4},
-		&ghs.State{Node: &n5},
-		&ghs.State{Node: &n6},
+	for i := 0; i < count; i++ {
+		for j := i + 1; j < count; j++ {
+			log.Println("join", i, j)
+			w := rand.NormFloat64()*1.0 + 5.0
+			nodes[i].Join(nodes[j], w, graphalg.MakeChanPair)
+		}
 	}
 
 	for _, g := range s.ghs {
