@@ -47,6 +47,7 @@
           height = 500;
 
       var c20c = d3.scale.category20c();
+      var fmtf = d3.format('f.2');
 
       var nodes = [],
           halfLinks = [],
@@ -123,7 +124,7 @@
                          .append('textPath')
                          .attr('xlink:href',function(d,i) {return '#linkPath'+i})
                          .style("pointer-events", "none")
-                         .text(function(d,i){return d.cost});
+                         .text(function(d,i){return fmtf(d.cost)});
 
         node = node.data(nodes);
         node.enter().append("circle")

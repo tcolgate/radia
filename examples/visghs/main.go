@@ -48,7 +48,7 @@ func setupGHS(mux *http.ServeMux) {
 
 	s.wg = &sync.WaitGroup{}
 
-	count := 20
+	count := 25
 	s.wg.Add(count)
 	nodes := make([]*graphalg.Node, 0)
 	s.ghs = make([]*ghs.State, 0)
@@ -65,7 +65,7 @@ func setupGHS(mux *http.ServeMux) {
 	for i := 0; i < count; i++ {
 		for j := i + 1; j < count; j++ {
 			log.Println("join", i, j)
-			w := rand.NormFloat64()*1.0 + 5.0
+			w := rand.NormFloat64()*1.0 + 4.0
 			nodes[i].Join(nodes[j], w, graphalg.MakeChanPair)
 		}
 	}
