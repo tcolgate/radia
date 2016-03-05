@@ -61,8 +61,7 @@ var (
 	authProvider = flag.String("mesos_authentication_provider", sasl.ProviderName,
 		fmt.Sprintf("Authentication provider to use, default is SASL that supports mechanisms: %+v", mech.ListSupported()))
 	master    = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
-	traceTask = flag.Bool("tracer", false, "Run a tracer")
-	ghsNode   = flag.Bool("ghsnode", false, "Run a ghs node")
+	ghsNode   = flag.Bool("node", false, "Run a ghs node")
 	nodeCount = flag.String("node-count", "5", "Total task count to run.")
 
 	mesosAuthPrincipal  = flag.String("mesos_authentication_principal", "", "Mesos authentication principal.")
@@ -70,7 +69,7 @@ var (
 )
 
 type visghsScheduler struct {
-	executor *mesos.ExecutorInfo
+	nexec *mesos.ExecutorInfo
 
 	traceLaunched bool
 
@@ -80,13 +79,13 @@ type visghsScheduler struct {
 	nodeTasks     int
 }
 
-func newvisghsScheduler(exec *mesos.ExecutorInfo) *visghsScheduler {
+func newvisghsScheduler(nexec *mesos.ExecutorInfo) *visghsScheduler {
 	total, err := strconv.Atoi(*nodeCount)
 	if err != nil {
 		total = 5
 	}
 	return &visghsScheduler{
-		executor:      exec,
+		nexec:         nexec,
 		nodeTasks:     total,
 		traceLaunched: false,
 	}
@@ -109,7 +108,7 @@ func (sched *visghsScheduler) Disconnected(sched.SchedulerDriver) {
 }
 
 func (sched *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
-	if (sched.nodesLaunched - sched.nodesErrored) >= sched.nodeTasks {
+	if sched.traceLaunched && (sched.nodesLaunched-sched.nodesErrored) >= sched.nodeTasks {
 		log.Info("decline all of the offers since all of our tasks are already launched")
 		ids := make([]*mesos.OfferID, len(offers))
 		for i, offer := range offers {
@@ -207,7 +206,7 @@ func (sched *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
 				Name:     proto.String("visghs-node-" + taskId.GetValue()),
 				TaskId:   taskId,
 				SlaveId:  offer.SlaveId,
-				Executor: sched.executor,
+				Executor: sched.nexec,
 				Discovery: &mesos.DiscoveryInfo{
 					Name: proto.String("visghs"),
 					//Visibility: mesos.DiscoveryInfo_EXTERNAL.Enum(),
@@ -313,7 +312,7 @@ func prepareExecutorInfo() *mesos.ExecutorInfo {
 			}
 		}
 	}
-	executorCommand := fmt.Sprintf("./executor -logtostderr=true -v=%d", v)
+	nodeCommand := fmt.Sprintf("./executor -logtostderr=true -v=%d -node", v)
 
 	go http.ListenAndServe(fmt.Sprintf("%s:%d", *address, *artifactPort), nil)
 	log.V(2).Info("Serving executor artifacts...")
@@ -321,10 +320,10 @@ func prepareExecutorInfo() *mesos.ExecutorInfo {
 	// Create mesos scheduler driver.
 	return &mesos.ExecutorInfo{
 		ExecutorId: util.NewExecutorID("default"),
-		Name:       proto.String("visghs"),
+		Name:       proto.String("visghs-node"),
 		Source:     proto.String("visghs"),
 		Command: &mesos.CommandInfo{
-			Value: proto.String(executorCommand),
+			Value: proto.String(nodeCommand),
 			Uris:  executorUris,
 		},
 		Resources: []*mesos.Resource{
@@ -493,18 +492,13 @@ func setupGHS(mux *http.ServeMux) {
 
 func main() {
 
-	if *traceTask {
-		traceTaskMain()
-		return
-	}
-
 	if *ghsNode {
 		ghsNodeMain()
 		return
 	}
 
 	// build command executor
-	exec := prepareExecutorInfo()
+	nexec := prepareExecutorInfo()
 
 	// the framework
 	fwinfo := &mesos.FrameworkInfo{
@@ -533,7 +527,7 @@ func main() {
 
 	bindingAddress := parseIP(*address)
 	config := sched.DriverConfig{
-		Scheduler:      newvisghsScheduler(exec),
+		Scheduler:      newvisghsScheduler(nexec),
 		Framework:      fwinfo,
 		Master:         *master,
 		Credential:     cred,
