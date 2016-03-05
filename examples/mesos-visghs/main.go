@@ -69,30 +69,34 @@ var (
 	mesosAuthSecretFile = flag.String("mesos_authentication_secret_file", "", "Mesos authentication secret file.")
 )
 
-type VISGHSScheduler struct {
-	executor      *mesos.ExecutorInfo
-	tasksLaunched int
-	tasksFinished int
-	tasksErrored  int
-	totalTasks    int
+type visghsScheduler struct {
+	executor *mesos.ExecutorInfo
+
+	traceLaunched bool
+
+	nodesErrored  int
+	nodesLaunched int
+	nodesFinished int
+	nodeTasks     int
 }
 
-func newVISGHSScheduler(exec *mesos.ExecutorInfo) *VISGHSScheduler {
+func newvisghsScheduler(exec *mesos.ExecutorInfo) *visghsScheduler {
 	total, err := strconv.Atoi(*nodeCount)
 	if err != nil {
 		total = 5
 	}
-	return &VISGHSScheduler{
-		executor:   exec,
-		totalTasks: total,
+	return &visghsScheduler{
+		executor:      exec,
+		nodeTasks:     total,
+		traceLaunched: false,
 	}
 }
 
-func (sched *VISGHSScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
+func (sched *visghsScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
 	log.Infoln("Framework Registered with Master ", masterInfo)
 }
 
-func (sched *VISGHSScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
+func (sched *visghsScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
 	log.Infoln("Framework Re-Registered with Master ", masterInfo)
 	_, err := driver.ReconcileTasks([]*mesos.TaskStatus{})
 	if err != nil {
@@ -100,12 +104,12 @@ func (sched *VISGHSScheduler) Reregistered(driver sched.SchedulerDriver, masterI
 	}
 }
 
-func (sched *VISGHSScheduler) Disconnected(sched.SchedulerDriver) {
+func (sched *visghsScheduler) Disconnected(sched.SchedulerDriver) {
 	log.Warningf("disconnected from master")
 }
 
-func (sched *VISGHSScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
-	if (sched.tasksLaunched - sched.tasksErrored) >= sched.totalTasks {
+func (sched *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
+	if (sched.nodesLaunched - sched.nodesErrored) >= sched.nodeTasks {
 		log.Info("decline all of the offers since all of our tasks are already launched")
 		ids := make([]*mesos.OfferID, len(offers))
 		for i, offer := range offers {
@@ -137,7 +141,6 @@ func (sched *VISGHSScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
 		ports := []*mesos.Value_Range{}
 		portsCount := uint64(0)
 		for _, res := range portResources {
-			log.Infoln("PortRess", res)
 			for _, rs := range res.GetRanges().GetRange() {
 				ports = append(ports, rs)
 				portsCount += 1 + rs.GetEnd() - rs.GetBegin()
@@ -158,16 +161,16 @@ func (sched *VISGHSScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
 		}
 
 		var tasks []*mesos.TaskInfo
-		for (sched.tasksLaunched-sched.tasksErrored) < sched.totalTasks &&
+		for (sched.nodesLaunched-sched.nodesErrored) < sched.nodeTasks &&
 			CPUS_PER_TASK <= remainingCpus &&
 			MEM_PER_TASK <= remainingMems &&
 			PORTS_PER_TASK <= remainingPortsCount {
 			log.Infoln("Ports <", remainingPortsCount, remainingPorts)
 
-			sched.tasksLaunched++
+			sched.nodesLaunched++
 
 			taskId := &mesos.TaskID{
-				Value: proto.String(strconv.Itoa(sched.tasksLaunched)),
+				Value: proto.String(strconv.Itoa(sched.nodesLaunched)),
 			}
 
 			taskPorts := []*mesos.Value_Range{}
@@ -241,14 +244,14 @@ func (sched *VISGHSScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
 	}
 }
 
-func (sched *VISGHSScheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos.TaskStatus) {
+func (sched *visghsScheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos.TaskStatus) {
 	log.Infoln("Status update: task", status.TaskId.GetValue(), " is in state ", status.State.Enum().String())
 	if status.GetState() == mesos.TaskState_TASK_FINISHED {
-		sched.tasksFinished++
+		sched.nodesFinished++
 		driver.ReviveOffers() // TODO(jdef) rate-limit this
 	}
 
-	if sched.tasksFinished >= sched.totalTasks {
+	if sched.nodesFinished >= sched.nodeTasks {
 		log.Infoln("Total tasks completed, stopping framework.")
 		driver.Stop(false)
 	}
@@ -257,23 +260,23 @@ func (sched *VISGHSScheduler) StatusUpdate(driver sched.SchedulerDriver, status 
 		status.GetState() == mesos.TaskState_TASK_KILLED ||
 		status.GetState() == mesos.TaskState_TASK_FAILED ||
 		status.GetState() == mesos.TaskState_TASK_ERROR {
-		sched.tasksErrored++
+		sched.nodesErrored++
 	}
 }
 
-func (sched *VISGHSScheduler) OfferRescinded(_ sched.SchedulerDriver, oid *mesos.OfferID) {
+func (sched *visghsScheduler) OfferRescinded(_ sched.SchedulerDriver, oid *mesos.OfferID) {
 	log.Errorf("offer rescinded: %v", oid)
 }
-func (sched *VISGHSScheduler) FrameworkMessage(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, msg string) {
+func (sched *visghsScheduler) FrameworkMessage(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, msg string) {
 	log.Errorf("framework message from executor %q slave %q: %q", eid, sid, msg)
 }
-func (sched *VISGHSScheduler) SlaveLost(_ sched.SchedulerDriver, sid *mesos.SlaveID) {
+func (sched *visghsScheduler) SlaveLost(_ sched.SchedulerDriver, sid *mesos.SlaveID) {
 	log.Errorf("slave lost: %v", sid)
 }
-func (sched *VISGHSScheduler) ExecutorLost(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, code int) {
+func (sched *visghsScheduler) ExecutorLost(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, code int) {
 	log.Errorf("executor %q lost on slave %q code %d", eid, sid, code)
 }
-func (sched *VISGHSScheduler) Error(_ sched.SchedulerDriver, err string) {
+func (sched *visghsScheduler) Error(_ sched.SchedulerDriver, err string) {
 	log.Errorf("Scheduler received error: %v", err)
 }
 
@@ -527,9 +530,10 @@ func main() {
 			cred.Secret = proto.String(string(secret))
 		}
 	}
+
 	bindingAddress := parseIP(*address)
 	config := sched.DriverConfig{
-		Scheduler:      newVISGHSScheduler(exec),
+		Scheduler:      newvisghsScheduler(exec),
 		Framework:      fwinfo,
 		Master:         *master,
 		Credential:     cred,
