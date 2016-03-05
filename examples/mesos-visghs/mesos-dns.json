@@ -1,0 +1,22 @@
+{
+  "zk": "zk://127.0.0.1:2181/mesos",
+  "masters": ["127.0.0.1:5050"],
+  "refreshSeconds": 5,
+  "ttl": 5,
+  "domain": "mesos",
+  "port": 5053,
+  "resolvers": ["8.8.8.8"],
+  "timeout": 5,
+  "httpon": true,
+  "dnson": false,
+  "httpport": 8053,
+  "externalon": true,
+  "listener": "127.0.0.1",
+  "SOAMname": "ns1.mesos",
+  "SOARname": "root.ns1.mesos",
+  "SOARefresh": 60,
+  "SOARetry":   600,
+  "SOAExpire":  86400,
+  "SOAMinttl": 60,
+  "IPSources": ["netinfo", "mesos", "host"]
+}

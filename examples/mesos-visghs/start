@@ -1,0 +1,12 @@
+#!/bin/sh
+
+docker pull jplock/zookeeper:3.4.8
+docker run -p 2181:2181 -p 2888:2888 -p 3888:3888  jplock/zookeeper:3.4.8 &
+
+mesos master --work_dir=/tmp/mesos --zk="zk://localhost:2181/mesos" --quorum=1 &
+sudo mesos slave --master=127.0.0.1:5050 --resources='ports(*):[30000-31000]'&
+mesos-dns -config ./mesos-dns.json &
+
+./sched -master 127.0.0.1:5050 -alsologtostderr -executor $(pwd)/exec
+
+
