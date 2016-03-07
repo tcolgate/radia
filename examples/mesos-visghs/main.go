@@ -30,6 +30,8 @@ import (
 	"sync"
 	"time"
 
+	"google.golang.org/grpc"
+
 	"github.com/tcolgate/vonq/ghs"
 	"github.com/tcolgate/vonq/graphalg"
 	"github.com/tcolgate/vonq/tracer"
@@ -45,6 +47,11 @@ import (
 	sched "github.com/mesos/mesos-go/scheduler"
 	"golang.org/x/net/context"
 )
+
+func init() {
+	flag.Parse()
+	log.Infoln("Initializing the VISGHS Scheduler...")
+}
 
 const (
 	CPUS_PER_EXECUTOR   = 0.01
@@ -69,9 +76,9 @@ var (
 )
 
 type visghsScheduler struct {
-	nexec *mesos.ExecutorInfo
+	tracer.Tracer
 
-	traceLaunched bool
+	nexec *mesos.ExecutorInfo
 
 	nodesErrored  int
 	nodesLaunched int
@@ -85,17 +92,16 @@ func newvisghsScheduler(nexec *mesos.ExecutorInfo) *visghsScheduler {
 		total = 5
 	}
 	return &visghsScheduler{
-		nexec:         nexec,
-		nodeTasks:     total,
-		traceLaunched: false,
+		nexec:     nexec,
+		nodeTasks: total,
 	}
 }
 
-func (sched *visghsScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
+func (s *visghsScheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
 	log.Infoln("Framework Registered with Master ", masterInfo)
 }
 
-func (sched *visghsScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
+func (s *visghsScheduler) Reregistered(driver sched.SchedulerDriver, masterInfo *mesos.MasterInfo) {
 	log.Infoln("Framework Re-Registered with Master ", masterInfo)
 	_, err := driver.ReconcileTasks([]*mesos.TaskStatus{})
 	if err != nil {
@@ -103,12 +109,12 @@ func (sched *visghsScheduler) Reregistered(driver sched.SchedulerDriver, masterI
 	}
 }
 
-func (sched *visghsScheduler) Disconnected(sched.SchedulerDriver) {
+func (s *visghsScheduler) Disconnected(sched.SchedulerDriver) {
 	log.Warningf("disconnected from master")
 }
 
-func (sched *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
-	if sched.traceLaunched && (sched.nodesLaunched-sched.nodesErrored) >= sched.nodeTasks {
+func (s *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
+	if (s.nodesLaunched - s.nodesErrored) >= s.nodeTasks {
 		log.Info("decline all of the offers since all of our tasks are already launched")
 		ids := make([]*mesos.OfferID, len(offers))
 		for i, offer := range offers {
@@ -160,16 +166,16 @@ func (sched *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
 		}
 
 		var tasks []*mesos.TaskInfo
-		for (sched.nodesLaunched-sched.nodesErrored) < sched.nodeTasks &&
+		for (s.nodesLaunched-s.nodesErrored) < s.nodeTasks &&
 			CPUS_PER_TASK <= remainingCpus &&
 			MEM_PER_TASK <= remainingMems &&
 			PORTS_PER_TASK <= remainingPortsCount {
 			log.Infoln("Ports <", remainingPortsCount, remainingPorts)
 
-			sched.nodesLaunched++
+			s.nodesLaunched++
 
 			taskId := &mesos.TaskID{
-				Value: proto.String(strconv.Itoa(sched.nodesLaunched)),
+				Value: proto.String(strconv.Itoa(s.nodesLaunched)),
 			}
 
 			taskPorts := []*mesos.Value_Range{}
@@ -206,7 +212,7 @@ func (sched *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offer
 				Name:     proto.String("visghs-node-" + taskId.GetValue()),
 				TaskId:   taskId,
 				SlaveId:  offer.SlaveId,
-				Executor: sched.nexec,
+				Executor: s.nexec,
 				Discovery: &mesos.DiscoveryInfo{
 					Name: proto.String("visghs"),
 					//Visibility: mesos.DiscoveryInfo_EXTERNAL.Enum(),
@@ -263,27 +269,23 @@ func (sched *visghsScheduler) StatusUpdate(driver sched.SchedulerDriver, status 
 	}
 }
 
-func (sched *visghsScheduler) OfferRescinded(_ sched.SchedulerDriver, oid *mesos.OfferID) {
+func (s *visghsScheduler) OfferRescinded(_ sched.SchedulerDriver, oid *mesos.OfferID) {
 	log.Errorf("offer rescinded: %v", oid)
 }
-func (sched *visghsScheduler) FrameworkMessage(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, msg string) {
+func (s *visghsScheduler) FrameworkMessage(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, msg string) {
 	log.Errorf("framework message from executor %q slave %q: %q", eid, sid, msg)
 }
-func (sched *visghsScheduler) SlaveLost(_ sched.SchedulerDriver, sid *mesos.SlaveID) {
+func (s *visghsScheduler) SlaveLost(_ sched.SchedulerDriver, sid *mesos.SlaveID) {
 	log.Errorf("slave lost: %v", sid)
 }
-func (sched *visghsScheduler) ExecutorLost(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, code int) {
+func (s *visghsScheduler) ExecutorLost(_ sched.SchedulerDriver, eid *mesos.ExecutorID, sid *mesos.SlaveID, code int) {
 	log.Errorf("executor %q lost on slave %q code %d", eid, sid, code)
 }
-func (sched *visghsScheduler) Error(_ sched.SchedulerDriver, err string) {
+func (s *visghsScheduler) Error(_ sched.SchedulerDriver, err string) {
 	log.Errorf("Scheduler received error: %v", err)
 }
 
-// ----------------------- func init() ------------------------- //
-
-func init() {
-	flag.Parse()
-	log.Infoln("Initializing the VISGHS Scheduler...")
+func (s *visghsScheduler) OnRun() {
 }
 
 // returns (downloadURI, basename(path))
@@ -447,7 +449,7 @@ func (s *state) OnRun() {
 func setupGHS(mux *http.ServeMux) {
 	s := state{}
 
-	t := tracer.NewHTTPDisplay(mux, s.OnRun)
+	t := tracer.New(tracer.NewHTTPDisplay(mux, s.OnRun))
 
 	s.wg = &sync.WaitGroup{}
 
@@ -499,6 +501,20 @@ func main() {
 
 	// build command executor
 	nexec := prepareExecutorInfo()
+	s := newvisghsScheduler(nexec)
+
+	// Setup tracer
+	mux := http.NewServeMux()
+	err := http.ListenAndServe(":12345", mux)
+	t := tracer.NewHTTPDisplay(mux, s.OnRun)
+	server := tracer.NewGRPCServer(t)
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	grpcServer := grpc.NewServer()
+	tracer.RegisterTraceServiceServer(grpcServer, server)
+	go grpcServer.Serve(lis)
 
 	// the framework
 	fwinfo := &mesos.FrameworkInfo{
@@ -527,7 +543,7 @@ func main() {
 
 	bindingAddress := parseIP(*address)
 	config := sched.DriverConfig{
-		Scheduler:      newvisghsScheduler(nexec),
+		Scheduler:      s,
 		Framework:      fwinfo,
 		Master:         *master,
 		Credential:     cred,
@@ -552,38 +568,19 @@ func main() {
 	log.Infof("framework terminating")
 }
 
-func traceTaskMain() {
-	fmt.Println("Starting VISGHS Executor")
-
-	dconfig := exec.DriverConfig{
-		Executor: newVISGHSExecutor(),
-	}
-	driver, err := exec.NewMesosExecutorDriver(dconfig)
-
-	if err != nil {
-		fmt.Println("Unable to create a ExecutorDriver ", err.Error())
-	}
-
-	_, err = driver.Start()
-	if err != nil {
-		fmt.Println("Got error:", err)
-		return
-	}
-	fmt.Println("Executor process has started and running.")
-	_, err = driver.Join()
-	if err != nil {
-		fmt.Println("driver failed:", err)
-	}
-	fmt.Println("executor terminating")
-}
-
 func ghsNodeMain() {
 	/*
-		mux := http.NewServeMux()
-		setupGHS(mux)
-		err := http.ListenAndServe(":12345", mux)
+			mux := http.NewServeMux()
+			setupGHS(mux)
+			err := http.ListenAndServe(":12345", mux)
+			if err != nil {
+				log.Fatal("ListenAndServe: ", err)
+			}
+
+		c, err := NewGRPCDisplayClient(lis.Addr().String(), grpc.WithInsecure())
 		if err != nil {
-			log.Fatal("ListenAndServe: ", err)
+			log.Fatalf("failed to connect: %v", err)
 		}
 	*/
+
 }

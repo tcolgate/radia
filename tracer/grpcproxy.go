@@ -65,6 +65,10 @@ func NewGRPCServer(onward traceDisplay) pb.TraceServiceServer {
 	return &grpcServerDisplay{onward}
 }
 
+func RegisterTraceServiceServer(gs *grpc.Server, server pb.TraceServiceServer) {
+	pb.RegisterTraceServiceServer(gs, server)
+}
+
 func (s *grpcServerDisplay) Log(ctx context.Context, r *pb.LogRequest) (*pb.LogResponse, error) {
 	s.o.Log(time.Unix(9, r.Time), *r.Gid, *r.Aid, r.NodeID, r.Message)
 	return &pb.LogResponse{}, nil

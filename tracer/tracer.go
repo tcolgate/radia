@@ -102,3 +102,7 @@ func (t *Tracer) EdgeMessage(gid graph.GraphID, aid graph.AlgorithmID, id, edgeI
 		t.td.EdgeMessage(time.Now(), gid, aid, id, edgeId, dir, str)
 	}
 }
+
+func New(td traceDisplay) *Tracer {
+	return &Tracer{td}
+}

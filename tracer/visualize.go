@@ -144,7 +144,7 @@ func (v httpDisplay) handleRun(w http.ResponseWriter, r *http.Request) {
 	v.update <- struct{}{}
 }
 
-func NewHTTPDisplay(mux *http.ServeMux, onRun func()) *Tracer {
+func NewHTTPDisplay(mux *http.ServeMux, onRun func()) traceDisplay {
 	v := httpDisplay{}
 	v.OnRun = onRun
 	v.update = make(chan struct{})
@@ -154,5 +154,5 @@ func NewHTTPDisplay(mux *http.ServeMux, onRun func()) *Tracer {
 	mux.Handle("/updates", websocket.Handler(v.updateSocket))
 	mux.HandleFunc("/run", v.handleRun)
 
-	return &Tracer{&v}
+	return &v
 }
