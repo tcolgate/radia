@@ -33,6 +33,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/tcolgate/vonq/ghs"
+	"github.com/tcolgate/vonq/graph"
 	"github.com/tcolgate/vonq/graphalg"
 	"github.com/tcolgate/vonq/tracer"
 
@@ -67,9 +68,10 @@ var (
 	artifactPort = flag.Int("artifactPort", defaultArtifactPort, "Binding port for artifact server")
 	authProvider = flag.String("mesos_authentication_provider", sasl.ProviderName,
 		fmt.Sprintf("Authentication provider to use, default is SASL that supports mechanisms: %+v", mech.ListSupported()))
-	master    = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
-	ghsNode   = flag.Bool("node", false, "Run a ghs node")
-	nodeCount = flag.String("node-count", "5", "Total task count to run.")
+	master     = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
+	ghsNode    = flag.Bool("node", false, "Run a ghs node")
+	nodeCount  = flag.Int("node-count", 5, "Total task count to run.")
+	tracerAddr = flag.String("tracerAddr", "", "Tracer GRPC url")
 
 	mesosAuthPrincipal  = flag.String("mesos_authentication_principal", "", "Mesos authentication principal.")
 	mesosAuthSecretFile = flag.String("mesos_authentication_secret_file", "", "Mesos authentication secret file.")
@@ -87,10 +89,7 @@ type visghsScheduler struct {
 }
 
 func newvisghsScheduler(nexec *mesos.ExecutorInfo) *visghsScheduler {
-	total, err := strconv.Atoi(*nodeCount)
-	if err != nil {
-		total = 5
-	}
+	total := *nodeCount
 	return &visghsScheduler{
 		nexec:     nexec,
 		nodeTasks: total,
@@ -300,7 +299,7 @@ func serveSelf() *string {
 	return &hostURI
 }
 
-func prepareExecutorInfo() *mesos.ExecutorInfo {
+func prepareExecutorInfo(gt net.Addr) *mesos.ExecutorInfo {
 	executorUris := []*mesos.CommandInfo_URI{}
 	uri := serveSelf()
 	executorUris = append(executorUris, &mesos.CommandInfo_URI{Value: uri, Executable: proto.Bool(true)})
@@ -314,10 +313,8 @@ func prepareExecutorInfo() *mesos.ExecutorInfo {
 			}
 		}
 	}
-	nodeCommand := fmt.Sprintf("./executor -logtostderr=true -v=%d -node", v)
-
-	go http.ListenAndServe(fmt.Sprintf("%s:%d", *address, *artifactPort), nil)
-	log.V(2).Info("Serving executor artifacts...")
+	nodeCommand := fmt.Sprintf("./executor -logtostderr=true -v=%d -node -tracerAddr %s", v, gt.String())
+	log.V(2).Info("nodeCommand: ", nodeCommand)
 
 	// Create mesos scheduler driver.
 	return &mesos.ExecutorInfo{
@@ -499,22 +496,22 @@ func main() {
 		return
 	}
 
-	// build command executor
-	nexec := prepareExecutorInfo()
-	s := newvisghsScheduler(nexec)
-
-	// Setup tracer
-	mux := http.NewServeMux()
-	err := http.ListenAndServe(":12345", mux)
-	t := tracer.NewHTTPDisplay(mux, s.OnRun)
-	server := tracer.NewGRPCServer(t)
+	// Allocate a port for GRPC
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("grpc failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
+
+	// build command executor
+	nexec := prepareExecutorInfo(lis.Addr())
+	s := newvisghsScheduler(nexec)
+
+	t := tracer.NewHTTPDisplay(http.DefaultServeMux, s.OnRun)
+	server := tracer.NewGRPCServer(t)
 	tracer.RegisterTraceServiceServer(grpcServer, server)
 	go grpcServer.Serve(lis)
+	go http.ListenAndServe(":12345", nil)
 
 	// the framework
 	fwinfo := &mesos.FrameworkInfo{
@@ -569,18 +566,21 @@ func main() {
 }
 
 func ghsNodeMain() {
-	/*
-			mux := http.NewServeMux()
-			setupGHS(mux)
-			err := http.ListenAndServe(":12345", mux)
-			if err != nil {
-				log.Fatal("ListenAndServe: ", err)
-			}
+	c, err := tracer.NewGRPCDisplayClient(*tracerAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect: %v", err)
+	}
+	t := tracer.New(c)
+	t.Log(graph.GraphID{}, graph.AlgorithmID{}, "n1", "Hello")
 
-		c, err := NewGRPCDisplayClient(lis.Addr().String(), grpc.WithInsecure())
+	/*
+		mux := http.NewServeMux()
+		setupGHS(mux)
+		err := http.ListenAndServe(":12345", mux)
 		if err != nil {
-			log.Fatalf("failed to connect: %v", err)
+			log.Fatal("ListenAndServe: ", err)
 		}
+
 	*/
 
 }
