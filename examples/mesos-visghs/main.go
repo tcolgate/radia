@@ -51,7 +51,6 @@ import (
 
 func init() {
 	flag.Parse()
-	log.Infoln("Initializing the VISGHS Scheduler...")
 }
 
 const (
@@ -490,7 +489,6 @@ func setupGHS(mux *http.ServeMux) {
 // ----------------------- func main() ------------------------- //
 
 func main() {
-
 	if *ghsNode {
 		ghsNodeMain()
 		return
@@ -511,6 +509,7 @@ func main() {
 	server := tracer.NewGRPCServer(t)
 	tracer.RegisterTraceServiceServer(grpcServer, server)
 	go grpcServer.Serve(lis)
+	time.Sleep(2 * time.Second)
 	go http.ListenAndServe(":12345", nil)
 
 	// the framework
@@ -566,21 +565,12 @@ func main() {
 }
 
 func ghsNodeMain() {
+	log.Infoln("Initializing the VISGHS Executor...")
 	c, err := tracer.NewGRPCDisplayClient(*tracerAddr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
 	t := tracer.New(c)
 	t.Log(graph.GraphID{}, graph.AlgorithmID{}, "n1", "Hello")
-
-	/*
-		mux := http.NewServeMux()
-		setupGHS(mux)
-		err := http.ListenAndServe(":12345", mux)
-		if err != nil {
-			log.Fatal("ListenAndServe: ", err)
-		}
-
-	*/
 
 }
