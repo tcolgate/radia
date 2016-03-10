@@ -342,27 +342,35 @@ func parseIP(address string) net.IP {
 	return addr[0]
 }
 
-type exampleExecutor struct {
+type ghsvisExecutor struct {
 	tasksLaunched int
+	*tracer.Tracer
 }
 
-func newVISGHSExecutor() *exampleExecutor {
-	return &exampleExecutor{tasksLaunched: 0}
+func newVISGHSExecutor() *ghsvisExecutor {
+	log.Infoln("Initializing the VISGHS Executor...", *tracerAddr)
+	c, err := tracer.NewGRPCDisplayClient(*tracerAddr, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect: %v", err)
+	}
+	t := tracer.New(c)
+
+	return &ghsvisExecutor{tasksLaunched: 0, Tracer: t}
 }
 
-func (exec *exampleExecutor) Registered(driver exec.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwinfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
+func (exec *ghsvisExecutor) Registered(driver exec.ExecutorDriver, execInfo *mesos.ExecutorInfo, fwinfo *mesos.FrameworkInfo, slaveInfo *mesos.SlaveInfo) {
 	fmt.Println("Registered Executor on slave ", slaveInfo.GetHostname())
 }
 
-func (exec *exampleExecutor) Reregistered(driver exec.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
+func (exec *ghsvisExecutor) Reregistered(driver exec.ExecutorDriver, slaveInfo *mesos.SlaveInfo) {
 	fmt.Println("Re-registered Executor on slave ", slaveInfo.GetHostname())
 }
 
-func (exec *exampleExecutor) Disconnected(exec.ExecutorDriver) {
+func (exec *ghsvisExecutor) Disconnected(exec.ExecutorDriver) {
 	fmt.Println("Executor disconnected.")
 }
 
-func (exec *exampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos.TaskInfo) {
+func (exec *ghsvisExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *mesos.TaskInfo) {
 	fmt.Println("Launching task", taskInfo.GetName(), "with command", taskInfo.Command.GetValue())
 	fmt.Println(taskInfo)
 
@@ -400,7 +408,6 @@ func (exec *exampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
 	if _, err := driver.SendStatusUpdate(starting); err != nil {
 		fmt.Println("error sending STARTING", err)
 	}
-	delay := time.Duration(rand.Intn(90)+10) * time.Second
 	go func() {
 		running := &mesos.TaskStatus{
 			TaskId: taskInfo.GetTaskId(),
@@ -409,24 +416,30 @@ func (exec *exampleExecutor) LaunchTask(driver exec.ExecutorDriver, taskInfo *me
 		if _, err := driver.SendStatusUpdate(running); err != nil {
 			fmt.Println("error sending RUNNING", err)
 		}
-		time.Sleep(delay) // TODO(jdef) add jitter
+		for {
+			select {
+			case <-time.Tick(5 * time.Second):
+				fmt.Println("In loop", taskInfo.String)
+				exec.Log(graph.GraphID{}, graph.AlgorithmID{}, taskInfo.GetTaskId().String(), "Hello")
+			}
+		}
 		finishTask()
 	}()
 }
 
-func (exec *exampleExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
+func (exec *ghsvisExecutor) KillTask(exec.ExecutorDriver, *mesos.TaskID) {
 	fmt.Println("Kill task")
 }
 
-func (exec *exampleExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg string) {
+func (exec *ghsvisExecutor) FrameworkMessage(driver exec.ExecutorDriver, msg string) {
 	fmt.Println("Got framework message: ", msg)
 }
 
-func (exec *exampleExecutor) Shutdown(exec.ExecutorDriver) {
+func (exec *ghsvisExecutor) Shutdown(exec.ExecutorDriver) {
 	fmt.Println("Shutting down the executor")
 }
 
-func (exec *exampleExecutor) Error(driver exec.ExecutorDriver, err string) {
+func (exec *ghsvisExecutor) Error(driver exec.ExecutorDriver, err string) {
 	fmt.Println("Got error message:", err)
 }
 
@@ -565,12 +578,27 @@ func main() {
 }
 
 func ghsNodeMain() {
-	log.Infoln("Initializing the VISGHS Executor...")
-	c, err := tracer.NewGRPCDisplayClient(*tracerAddr, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err)
+	fmt.Println("Starting GHSVIS Executor")
+
+	dconfig := exec.DriverConfig{
+		Executor: newVISGHSExecutor(),
 	}
-	t := tracer.New(c)
-	t.Log(graph.GraphID{}, graph.AlgorithmID{}, "n1", "Hello")
+
+	driver, err := exec.NewMesosExecutorDriver(dconfig)
+	if err != nil {
+		fmt.Println("Unable to create a ExecutorDriver ", err.Error())
+	}
+
+	_, err = driver.Start()
+	if err != nil {
+		fmt.Println("Got error:", err)
+		return
+	}
+	fmt.Println("Executor process has started and running.")
+	_, err = driver.Join()
+	if err != nil {
+		fmt.Println("driver failed:", err)
+	}
+	fmt.Println("executor terminating")
 
 }

@@ -38,7 +38,7 @@ func NewGRPCDisplayClient(addr string, os ...grpc.DialOption) (traceDisplay, err
 }
 
 func (g *grpcClientDisplay) Log(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
-	r := pb.LogRequest{Time: t.UnixNano(), NodeID: id, Message: s}
+	r := pb.LogRequest{Time: t.UnixNano(), NodeID: id, Message: s, Gid: &gid, Aid: &aid}
 	g.TraceServiceClient.Log(context.Background(), &r)
 }
 
