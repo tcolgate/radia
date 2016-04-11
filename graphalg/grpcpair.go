@@ -17,12 +17,27 @@
 
 package graphalg
 
-import google_protobuf "github.com/golang/protobuf/ptypes/any"
+import (
+	"sync"
+
+	google_protobuf "github.com/golang/protobuf/ptypes/any"
+)
 
 // grpcPair is a sender reciever using channels
 type grpcPair struct {
 	send chan<- Message
 	recv <-chan Message
+}
+
+type grpcProxy struct {
+	sync.Mutex
+	rmap map[NodeID]chan<- Message
+}
+
+// Subscribe returns a Reciever for the remote NodeID
+// passed in.
+func (p *grpcProxy) Subscribe(r NodeID) Reciever {
+	return nil
 }
 
 func (p grpcPair) Send(m MessageMarshaler) {

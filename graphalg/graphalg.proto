@@ -22,6 +22,7 @@ package graphalg;
 
 service MessageService {
   rpc SendMessage (stream SendMessageRequest) returns (SendMessageResponse);
+  rpc RecvMessages (RecvMessagesRequest) returns (stream RecvMessageResponse);
 }
 
 message Weight {
@@ -52,3 +53,14 @@ message SendMessageResponse {
 message TestMessage {
   int32 Value = 1;
 }
+
+message RecvMessagesRequest {
+  string NodeID     = 1;
+}
+
+message RecvMessageResponse {
+  graph.GraphID gid     = 1;
+  graph.AlgorithmID aid = 2;
+  Message msg           = 3;
+}
+
