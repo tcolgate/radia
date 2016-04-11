@@ -16,7 +16,7 @@ package ghs
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import graphalg "github.com/tcolgate/vonq/graphalg"
+import graphalg "github.com/tcolgate/radia/graphalg"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal

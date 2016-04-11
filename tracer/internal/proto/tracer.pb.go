@@ -23,7 +23,7 @@ package proto
 import proto1 "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import graph "github.com/tcolgate/vonq/graph"
+import graph "github.com/tcolgate/radia/graph"
 
 import (
 	context "golang.org/x/net/context"

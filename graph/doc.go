@@ -1,19 +1,19 @@
-// This file is part of vonq.
+// This file is part of radia.
 //
-// vonq is free software: you can redistribute it and/or modify
+// radia is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// vonq is distributed in the hope that it will be useful,
+// radia is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with vonq.  If not, see <http://www.gnu.org/licenses/>.
+// along with radia.  If not, see <http://www.gnu.org/licenses/>.
 
-// Package graph includes base types for vonq graphs. I'd have called
+// Package graph includes base types for radia graphs. I'd have called
 // it common, but that just smells bad.
 package graph
 

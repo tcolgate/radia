@@ -22,7 +22,7 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import google_protobuf "github.com/golang/protobuf/ptypes/any"
-import graph "github.com/tcolgate/vonq/graph"
+import graph "github.com/tcolgate/radia/graph"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal

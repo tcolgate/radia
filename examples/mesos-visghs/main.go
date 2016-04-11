@@ -32,10 +32,10 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/tcolgate/vonq/ghs"
-	"github.com/tcolgate/vonq/graph"
-	"github.com/tcolgate/vonq/graphalg"
-	"github.com/tcolgate/vonq/tracer"
+	"github.com/tcolgate/radia/ghs"
+	"github.com/tcolgate/radia/graph"
+	"github.com/tcolgate/radia/graphalg"
+	"github.com/tcolgate/radia/tracer"
 
 	"github.com/gogo/protobuf/proto"
 	log "github.com/golang/glog"
@@ -205,7 +205,7 @@ func (s *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []
 				}
 			}
 
-			vonqPort := (uint32)(taskPorts[0].GetBegin())
+			radiaPort := (uint32)(taskPorts[0].GetBegin())
 			task := &mesos.TaskInfo{
 				Name:     proto.String("visghs-node-" + taskId.GetValue()),
 				TaskId:   taskId,
@@ -220,11 +220,11 @@ func (s *visghsScheduler) ResourceOffers(driver sched.SchedulerDriver, offers []
 							{Protocol: proto.String("UDP"),
 								Visibility: mesos.DiscoveryInfo_EXTERNAL.Enum(),
 								Name:       proto.String("udpprobe"),
-								Number:     proto.Uint32(vonqPort)},
+								Number:     proto.Uint32(radiaPort)},
 							{Protocol: proto.String("TCP"),
 								Visibility: mesos.DiscoveryInfo_EXTERNAL.Enum(),
-								Name:       proto.String("vonqrpc"),
-								Number:     proto.Uint32(vonqPort)},
+								Name:       proto.String("radiarpc"),
+								Number:     proto.Uint32(radiaPort)},
 						},
 					},
 				},
