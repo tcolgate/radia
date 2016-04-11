@@ -345,6 +345,7 @@ func parseIP(address string) net.IP {
 type ghsvisExecutor struct {
 	tasksLaunched int
 	*tracer.Tracer
+	*grpc.Server
 }
 
 func newVISGHSExecutor() *ghsvisExecutor {
@@ -354,6 +355,24 @@ func newVISGHSExecutor() *ghsvisExecutor {
 		log.Fatalf("failed to connect: %v", err)
 	}
 	t := tracer.New(c)
+
+	// Establish gRPC on the deisgnated port
+	lis, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatalf("grpc failed to listen: %v", err)
+	}
+	grpcServer := grpc.NewServer()
+
+	// build command executor
+	nexec := prepareExecutorInfo(lis.Addr())
+	s := newvisghsScheduler(nexec)
+
+	t := tracer.NewHTTPDisplay(http.DefaultServeMux, s.OnRun)
+	server := tracer.NewGRPCServer(t)
+	tracer.RegisterTraceServiceServer(grpcServer, server)
+	go grpcServer.Serve(lis)
+	time.Sleep(2 * time.Second)
+	go http.ListenAndServe(":12345", nil)
 
 	return &ghsvisExecutor{tasksLaunched: 0, Tracer: t}
 }
