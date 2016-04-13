@@ -22,6 +22,7 @@ package graphalg;
 
 service MessageService {
   rpc SendMessage (SendMessageRequest) returns (SendMessageResponse);
+  rpc EdgeWeight (EdgeWeightRequest) returns (EdgeWeightResponse);
 }
 
 message Weight {
@@ -54,3 +55,15 @@ message SendMessageResponse {
 message TestMessage {
   int32 Value = 1;
 }
+
+message EdgeWeightRequest {
+  string From           = 1;
+  string To             = 2;
+  Weight weight         = 3;
+}
+
+message EdgeWeightResponse {
+  Error error   = 1;
+  Weight weight = 2;
+}
+

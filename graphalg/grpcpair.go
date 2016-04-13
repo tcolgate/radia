@@ -53,6 +53,10 @@ func (*grpcProxy) SendMessage(context.Context, *SendMessageRequest) (*SendMessag
 	return nil, nil
 }
 
+func (*grpcProxy) EdgeWeight(context.Context, *EdgeWeightRequest) (*EdgeWeightResponse, error) {
+	return nil, nil
+}
+
 func (p grpcPair) Send(m MessageMarshaler) {
 	bs, url := m.MarshalMessage()
 
