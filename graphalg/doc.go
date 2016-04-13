@@ -19,4 +19,4 @@
 // running graph algorithms over sets of nodes and edges.
 package graphalg
 
-//go:generate protoc -I $GOPATH/src:. --go_out=:. graphalg.proto
+//go:generate protoc -I $GOPATH/src:. --go_out=plugins=grpc:. graphalg.proto

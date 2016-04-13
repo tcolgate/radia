@@ -20,6 +20,10 @@ package graphalg
 import (
 	"sync"
 
+	"golang.org/x/net/context"
+
+	"google.golang.org/grpc"
+
 	google_protobuf "github.com/golang/protobuf/ptypes/any"
 )
 
@@ -31,6 +35,7 @@ type grpcPair struct {
 
 type grpcProxy struct {
 	sync.Mutex
+	smap map[NodeID]*grpc.ClientConn
 	rmap map[NodeID]chan<- Message
 }
 
@@ -38,6 +43,14 @@ type grpcProxy struct {
 // passed in.
 func (p *grpcProxy) Subscribe(r NodeID) Reciever {
 	return nil
+}
+
+func NewGRPCServer() MessageServiceServer {
+	return &grpcProxy{}
+}
+
+func (*grpcProxy) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
+	return nil, nil
 }
 
 func (p grpcPair) Send(m MessageMarshaler) {

@@ -21,8 +21,7 @@ import "github.com/tcolgate/radia/graph/graph.proto";
 package graphalg;
 
 service MessageService {
-  rpc SendMessage (stream SendMessageRequest) returns (SendMessageResponse);
-  rpc RecvMessages (RecvMessagesRequest) returns (stream RecvMessageResponse);
+  rpc SendMessage (SendMessageRequest) returns (SendMessageResponse);
 }
 
 message Weight {
@@ -36,9 +35,11 @@ message Message {
 }
 
 message SendMessageRequest {
-  graph.GraphID gid     = 1;
-  graph.AlgorithmID aid = 2;
-  Message msg           = 3;
+  string From           = 1;
+  string To             = 2;
+  graph.GraphID gid     = 3;
+  graph.AlgorithmID aid = 4;
+  Message msg           = 5;
 }
 
 message Error {
@@ -53,14 +54,3 @@ message SendMessageResponse {
 message TestMessage {
   int32 Value = 1;
 }
-
-message RecvMessagesRequest {
-  string NodeID     = 1;
-}
-
-message RecvMessageResponse {
-  graph.GraphID gid     = 1;
-  graph.AlgorithmID aid = 2;
-  Message msg           = 3;
-}
-
