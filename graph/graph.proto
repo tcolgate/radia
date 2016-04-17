@@ -21,13 +21,13 @@ package graph;
 // We can use this to select the specific topology we wish to pass messages
 // to.
 message GraphID {
-  repeated int32 id = 1; // Componenets o the id
+  string id = 1;
 }
 
 // AlgorithmID identifies a specific instance of a running algorithm. It
 // should be possible to run multiple instances of any algorithms
 // over a given graph at any one time
 message AlgorithmID {
-  repeated int32 id = 1; // Componenets o the id
+  string id = 1;
 }
 

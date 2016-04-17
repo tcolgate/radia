@@ -21,10 +21,18 @@ import (
 	"log"
 	"reflect"
 	"testing"
+
+	"google.golang.org/grpc"
 )
 
 func TestRPCPairTestMessage1(t *testing.T) {
 	RegisterMessage(TestMessage{})
+
+	s1 := grpc.NewServer()
+	sp1 := struct{}{}
+	RegisterMessageServiceServer(s1, sp1)
+
+	s2 := grpc.NewServer()
 
 	n1 := Node{
 		ID: NodeID("n1"),

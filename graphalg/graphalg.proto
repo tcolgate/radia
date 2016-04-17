@@ -59,7 +59,8 @@ message TestMessage {
 message EdgeWeightRequest {
   string From           = 1;
   string To             = 2;
-  Weight weight         = 3;
+  graph.GraphID gid     = 3;
+  Weight weight         = 4;
 }
 
 message EdgeWeightResponse {

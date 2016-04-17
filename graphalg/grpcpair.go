@@ -25,32 +25,61 @@ import (
 	"google.golang.org/grpc"
 
 	google_protobuf "github.com/golang/protobuf/ptypes/any"
+	"github.com/tcolgate/radia/graph"
 )
 
 // grpcPair is a sender reciever using channels
 type grpcPair struct {
+	g    graph.GraphID
+	a    graph.AlgorithmID
 	send chan<- Message
 	recv <-chan Message
+}
+
+type endAddress struct {
+	g graph.GraphID
+	a graph.AlgorithmID
 }
 
 type grpcProxy struct {
 	sync.Mutex
 	smap map[NodeID]*grpc.ClientConn
-	rmap map[NodeID]chan<- Message
+	rmap map[endAddress]chan<- Message
 }
 
-// Subscribe returns a Reciever for the remote NodeID
+// subscribe returns a Reciever for the remote NodeID
 // passed in.
-func (p *grpcProxy) Subscribe(r NodeID) Reciever {
-	return nil
+func (p *grpcProxy) subscribe(g graph.GraphID, a graph.AlgorithmID) chan<- Message {
+	p.Lock()
+	defer p.Unlock()
+	if p.rmap == nil {
+		p.rmap = make(map[endAddress]chan<- Message)
+	}
+
+	if _, ok := p.rmap[endAddress{g, a}]; ok {
+		panic("already subscribed")
+	}
+
+	c := make(chan Message)
+
+	p.rmap[endAddress{g, a}] = c
+	return c
 }
 
 func NewGRPCServer() MessageServiceServer {
 	return &grpcProxy{}
 }
 
-func (*grpcProxy) SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error) {
-	return nil, nil
+// SendMessage implements the SendMessage RPC - this is going to be very difficult
+// we need to look at errors, cancellation, possibly duplicate message detecton
+// integrity. We'll start off hugely naive.
+func (p *grpcProxy) SendMessage(ctx context.Context, r *SendMessageRequest) (*SendMessageResponse, error) {
+	if c, ok := p.rmap[endAddress{*r.Gid, *r.Aid}]; ok {
+		return nil, nil
+	} else {
+		c <- *r.Msg
+		return nil, nil
+	}
 }
 
 func (*grpcProxy) EdgeWeight(context.Context, *EdgeWeightRequest) (*EdgeWeightResponse, error) {
@@ -78,9 +107,8 @@ func (p grpcPair) Close() {
 	close(p.send)
 }
 
-// MakeGRPCPair is an edge sender/reciever built using a
+// MakeGRPCEdge is an edge sender/reciever built using a
 // channel
-func MakeGRPCPair() (SenderReciever, SenderReciever) {
-	c1, c2 := make(chan Message), make(chan Message)
-	return grpcPair{c1, c2}, grpcPair{c2, c1}
+func MakeGRPCEdge(g graph.GraphID, a graph.AlgorithmID) SenderReciever {
+	return grpcPair{g: g, a: a}
 }
