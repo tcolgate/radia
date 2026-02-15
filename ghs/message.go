@@ -125,7 +125,7 @@ func (s *State) SendGHS(j int, m *Message) {
 	s.Send(j, m)
 }
 
-func (s *State) Dispatch(j int, i interface{}) {
+func (s *State) Dispatch(j int, i any) {
 	m, ok := i.(*Message)
 	if !ok {
 		log.Fatalf("Non ghs.Message recieved")
