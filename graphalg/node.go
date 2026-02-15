@@ -21,9 +21,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-)
+	"time"
 
-import (
 	"github.com/tcolgate/radia/graph"
 	"github.com/tcolgate/radia/tracer"
 )
@@ -32,7 +31,7 @@ type NodeID string
 
 type QueuedMessage struct {
 	e int
-	m interface{}
+	m any
 }
 
 type Node struct {
@@ -43,7 +42,7 @@ type Node struct {
 
 	msgQueue []QueuedMessage
 
-	*tracer.Tracer
+	Tracer tracer.TraceDisplay
 }
 
 func (n *Node) Edges() Edges {
@@ -92,7 +91,7 @@ func (n *Node) Send(e int, d MessageMarshaler) {
 }
 
 // Queue - re-queue a message to the internal queue
-func (n *Node) Queue(e int, d interface{}) {
+func (n *Node) Queue(e int, d any) {
 	if n.Tracer != nil {
 		str, _ := json.Marshal(d)
 		n.Edges()[e].EdgeMessage(string(str), tracer.EMDirQUEUE)
@@ -109,21 +108,21 @@ func (n *Node) ClearQueue() {
 }
 
 func (n *Node) Log(s string) {
-	n.Tracer.Log(graph.GraphID{}, graph.AlgorithmID{}, string(n.ID), s)
+	n.Tracer.Log(time.Now(), graph.GraphID{}, graph.AlgorithmID{}, string(n.ID), s)
 }
 
-func (n *Node) Print(v ...interface{}) {
+func (n *Node) Print(v ...any) {
 	n.Log(fmt.Sprint(v...))
 }
 
-func (n *Node) Println(v ...interface{}) {
+func (n *Node) Println(v ...any) {
 	n.Log(fmt.Sprintln(v...))
 }
 
-func (n *Node) Printf(str string, v ...interface{}) {
+func (n *Node) Printf(str string, v ...any) {
 	n.Log(fmt.Sprintf(str, v...))
 }
 
 func (n *Node) NodeUpdate(s string) {
-	n.Tracer.NodeUpdate(graph.GraphID{}, graph.AlgorithmID{}, string(n.ID), s)
+	n.Tracer.NodeUpdate(time.Now(), graph.GraphID{}, graph.AlgorithmID{}, string(n.ID), s)
 }

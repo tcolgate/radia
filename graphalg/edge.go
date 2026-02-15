@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/tcolgate/radia/graph"
 	"github.com/tcolgate/radia/tracer"
@@ -82,7 +83,7 @@ func NewEdge(f SenderRecieverMaker) (*Edge, *Edge) {
 	return &Edge{SenderReciever: c1}, &Edge{SenderReciever: c2}
 }
 
-func (e *Edge) Recieve() (interface{}, error) {
+func (e *Edge) Recieve() (any, error) {
 	i, err := e.SenderReciever.Recieve()
 	if e.local.Tracer != nil {
 		str, _ := json.Marshal(i)
@@ -103,10 +104,10 @@ func (e *Edge) Send(m MessageMarshaler) {
 func (e *Edge) EdgeUpdate() {
 	bs, _ := json.Marshal(e.Weight)
 	sbs, _ := json.Marshal(e)
-	e.local.Tracer.EdgeUpdate(graph.GraphID{}, graph.AlgorithmID{}, string(e.local.ID), string(bs), string(sbs))
+	e.local.Tracer.EdgeUpdate(time.Now(), graph.GraphID{}, graph.AlgorithmID{}, string(e.local.ID), string(bs), string(sbs))
 }
 
 func (e *Edge) EdgeMessage(s string, d tracer.MessageDir) {
 	bs, _ := json.Marshal(e.Weight)
-	e.local.Tracer.EdgeMessage(graph.GraphID{}, graph.AlgorithmID{}, string(e.local.ID), string(bs), d, s)
+	e.local.Tracer.EdgeMessage(time.Now(), graph.GraphID{}, graph.AlgorithmID{}, string(e.local.ID), string(bs), d, s)
 }

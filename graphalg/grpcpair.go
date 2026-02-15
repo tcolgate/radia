@@ -18,9 +18,8 @@
 package graphalg
 
 import (
+	context0 "context"
 	"sync"
-
-	"golang.org/x/net/context"
 
 	"google.golang.org/grpc"
 
@@ -73,7 +72,7 @@ func NewGRPCServer() MessageServiceServer {
 // SendMessage implements the SendMessage RPC - this is going to be very difficult
 // we need to look at errors, cancellation, possibly duplicate message detecton
 // integrity. We'll start off hugely naive.
-func (p *grpcProxy) SendMessage(ctx context.Context, r *SendMessageRequest) (*SendMessageResponse, error) {
+func (p *grpcProxy) SendMessage(ctx context0.Context, r *SendMessageRequest) (*SendMessageResponse, error) {
 	if c, ok := p.rmap[endAddress{*r.Gid, *r.Aid}]; ok {
 		return nil, nil
 	} else {
@@ -82,7 +81,7 @@ func (p *grpcProxy) SendMessage(ctx context.Context, r *SendMessageRequest) (*Se
 	}
 }
 
-func (*grpcProxy) EdgeWeight(context.Context, *EdgeWeightRequest) (*EdgeWeightResponse, error) {
+func (*grpcProxy) EdgeWeight(context0.Context, *EdgeWeightRequest) (*EdgeWeightResponse, error) {
 	return nil, nil
 }
 
@@ -97,7 +96,7 @@ func (p grpcPair) Send(m MessageMarshaler) {
 	}
 }
 
-func (p grpcPair) Recieve() (interface{}, error) {
+func (p grpcPair) Recieve() (any, error) {
 	m := <-p.recv
 
 	return unmarshalAny(m.Payload)

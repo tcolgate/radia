@@ -30,7 +30,7 @@ type Sender interface {
 }
 
 type Reciever interface {
-	Recieve() (interface{}, error)
+	Recieve() (any, error)
 }
 
 type Closer interface {
@@ -49,7 +49,7 @@ var (
 	typeRegistry = make(map[string]reflect.Type)
 )
 
-func RegisterMessage(i interface{}) string {
+func RegisterMessage(i any) string {
 	t := reflect.TypeOf(i)
 	ti := reflect.New(t).Interface()
 	url := fmt.Sprintf("%s.%s", t.PkgPath(), t.Name())
@@ -64,7 +64,7 @@ type MessageMarshaler interface {
 	MarshalMessage() ([]byte, string)
 }
 
-func unmarshalAny(any *google_protobuf.Any) (interface{}, error) {
+func unmarshalAny(any *google_protobuf.Any) (any, error) {
 	class := any.TypeUrl
 	bytes := any.Value
 

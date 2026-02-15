@@ -6,9 +6,11 @@
 Package ghs is a generated protocol buffer package.
 
 It is generated from these files:
+
 	ghs.proto
 
 It has these top-level messages:
+
 	Message
 */
 package ghs
@@ -173,8 +175,8 @@ func (m *Message) GetHalt() *Message_HaltMsg {
 }
 
 // XXX_OneofFuncs is for the internal use of the proto package.
-func (*Message) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
-	return _Message_OneofMarshaler, _Message_OneofUnmarshaler, _Message_OneofSizer, []interface{}{
+func (*Message) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []any) {
+	return _Message_OneofMarshaler, _Message_OneofUnmarshaler, _Message_OneofSizer, []any{
 		(*Message_Connect)(nil),
 		(*Message_Initiate)(nil),
 		(*Message_Test)(nil),

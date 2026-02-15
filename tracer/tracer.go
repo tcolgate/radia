@@ -48,7 +48,7 @@ func (m MessageDir) String() string {
 	}
 }
 
-type traceDisplay interface {
+type TraceDisplay interface {
 	Log(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string)                                          // Log a plain text message
 	NodeUpdate(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string)                                   // Log change of state of a node
 	EdgeUpdate(ts time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, edgeName, s string)                         // Log change of state of an edge
@@ -56,7 +56,7 @@ type traceDisplay interface {
 }
 
 type Tracer struct {
-	td traceDisplay
+	td TraceDisplay
 }
 
 func init() {
@@ -103,6 +103,6 @@ func (t *Tracer) EdgeMessage(gid graph.GraphID, aid graph.AlgorithmID, id, edgeI
 	}
 }
 
-func New(td traceDisplay) *Tracer {
+func New(td TraceDisplay) *Tracer {
 	return &Tracer{td}
 }

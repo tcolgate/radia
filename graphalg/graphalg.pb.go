@@ -6,9 +6,11 @@
 Package graphalg is a generated protocol buffer package.
 
 It is generated from these files:
+
 	graphalg.proto
 
 It has these top-level messages:
+
 	Weight
 	Message
 	SendMessageRequest
@@ -20,6 +22,8 @@ It has these top-level messages:
 */
 package graphalg
 
+import context0 "context"
+
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
@@ -27,7 +31,6 @@ import google_protobuf "github.com/golang/protobuf/ptypes/any"
 import graph "github.com/tcolgate/radia/graph"
 
 import (
-	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )
 
@@ -270,7 +273,7 @@ func init() {
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
+var _ context0.Context
 var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
@@ -280,8 +283,8 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for MessageService service
 
 type MessageServiceClient interface {
-	SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
-	EdgeWeight(ctx context.Context, in *EdgeWeightRequest, opts ...grpc.CallOption) (*EdgeWeightResponse, error)
+	SendMessage(ctx context0.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error)
+	EdgeWeight(ctx context0.Context, in *EdgeWeightRequest, opts ...grpc.CallOption) (*EdgeWeightResponse, error)
 }
 
 type messageServiceClient struct {
@@ -292,7 +295,7 @@ func NewMessageServiceClient(cc *grpc.ClientConn) MessageServiceClient {
 	return &messageServiceClient{cc}
 }
 
-func (c *messageServiceClient) SendMessage(ctx context.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error) {
+func (c *messageServiceClient) SendMessage(ctx context0.Context, in *SendMessageRequest, opts ...grpc.CallOption) (*SendMessageResponse, error) {
 	out := new(SendMessageResponse)
 	err := grpc.Invoke(ctx, "/graphalg.MessageService/SendMessage", in, out, c.cc, opts...)
 	if err != nil {
@@ -301,7 +304,7 @@ func (c *messageServiceClient) SendMessage(ctx context.Context, in *SendMessageR
 	return out, nil
 }
 
-func (c *messageServiceClient) EdgeWeight(ctx context.Context, in *EdgeWeightRequest, opts ...grpc.CallOption) (*EdgeWeightResponse, error) {
+func (c *messageServiceClient) EdgeWeight(ctx context0.Context, in *EdgeWeightRequest, opts ...grpc.CallOption) (*EdgeWeightResponse, error) {
 	out := new(EdgeWeightResponse)
 	err := grpc.Invoke(ctx, "/graphalg.MessageService/EdgeWeight", in, out, c.cc, opts...)
 	if err != nil {
@@ -313,15 +316,15 @@ func (c *messageServiceClient) EdgeWeight(ctx context.Context, in *EdgeWeightReq
 // Server API for MessageService service
 
 type MessageServiceServer interface {
-	SendMessage(context.Context, *SendMessageRequest) (*SendMessageResponse, error)
-	EdgeWeight(context.Context, *EdgeWeightRequest) (*EdgeWeightResponse, error)
+	SendMessage(context0.Context, *SendMessageRequest) (*SendMessageResponse, error)
+	EdgeWeight(context0.Context, *EdgeWeightRequest) (*EdgeWeightResponse, error)
 }
 
 func RegisterMessageServiceServer(s *grpc.Server, srv MessageServiceServer) {
 	s.RegisterService(&_MessageService_serviceDesc, srv)
 }
 
-func _MessageService_SendMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MessageService_SendMessage_Handler(srv any, ctx context0.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(SendMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -333,13 +336,13 @@ func _MessageService_SendMessage_Handler(srv interface{}, ctx context.Context, d
 		Server:     srv,
 		FullMethod: "/graphalg.MessageService/SendMessage",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context0.Context, req any) (any, error) {
 		return srv.(MessageServiceServer).SendMessage(ctx, req.(*SendMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MessageService_EdgeWeight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MessageService_EdgeWeight_Handler(srv any, ctx context0.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(EdgeWeightRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -351,7 +354,7 @@ func _MessageService_EdgeWeight_Handler(srv interface{}, ctx context.Context, de
 		Server:     srv,
 		FullMethod: "/graphalg.MessageService/EdgeWeight",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context0.Context, req any) (any, error) {
 		return srv.(MessageServiceServer).EdgeWeight(ctx, req.(*EdgeWeightRequest))
 	}
 	return interceptor(ctx, in, info, handler)

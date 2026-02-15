@@ -6,9 +6,11 @@
 Package proto is a generated protocol buffer package.
 
 It is generated from these files:
+
 	tracer.proto
 
 It has these top-level messages:
+
 	LogRequest
 	LogResponse
 	NodeUpdateRequest
@@ -20,13 +22,14 @@ It has these top-level messages:
 */
 package proto
 
+import context0 "context"
+
 import proto1 "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 import graph "github.com/tcolgate/radia/graph"
 
 import (
-	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )
 
@@ -326,7 +329,7 @@ func init() {
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
+var _ context0.Context
 var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
@@ -336,10 +339,10 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for TraceService service
 
 type TraceServiceClient interface {
-	Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error)
-	NodeUpdate(ctx context.Context, in *NodeUpdateRequest, opts ...grpc.CallOption) (*NodeUpdateResponse, error)
-	EdgeUpdate(ctx context.Context, in *EdgeUpdateRequest, opts ...grpc.CallOption) (*EdgeUpdateResponse, error)
-	EdgeMessage(ctx context.Context, in *EdgeMessageRequest, opts ...grpc.CallOption) (*EdgeMessageResponse, error)
+	Log(ctx context0.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error)
+	NodeUpdate(ctx context0.Context, in *NodeUpdateRequest, opts ...grpc.CallOption) (*NodeUpdateResponse, error)
+	EdgeUpdate(ctx context0.Context, in *EdgeUpdateRequest, opts ...grpc.CallOption) (*EdgeUpdateResponse, error)
+	EdgeMessage(ctx context0.Context, in *EdgeMessageRequest, opts ...grpc.CallOption) (*EdgeMessageResponse, error)
 }
 
 type traceServiceClient struct {
@@ -350,7 +353,7 @@ func NewTraceServiceClient(cc *grpc.ClientConn) TraceServiceClient {
 	return &traceServiceClient{cc}
 }
 
-func (c *traceServiceClient) Log(ctx context.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error) {
+func (c *traceServiceClient) Log(ctx context0.Context, in *LogRequest, opts ...grpc.CallOption) (*LogResponse, error) {
 	out := new(LogResponse)
 	err := grpc.Invoke(ctx, "/proto.TraceService/Log", in, out, c.cc, opts...)
 	if err != nil {
@@ -359,7 +362,7 @@ func (c *traceServiceClient) Log(ctx context.Context, in *LogRequest, opts ...gr
 	return out, nil
 }
 
-func (c *traceServiceClient) NodeUpdate(ctx context.Context, in *NodeUpdateRequest, opts ...grpc.CallOption) (*NodeUpdateResponse, error) {
+func (c *traceServiceClient) NodeUpdate(ctx context0.Context, in *NodeUpdateRequest, opts ...grpc.CallOption) (*NodeUpdateResponse, error) {
 	out := new(NodeUpdateResponse)
 	err := grpc.Invoke(ctx, "/proto.TraceService/NodeUpdate", in, out, c.cc, opts...)
 	if err != nil {
@@ -368,7 +371,7 @@ func (c *traceServiceClient) NodeUpdate(ctx context.Context, in *NodeUpdateReque
 	return out, nil
 }
 
-func (c *traceServiceClient) EdgeUpdate(ctx context.Context, in *EdgeUpdateRequest, opts ...grpc.CallOption) (*EdgeUpdateResponse, error) {
+func (c *traceServiceClient) EdgeUpdate(ctx context0.Context, in *EdgeUpdateRequest, opts ...grpc.CallOption) (*EdgeUpdateResponse, error) {
 	out := new(EdgeUpdateResponse)
 	err := grpc.Invoke(ctx, "/proto.TraceService/EdgeUpdate", in, out, c.cc, opts...)
 	if err != nil {
@@ -377,7 +380,7 @@ func (c *traceServiceClient) EdgeUpdate(ctx context.Context, in *EdgeUpdateReque
 	return out, nil
 }
 
-func (c *traceServiceClient) EdgeMessage(ctx context.Context, in *EdgeMessageRequest, opts ...grpc.CallOption) (*EdgeMessageResponse, error) {
+func (c *traceServiceClient) EdgeMessage(ctx context0.Context, in *EdgeMessageRequest, opts ...grpc.CallOption) (*EdgeMessageResponse, error) {
 	out := new(EdgeMessageResponse)
 	err := grpc.Invoke(ctx, "/proto.TraceService/EdgeMessage", in, out, c.cc, opts...)
 	if err != nil {
@@ -389,17 +392,17 @@ func (c *traceServiceClient) EdgeMessage(ctx context.Context, in *EdgeMessageReq
 // Server API for TraceService service
 
 type TraceServiceServer interface {
-	Log(context.Context, *LogRequest) (*LogResponse, error)
-	NodeUpdate(context.Context, *NodeUpdateRequest) (*NodeUpdateResponse, error)
-	EdgeUpdate(context.Context, *EdgeUpdateRequest) (*EdgeUpdateResponse, error)
-	EdgeMessage(context.Context, *EdgeMessageRequest) (*EdgeMessageResponse, error)
+	Log(context0.Context, *LogRequest) (*LogResponse, error)
+	NodeUpdate(context0.Context, *NodeUpdateRequest) (*NodeUpdateResponse, error)
+	EdgeUpdate(context0.Context, *EdgeUpdateRequest) (*EdgeUpdateResponse, error)
+	EdgeMessage(context0.Context, *EdgeMessageRequest) (*EdgeMessageResponse, error)
 }
 
 func RegisterTraceServiceServer(s *grpc.Server, srv TraceServiceServer) {
 	s.RegisterService(&_TraceService_serviceDesc, srv)
 }
 
-func _TraceService_Log_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TraceService_Log_Handler(srv any, ctx context0.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(LogRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -411,13 +414,13 @@ func _TraceService_Log_Handler(srv interface{}, ctx context.Context, dec func(in
 		Server:     srv,
 		FullMethod: "/proto.TraceService/Log",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context0.Context, req any) (any, error) {
 		return srv.(TraceServiceServer).Log(ctx, req.(*LogRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TraceService_NodeUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TraceService_NodeUpdate_Handler(srv any, ctx context0.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(NodeUpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -429,13 +432,13 @@ func _TraceService_NodeUpdate_Handler(srv interface{}, ctx context.Context, dec 
 		Server:     srv,
 		FullMethod: "/proto.TraceService/NodeUpdate",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context0.Context, req any) (any, error) {
 		return srv.(TraceServiceServer).NodeUpdate(ctx, req.(*NodeUpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TraceService_EdgeUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TraceService_EdgeUpdate_Handler(srv any, ctx context0.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(EdgeUpdateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -447,13 +450,13 @@ func _TraceService_EdgeUpdate_Handler(srv interface{}, ctx context.Context, dec 
 		Server:     srv,
 		FullMethod: "/proto.TraceService/EdgeUpdate",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context0.Context, req any) (any, error) {
 		return srv.(TraceServiceServer).EdgeUpdate(ctx, req.(*EdgeUpdateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TraceService_EdgeMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TraceService_EdgeMessage_Handler(srv any, ctx context0.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(EdgeMessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -465,7 +468,7 @@ func _TraceService_EdgeMessage_Handler(srv interface{}, ctx context.Context, dec
 		Server:     srv,
 		FullMethod: "/proto.TraceService/EdgeMessage",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context0.Context, req any) (any, error) {
 		return srv.(TraceServiceServer).EdgeMessage(ctx, req.(*EdgeMessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)

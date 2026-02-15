@@ -53,7 +53,7 @@ func setupGHS(mux *http.ServeMux) {
 	nodes := make([]*graphalg.Node, 0)
 	s.ghs = make([]*ghs.State, 0)
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		n := &graphalg.Node{
 			ID:     graphalg.NodeID(fmt.Sprintf("n%v", i+1)),
 			Tracer: t,
@@ -62,7 +62,7 @@ func setupGHS(mux *http.ServeMux) {
 		s.ghs = append(s.ghs, &ghs.State{Node: n})
 	}
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		for j := i + 1; j < count; j++ {
 			log.Println("join", i, j)
 			w := rand.NormFloat64()*1.0 + 4.0

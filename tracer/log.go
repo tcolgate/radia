@@ -25,7 +25,7 @@ import (
 	"github.com/tcolgate/radia/graph"
 )
 
-func NewLogDisplay(w io.Writer) traceDisplay {
+func NewLogDisplay(w io.Writer) TraceDisplay {
 	return &logDisplay{log.New(w, "radia: ", 0)}
 }
 

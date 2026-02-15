@@ -30,7 +30,7 @@ func (p chanPair) Send(m MessageMarshaler) {
 	p.send <- m
 }
 
-func (p chanPair) Recieve() (interface{}, error) {
+func (p chanPair) Recieve() (any, error) {
 	m := <-p.recv
 	if p.delay != nil {
 		time.Sleep(*p.delay)

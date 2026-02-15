@@ -18,19 +18,19 @@
 package tracer
 
 import (
+	context0 "context"
 	"time"
 
 	"github.com/tcolgate/radia/graph"
 	pb "github.com/tcolgate/radia/tracer/internal/proto"
 	"google.golang.org/grpc"
 )
-import "golang.org/x/net/context"
 
 type grpcClientDisplay struct {
 	pb.TraceServiceClient
 }
 
-func NewGRPCDisplayClient(addr string, os ...grpc.DialOption) (traceDisplay, error) {
+func NewGRPCDisplayClient(addr string, os ...grpc.DialOption) (TraceDisplay, error) {
 	conn, err := grpc.Dial(addr, os...)
 	return &grpcClientDisplay{
 		pb.NewTraceServiceClient(conn),
@@ -39,29 +39,29 @@ func NewGRPCDisplayClient(addr string, os ...grpc.DialOption) (traceDisplay, err
 
 func (g *grpcClientDisplay) Log(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
 	r := pb.LogRequest{Time: t.UnixNano(), NodeID: id, Message: s, Gid: &gid, Aid: &aid}
-	g.TraceServiceClient.Log(context.Background(), &r)
+	g.TraceServiceClient.Log(context0.Background(), &r)
 }
 
 func (g *grpcClientDisplay) NodeUpdate(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, s string) {
 	r := pb.NodeUpdateRequest{}
-	g.TraceServiceClient.NodeUpdate(context.Background(), &r)
+	g.TraceServiceClient.NodeUpdate(context0.Background(), &r)
 }
 
 func (g *grpcClientDisplay) EdgeUpdate(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, eid, s string) {
 	r := pb.EdgeUpdateRequest{}
-	g.TraceServiceClient.EdgeUpdate(context.Background(), &r)
+	g.TraceServiceClient.EdgeUpdate(context0.Background(), &r)
 }
 
 func (g *grpcClientDisplay) EdgeMessage(t time.Time, gid graph.GraphID, aid graph.AlgorithmID, id, eid string, dir MessageDir, str string) {
 	r := pb.EdgeMessageRequest{}
-	g.TraceServiceClient.EdgeMessage(context.Background(), &r)
+	g.TraceServiceClient.EdgeMessage(context0.Background(), &r)
 }
 
 type grpcServerDisplay struct {
-	o traceDisplay
+	o TraceDisplay
 }
 
-func NewGRPCServer(onward traceDisplay) pb.TraceServiceServer {
+func NewGRPCServer(onward TraceDisplay) pb.TraceServiceServer {
 	return &grpcServerDisplay{onward}
 }
 
@@ -69,22 +69,22 @@ func RegisterTraceServiceServer(gs *grpc.Server, server pb.TraceServiceServer) {
 	pb.RegisterTraceServiceServer(gs, server)
 }
 
-func (s *grpcServerDisplay) Log(ctx context.Context, r *pb.LogRequest) (*pb.LogResponse, error) {
+func (s *grpcServerDisplay) Log(ctx context0.Context, r *pb.LogRequest) (*pb.LogResponse, error) {
 	s.o.Log(time.Unix(9, r.Time), *r.Gid, *r.Aid, r.NodeID, r.Message)
 	return &pb.LogResponse{}, nil
 }
 
-func (s *grpcServerDisplay) NodeUpdate(ctx context.Context, r *pb.NodeUpdateRequest) (*pb.NodeUpdateResponse, error) {
+func (s *grpcServerDisplay) NodeUpdate(ctx context0.Context, r *pb.NodeUpdateRequest) (*pb.NodeUpdateResponse, error) {
 	s.o.NodeUpdate(time.Unix(0, r.Time), *r.Gid, *r.Aid, r.NodeID, r.Status)
 	return &pb.NodeUpdateResponse{}, nil
 }
 
-func (s *grpcServerDisplay) EdgeUpdate(ctx context.Context, r *pb.EdgeUpdateRequest) (*pb.EdgeUpdateResponse, error) {
+func (s *grpcServerDisplay) EdgeUpdate(ctx context0.Context, r *pb.EdgeUpdateRequest) (*pb.EdgeUpdateResponse, error) {
 	s.o.EdgeUpdate(time.Unix(0, r.Time), *r.Gid, *r.Aid, r.NodeID, r.EdgeName, r.Status)
 	return &pb.EdgeUpdateResponse{}, nil
 }
 
-func (s *grpcServerDisplay) EdgeMessage(ctx context.Context, r *pb.EdgeMessageRequest) (*pb.EdgeMessageResponse, error) {
+func (s *grpcServerDisplay) EdgeMessage(ctx context0.Context, r *pb.EdgeMessageRequest) (*pb.EdgeMessageResponse, error) {
 	s.o.EdgeMessage(time.Unix(0, r.Time), *r.Gid, *r.Aid, r.NodeID, r.EdgeName, MessageDir(r.Direction), r.Message)
 	return &pb.EdgeMessageResponse{}, nil
 }

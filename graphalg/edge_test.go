@@ -98,7 +98,7 @@ func TestEdgeTestMessage2(t *testing.T) {
 	}
 
 	sentm := TestMessage{1}
-	c := make(chan interface{})
+	c := make(chan any)
 	go func() {
 		m, err := n1.Edges()[0].Recieve()
 		if err != nil {

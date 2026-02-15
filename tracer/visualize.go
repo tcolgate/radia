@@ -144,7 +144,7 @@ func (v httpDisplay) handleRun(w http.ResponseWriter, r *http.Request) {
 	v.update <- struct{}{}
 }
 
-func NewHTTPDisplay(mux *http.ServeMux, onRun func()) traceDisplay {
+func NewHTTPDisplay(mux *http.ServeMux, onRun func()) TraceDisplay {
 	v := httpDisplay{}
 	v.OnRun = onRun
 	v.update = make(chan struct{})
